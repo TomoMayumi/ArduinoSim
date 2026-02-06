@@ -1,0 +1,78 @@
+import { useRef, useEffect, useState, useCallback } from 'react';
+import { Atmega328P } from './atmega328p';
+
+export function useEmulator(program: Uint16Array | null) {
+    const [emulator, setEmulator] = useState<Atmega328P | null>(null);
+    const [isRunning, setIsRunning] = useState(false);
+    const requestRef = useRef<number>(0);
+
+    const start = useCallback(() => {
+        if (emulator) {
+            setIsRunning(true);
+        }
+    }, [emulator]);
+
+    const stop = useCallback(() => {
+        setIsRunning(false);
+        if (requestRef.current) {
+            cancelAnimationFrame(requestRef.current);
+        }
+    }, []);
+
+    const reset = useCallback(() => {
+        if (emulator) {
+            emulator.reset();
+        }
+    }, [emulator]);
+
+    useEffect(() => {
+        if (program) {
+            const newEmulator = new Atmega328P(program);
+            setEmulator(newEmulator);
+        } else {
+            setEmulator(null);
+        }
+    }, [program]);
+
+    const isRunningRef = useRef(isRunning);
+    const emulatorRef = useRef<Atmega328P | null>(null);
+
+    useEffect(() => {
+        isRunningRef.current = isRunning;
+    }, [isRunning]);
+
+    useEffect(() => {
+        emulatorRef.current = emulator;
+    }, [emulator]);
+
+    useEffect(() => {
+        const loop = () => {
+            if (isRunningRef.current && emulatorRef.current) {
+                // 1フレームあたり約1ms分進める (16MHz / 60fps = 266,666 ticks)
+                // 150,000回（30,000 * 5）回して様子を見る
+                for (let i = 0; i < 5; i++) {
+                    emulatorRef.current.step();
+                }
+                requestRef.current = requestAnimationFrame(loop);
+            }
+        };
+
+        if (isRunning) {
+            requestRef.current = requestAnimationFrame(loop);
+        }
+
+        return () => {
+            if (requestRef.current) {
+                cancelAnimationFrame(requestRef.current);
+            }
+        };
+    }, [isRunning, emulator]); // Re-run effect when isRunning or emulator instance changes
+
+    return {
+        emulator,
+        isRunning,
+        start,
+        stop,
+        reset,
+    };
+}
