@@ -30,13 +30,14 @@ export class Atmega328P {
   private stopFlag = false;
 
   constructor(program: Uint16Array) {
-    console.log('Atmega328P: Constructor started. Program length:', program.length);
-    // ATmega328P has 2048 bytes of SRAM
-    this.cpu = new CPU(program, 2048);
+    // ATmega328P has 2048 bytes of SRAM. Using 8192 just in case some code overruns.
+    this.cpu = new CPU(program, 8192);
 
     // Stack Pointer (SP) should be initialized to the end of RAM (0x08ff)
     this.cpu.SP = 0x08ff;
-    console.log('Atmega328P: CPU and SP initialized. SP:', this.cpu.SP.toString(16));
+    // Also set SPH/SPL registers explicitly to be sure avr8js registers it.
+    this.cpu.data[0x5d] = 0xff; // SPL
+    this.cpu.data[0x5e] = 0x08; // SPH
 
     this.timer0 = new AVRTimer(this.cpu, timer0Config);
     this.timer1 = new AVRTimer(this.cpu, timer1Config);
@@ -45,19 +46,16 @@ export class Atmega328P {
     this.portB = new AVRIOPort(this.cpu, portBConfig);
     this.portC = new AVRIOPort(this.cpu, portCConfig);
     this.portD = new AVRIOPort(this.cpu, portDConfig);
-    console.log('Atmega328P: Peripherals initialized.');
   }
 
-  private stepCount = 0;
   public step() {
-    if (this.stepCount % 60 === 0) {
-      console.log('Atmega328P: step() called. PC:', this.cpu.pc, 'Cycles:', this.cpu.cycles);
-    }
-    this.stepCount++;
-
     for (let i = 0; i < 50000; i++) {
       avrInstruction(this.cpu);
       this.cpu.tick();
+
+      if (isNaN(this.cpu.pc)) {
+        break;
+      }
     }
   }
 
@@ -66,7 +64,10 @@ export class Atmega328P {
   }
 
   public reset() {
+    this.cpu.reset();
+    this.cpu.SP = 0x08ff;
+    this.cpu.data[0x5d] = 0xff; // SPL
+    this.cpu.data[0x5e] = 0x08; // SPH
     this.cpu.pc = 0;
-    // メモリのリセットなどは必要に応じて追加
   }
 }
