@@ -1,5 +1,6 @@
 import {
   CPU,
+  avrInstruction,
   AVRTimer,
   AVRUSART,
   AVRIOPort,
@@ -55,6 +56,7 @@ export class Atmega328P {
     this.stepCount++;
 
     for (let i = 0; i < 50000; i++) {
+      avrInstruction(this.cpu);
       this.cpu.tick();
     }
   }

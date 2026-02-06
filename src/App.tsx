@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { parseHex } from './emulator/intelhex';
 import { useEmulator } from './emulator/useEmulator';
 import { Pin13Led } from './components/Pin13Led';
