@@ -48,21 +48,23 @@ export function useEmulator(program: Uint16Array | null) {
     useEffect(() => {
         const loop = () => {
             if (isRunningRef.current && emulatorRef.current) {
-                // 1フレームあたり約1ms分進める (16MHz / 60fps = 266,666 ticks)
-                // 150,000回（30,000 * 5）回して様子を見る
                 for (let i = 0; i < 5; i++) {
                     emulatorRef.current.step();
                 }
                 requestRef.current = requestAnimationFrame(loop);
+            } else {
+                console.log('useEmulator: Loop stopping. isRunning:', isRunningRef.current, 'emulator:', !!emulatorRef.current);
             }
         };
 
         if (isRunning) {
+            console.log('useEmulator: Starting loop...');
             requestRef.current = requestAnimationFrame(loop);
         }
 
         return () => {
             if (requestRef.current) {
+                console.log('useEmulator: Cancelling animation frame.');
                 cancelAnimationFrame(requestRef.current);
             }
         };
