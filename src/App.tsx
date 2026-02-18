@@ -21,6 +21,19 @@ const SERIAL_ECHO_HEX = `
 :00000001FF
 `.trim();
 
+const BLINK2_HEX = `
+:1000000001C00000249A2C9A29E23FEF4FEF4A9555
+:10001000F1F73A95D9F72A95C1F72C9829E23FEFE5
+:100020004FEF4A95F1F73A95D9F72A95C1F7EBCFFB
+:00000001FF
+`.trim();
+
+const PUSH_SWITCH_HEX = `
+:1000000001C00000259A52985A9A4A9902C02D9A26
+:06001000FCCF2D98FACF91
+:00000001FF
+`.trim();
+
 function App() {
   const [hexInput, setHexInput] = useState(BLINK_HEX);
   const [program, setProgram] = useState<Uint16Array | null>(null);
@@ -111,6 +124,12 @@ function App() {
             </button>
             <button onClick={() => setHexInput(SERIAL_ECHO_HEX)} style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}>
               Serial Echo (エコーバック)
+            </button>
+            <button onClick={() => setHexInput(BLINK2_HEX)} style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}>
+              Blink2 (Lチカ)
+            </button>
+            <button onClick={() => setHexInput(PUSH_SWITCH_HEX)} style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}>
+              Push Switch (プッシュスイッチ)
             </button>
           </div>
           <textarea
