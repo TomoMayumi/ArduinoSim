@@ -90,6 +90,8 @@ button.connected {
   overflow-y: auto;
   border-radius: 0.25rem;
   margin: 0.5rem 0;
+  word-break: break-all;
+  white-space: pre-wrap;
 }
 
 .serial-input {
@@ -111,7 +113,7 @@ button.connected {
   height: 20px;
   border-radius: 50%;
   background: #440000;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
   transition: all 0.1s;
 }
 

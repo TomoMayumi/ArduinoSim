@@ -12,6 +12,13 @@ const BLINK_HEX = `
 :00000001FF
 `.trim();
 
+const SERIAL_TEST_HEX = `
+:1000000007E60093C40000E00093C50008E10093C6
+:10001000C10006E00093C2001091C00015FFFCCF1D
+:0800200005E50093C600F7CF2D
+:00000001FF
+`.trim();
+
 function App() {
   const [hexInput, setHexInput] = useState(BLINK_HEX);
   const [program, setProgram] = useState<Uint16Array | null>(null);
@@ -92,15 +99,20 @@ function App() {
 
         <div className="card hex-upload">
           <h3>HEX プログラム</h3>
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+            <button onClick={() => setHexInput(BLINK_HEX)} style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}>
+              Blink (Lチカ)
+            </button>
+            <button onClick={() => setHexInput(SERIAL_TEST_HEX)} style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}>
+              Serial Test ('U')
+            </button>
+          </div>
           <textarea
             rows={10}
             value={hexInput}
             onChange={(e) => setHexInput(e.target.value)}
             placeholder="ここにIntel HEXを貼り付けてください"
           />
-          <p style={{ fontSize: '0.75rem', color: '#64748b' }}>
-            ※デフォルトはBlink（Lチカ）プログラムです。
-          </p>
         </div>
       </aside>
     </div>
