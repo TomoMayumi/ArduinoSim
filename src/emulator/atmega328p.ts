@@ -27,7 +27,6 @@ export class Atmega328P {
   public portC: AVRIOPort;
   public portD: AVRIOPort;
 
-  private stopFlag = false;
 
   constructor(program: Uint16Array) {
     // ATmega328P has 2048 bytes of SRAM. Using 8192 just in case some code overruns.
@@ -52,15 +51,11 @@ export class Atmega328P {
     for (let i = 0; i < 50000; i++) {
       avrInstruction(this.cpu);
       this.cpu.tick();
-
-      if (isNaN(this.cpu.pc)) {
-        break;
-      }
     }
   }
 
   public stop() {
-    this.stopFlag = true;
+    // 停止処理が必要な場合は記述
   }
 
   public reset() {

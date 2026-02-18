@@ -52,19 +52,15 @@ export function useEmulator(program: Uint16Array | null) {
                     emulatorRef.current.step();
                 }
                 requestRef.current = requestAnimationFrame(loop);
-            } else {
-                console.log('useEmulator: Loop stopping. isRunning:', isRunningRef.current, 'emulator:', !!emulatorRef.current);
             }
         };
 
         if (isRunning) {
-            console.log('useEmulator: Starting loop...');
             requestRef.current = requestAnimationFrame(loop);
         }
 
         return () => {
             if (requestRef.current) {
-                console.log('useEmulator: Cancelling animation frame.');
                 cancelAnimationFrame(requestRef.current);
             }
         };

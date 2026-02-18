@@ -28,6 +28,5 @@ export function parseHex(hex: string): Uint16Array {
         flash16[i] = flash[i * 2] | (flash[i * 2 + 1] << 8);
     }
 
-    console.log('parseHex: Parsed', flash16.length, 'words.');
     return flash16;
 }
