@@ -184,3 +184,27 @@ textarea {
 .hw-led.on {
   background: var(--led-color);
 }
+
+.hw-btn {
+  background: #334155;
+  border: 2px solid #475569;
+  color: #e2e8f0;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #1e293b;
+  transition: all 0.1s;
+}
+
+.hw-btn:active,
+.hw-btn.pressed {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 #1e293b;
+  background: #ef4444;
+}

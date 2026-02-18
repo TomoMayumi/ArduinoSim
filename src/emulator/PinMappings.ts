@@ -43,3 +43,13 @@ export function getPinState(cpu: CPU, pin: string): boolean {
     const portValue = cpu.data[config.portConfig.PORT];
     return (portValue & (1 << config.pinIndex)) !== 0;
 }
+
+export function setPinInput(cpu: CPU, pin: string, value: boolean): void {
+    const config = ARDUINO_PINS[pin];
+    if (!config) return;
+
+    const port = (cpu as any).gpioByPort[config.portConfig.PORT];
+    if (port) {
+        port.setPin(config.pinIndex, value);
+    }
+}
