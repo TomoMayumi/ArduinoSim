@@ -12,10 +12,11 @@ const BLINK_HEX = `
 :00000001FF
 `.trim();
 
-const SERIAL_TEST_HEX = `
-:1000000007E60093C40000E00093C50008E10093C6
-:10001000C10006E00093C2001091C00015FFFCCF1D
-:0800200005E50093C600F7CF2D
+const SERIAL_ECHO_HEX = `
+:1000000007E60093C40000E00093C50008E10093F8
+:10001000C10006E00093C2001091C00017FFFCCFA2
+:100020000091C6001091C00015FFFCCF0093C600E0
+:02003000F3CF0C
 :00000001FF
 `.trim();
 
@@ -103,8 +104,8 @@ function App() {
             <button onClick={() => setHexInput(BLINK_HEX)} style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}>
               Blink (Lチカ)
             </button>
-            <button onClick={() => setHexInput(SERIAL_TEST_HEX)} style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}>
-              Serial Test ('U')
+            <button onClick={() => setHexInput(SERIAL_ECHO_HEX)} style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}>
+              Serial Echo (エコーバック)
             </button>
           </div>
           <textarea
