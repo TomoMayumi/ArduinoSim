@@ -208,3 +208,9 @@ textarea {
   box-shadow: 0 0 0 #1e293b;
   background: #ef4444;
 }
+
+.hw-slider {
+  width: 100%;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}

@@ -4,9 +4,11 @@ import {
   AVRTimer,
   AVRUSART,
   AVRIOPort,
+  AVRADC,
   portBConfig,
   portCConfig,
   portDConfig,
+  adcConfig,
   timer0Config,
   timer1Config,
   timer2Config,
@@ -25,6 +27,7 @@ export class Atmega328P {
   public timer1: AVRTimer;
   public timer2: AVRTimer;
   public uart: AVRUSART;
+  public adc: AVRADC;
   public portB: AVRIOPort;
   public portC: AVRIOPort;
   public portD: AVRIOPort;
@@ -45,6 +48,8 @@ export class Atmega328P {
     this.timer1 = new AVRTimer(this.cpu, timer1Config);
     this.timer2 = new AVRTimer(this.cpu, timer2Config);
     this.uart = new AVRUSART(this.cpu, usart0Config, 16000000); // 16MHz
+    this.adc = new AVRADC(this.cpu, adcConfig);
+    (this.cpu as any).adc = this.adc;
     this.portB = new AVRIOPort(this.cpu, portBConfig);
     this.portC = new AVRIOPort(this.cpu, portCConfig);
     this.portD = new AVRIOPort(this.cpu, portDConfig);

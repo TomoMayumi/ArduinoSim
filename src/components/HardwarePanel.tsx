@@ -1,7 +1,9 @@
+
 import React, { useEffect, useState } from 'react';
 import { Atmega328P } from '../emulator/atmega328p';
 import { LedComponent } from '../emulator/hardware/LedComponent';
 import { SwitchComponent } from '../emulator/hardware/SwitchComponent';
+import { PotentiometerComponent } from '../emulator/hardware/PotentiometerComponent';
 import type { ComponentState } from '../emulator/hardware/Component';
 
 interface HardwarePanelProps {
@@ -23,6 +25,10 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator }) => {
         if (!emulator.hardware.getComponent('sw-d2')) {
             emulator.hardware.addComponent(new SwitchComponent('sw-d2', 'Button', 'D2', 'momentary'));
         }
+        // Debug: Potentiometer on A0
+        if (!emulator.hardware.getComponent('pot-a0')) {
+            emulator.hardware.addComponent(new PotentiometerComponent('pot-a0', 'Potentiometer', 'A0', 0));
+        }
 
         const interval = setInterval(() => {
             setStates(emulator.hardware.getAllStates());
@@ -39,6 +45,14 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator }) => {
             if (action === 'down') sw.setPressed(true);
             if (action === 'up') sw.setPressed(false);
             if (action === 'toggle') sw.toggle();
+        }
+    }
+
+    const handlePotChange = (id: string, value: number) => {
+        if (!emulator) return;
+        const comp = emulator.hardware.getComponent(id);
+        if (comp && comp.type === 'POTENTIOMETER') {
+            (comp as PotentiometerComponent).setValue(value);
         }
     }
 
@@ -59,10 +73,10 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator }) => {
                             <div key={comp.id} className="hardware-component">
                                 <span className="label">{comp.name} ({ledComp.pin})</span>
                                 <div
-                                    className={`hw-led ${ledState.isOn ? 'on' : ''}`}
+                                    className={`hw - led ${ledState.isOn ? 'on' : ''} `}
                                     style={{
                                         '--led-color': ledState.color,
-                                        boxShadow: ledState.isOn ? `0 0 10px ${ledState.color}, 0 0 20px ${ledState.color}` : 'inset 0 2px 4px rgba(0,0,0,0.5)'
+                                        boxShadow: ledState.isOn ? `0 0 10px ${ledState.color}, 0 0 20px ${ledState.color} ` : 'inset 0 2px 4px rgba(0,0,0,0.5)'
                                     } as React.CSSProperties}
                                 />
                             </div>
@@ -74,7 +88,7 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator }) => {
                             <div key={comp.id} className="hardware-component">
                                 <span className="label">{comp.name} ({swComp.pin})</span>
                                 <button
-                                    className={`hw-btn ${swState.isPressed ? 'pressed' : ''}`}
+                                    className={`hw - btn ${swState.isPressed ? 'pressed' : ''} `}
                                     onMouseDown={() => swState.mode === 'momentary' && handleSwitchAction(comp.id, 'down')}
                                     onMouseUp={() => swState.mode === 'momentary' && handleSwitchAction(comp.id, 'up')}
                                     onMouseLeave={() => swState.mode === 'momentary' && handleSwitchAction(comp.id, 'up')}
@@ -82,6 +96,26 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator }) => {
                                 >
                                     {swState.mode === 'momentary' ? 'PUSH' : (swState.isPressed ? 'ON' : 'OFF')}
                                 </button>
+                            </div>
+                        );
+                    } else if (comp.type === 'POTENTIOMETER') {
+                        const potState = state as any;
+                        const potComp = comp as PotentiometerComponent;
+                        return (
+                            <div key={comp.id} className="hardware-component" style={{ gridColumn: 'span 2' }}>
+                                <span className="label">{comp.name} ({potComp.pin})</span>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+                                    <span style={{ fontSize: '0.8rem', color: '#38bdf8' }}>{potState.value.toFixed(2)}V</span>
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="5"
+                                        step="0.01"
+                                        value={potState.value}
+                                        onChange={(e) => handlePotChange(comp.id, parseFloat(e.target.value))}
+                                        className="hw-slider"
+                                    />
+                                </div>
                             </div>
                         );
                     }
