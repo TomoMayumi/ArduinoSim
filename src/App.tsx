@@ -3,6 +3,7 @@ import { parseHex } from './emulator/intelhex';
 import { useEmulator } from './emulator/useEmulator';
 import { Pin13Led } from './components/Pin13Led';
 import { SerialConsole } from './components/SerialConsole';
+import { HardwarePanel } from './components/HardwarePanel';
 import './index.css';
 
 const BLINK_HEX = `
@@ -82,6 +83,10 @@ function App() {
             onReset={reset}
             noResetMode={noResetMode}
           />
+        </div>
+
+        <div className="card">
+          <HardwarePanel emulator={emulator} />
         </div>
       </main>
 

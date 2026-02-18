@@ -17,6 +17,8 @@ export interface EmulatorConfig {
   program: Uint16Array;
 }
 
+import { HardwareManager } from './hardware/HardwareManager';
+
 export class Atmega328P {
   public cpu: CPU;
   public timer0: AVRTimer;
@@ -26,6 +28,7 @@ export class Atmega328P {
   public portB: AVRIOPort;
   public portC: AVRIOPort;
   public portD: AVRIOPort;
+  public hardware: HardwareManager;
 
 
   constructor(program: Uint16Array) {
@@ -45,6 +48,8 @@ export class Atmega328P {
     this.portB = new AVRIOPort(this.cpu, portBConfig);
     this.portC = new AVRIOPort(this.cpu, portCConfig);
     this.portD = new AVRIOPort(this.cpu, portDConfig);
+
+    this.hardware = new HardwareManager(this.cpu);
   }
 
   public step() {
@@ -52,6 +57,8 @@ export class Atmega328P {
       avrInstruction(this.cpu);
       this.cpu.tick();
     }
+    // フレーム毎にハードウェアコンポーネントの状態も更新
+    this.hardware.update();
   }
 
   public stop() {

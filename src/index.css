@@ -143,3 +143,44 @@ textarea {
   font-family: monospace;
   resize: vertical;
 }
+
+.hardware-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.components-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 1rem;
+}
+
+.hardware-component {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hardware-component .label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.hw-led {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #333;
+  transition: all 0.1s;
+}
+
+.hw-led.on {
+  background: var(--led-color);
+}
