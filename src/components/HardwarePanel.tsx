@@ -73,10 +73,10 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator }) => {
                             <div key={comp.id} className="hardware-component">
                                 <span className="label">{comp.name} ({ledComp.pin})</span>
                                 <div
-                                    className={`hw - led ${ledState.isOn ? 'on' : ''} `}
+                                    className={`hw-led ${ledState.isOn ? 'on' : ''}`}
                                     style={{
                                         '--led-color': ledState.color,
-                                        boxShadow: ledState.isOn ? `0 0 10px ${ledState.color}, 0 0 20px ${ledState.color} ` : 'inset 0 2px 4px rgba(0,0,0,0.5)'
+                                        boxShadow: ledState.isOn ? `0 0 10px ${ledState.color}, 0 0 20px ${ledState.color}` : 'inset 0 2px 4px rgba(0,0,0,0.5)'
                                     } as React.CSSProperties}
                                 />
                             </div>
