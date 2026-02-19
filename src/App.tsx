@@ -34,6 +34,16 @@ const PUSH_SWITCH_HEX = `
 :00000001FF
 `.trim();
 
+const POT_BLINK_HEX = `
+:1000000001C00000259A389880E680937C0087E83C
+:1000100080937A0081E080937E0087EC80937A0061
+:1000200040E44A95F1F7209179002D9A0BD087ECA6
+:1000300080937A0040E44A95F1F7209179002D9859
+:1000400001D0EBCF3FEF4FEF4A95F1F73A95D9F753
+:060050002A95C1F7089596
+:00000001FF
+`.trim();
+
 function App() {
   const [hexInput, setHexInput] = useState(BLINK_HEX);
   const [program, setProgram] = useState<Uint16Array | null>(null);
@@ -130,6 +140,9 @@ function App() {
             </button>
             <button onClick={() => setHexInput(PUSH_SWITCH_HEX)} style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}>
               Push Switch (プッシュスイッチ)
+            </button>
+            <button onClick={() => setHexInput(POT_BLINK_HEX)} style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}>
+              Potentiometer (可変抵抗)
             </button>
           </div>
           <textarea
