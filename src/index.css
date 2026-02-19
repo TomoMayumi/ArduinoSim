@@ -214,3 +214,96 @@ textarea {
   cursor: pointer;
   margin-top: 0.5rem;
 }
+
+.seven-segment-display {
+  display: flex;
+  gap: 0.5rem;
+  background: #000;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.seven-segment-digit {
+  position: relative;
+  width: 24px;
+  height: 40px;
+  margin: 0 2px;
+}
+
+.segment {
+  position: absolute;
+  background: #300;
+  transition: background 0.05s;
+  border-radius: 2px;
+}
+
+.segment.on {
+  background: #f00;
+  box-shadow: 0 0 5px #f00;
+}
+
+/* Horizontal segments: a, g, d */
+.segment-a {
+  top: 0;
+  left: 4px;
+  right: 4px;
+  height: 4px;
+}
+
+.segment-g {
+  top: 18px;
+  left: 4px;
+  right: 4px;
+  height: 4px;
+}
+
+.segment-d {
+  bottom: 0;
+  left: 4px;
+  right: 4px;
+  height: 4px;
+}
+
+/* Vertical segments: f, b, e, c */
+.segment-f {
+  top: 4px;
+  left: 0;
+  width: 4px;
+  height: 14px;
+}
+
+.segment-b {
+  top: 4px;
+  right: 0;
+  width: 4px;
+  height: 14px;
+}
+
+.segment-e {
+  bottom: 4px;
+  left: 0;
+  width: 4px;
+  height: 14px;
+}
+
+.segment-c {
+  bottom: 4px;
+  right: 0;
+  width: 4px;
+  height: 14px;
+}
+
+.segment-dp {
+  position: absolute;
+  bottom: 0;
+  right: -4px;
+  width: 4px;
+  height: 4px;
+  background: #300;
+  border-radius: 50%;
+}
+
+.segment-dp.on {
+  background: #f00;
+  box-shadow: 0 0 5px #f00;
+}

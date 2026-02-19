@@ -4,11 +4,28 @@ import { Atmega328P } from '../emulator/atmega328p';
 import { LedComponent } from '../emulator/hardware/LedComponent';
 import { SwitchComponent } from '../emulator/hardware/SwitchComponent';
 import { PotentiometerComponent } from '../emulator/hardware/PotentiometerComponent';
+import { SevenSegmentComponent } from '../emulator/hardware/SevenSegmentComponent';
 import type { ComponentState } from '../emulator/hardware/Component';
+import type { SevenSegmentState } from '../emulator/hardware/SevenSegmentComponent';
 
 interface HardwarePanelProps {
     emulator: Atmega328P | null;
 }
+
+// 7セグメントのパターン定義 (a-g)
+// 1 = ON, 0 = OFF
+const SEGMENT_PATTERNS: { [key: number]: number[] } = {
+    0: [1, 1, 1, 1, 1, 1, 0], // a,b,c,d,e,f,g
+    1: [0, 1, 1, 0, 0, 0, 0],
+    2: [1, 1, 0, 1, 1, 0, 1],
+    3: [1, 1, 1, 1, 0, 0, 1],
+    4: [0, 1, 1, 0, 0, 1, 1],
+    5: [1, 0, 1, 1, 0, 1, 1],
+    6: [1, 0, 1, 1, 1, 1, 1],
+    7: [1, 1, 1, 0, 0, 0, 0],
+    8: [1, 1, 1, 1, 1, 1, 1],
+    9: [1, 1, 1, 1, 0, 1, 1],
+};
 
 export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator }) => {
     const [states, setStates] = useState<{ [id: string]: ComponentState }>({});
@@ -28,6 +45,10 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator }) => {
         // Debug: Potentiometer on A0
         if (!emulator.hardware.getComponent('pot-a0')) {
             emulator.hardware.addComponent(new PotentiometerComponent('pot-a0', 'Potentiometer', 'A0', 0));
+        }
+        // Debug: 4-Digit 7-Segment LED
+        if (!emulator.hardware.getComponent('sevseg-1')) {
+            emulator.hardware.addComponent(new SevenSegmentComponent('sevseg-1', '4-Digit 7-Segment'));
         }
 
         const interval = setInterval(() => {
@@ -88,7 +109,7 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator }) => {
                             <div key={comp.id} className="hardware-component">
                                 <span className="label">{comp.name} ({swComp.pin})</span>
                                 <button
-                                    className={`hw - btn ${swState.isPressed ? 'pressed' : ''} `}
+                                    className={`hw-btn ${swState.isPressed ? 'pressed' : ''}`}
                                     onMouseDown={() => swState.mode === 'momentary' && handleSwitchAction(comp.id, 'down')}
                                     onMouseUp={() => swState.mode === 'momentary' && handleSwitchAction(comp.id, 'up')}
                                     onMouseLeave={() => swState.mode === 'momentary' && handleSwitchAction(comp.id, 'up')}
@@ -115,6 +136,31 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator }) => {
                                         onChange={(e) => handlePotChange(comp.id, parseFloat(e.target.value))}
                                         className="hw-slider"
                                     />
+                                </div>
+                            </div>
+                        );
+                    } else if (comp.type === 'SEVEN_SEGMENT') {
+                        const segState = state as SevenSegmentState;
+
+                        return (
+                            <div key={comp.id} className="hardware-component" style={{ gridColumn: 'span 3', background: '#000' }}>
+                                <span className="label" style={{ color: '#fff' }}>{comp.name}</span>
+                                <div className="seven-segment-display">
+                                    {segState.digits.map((digit, idx) => (
+                                        <div key={idx} className="seven-segment-digit">
+                                            {/* Segments a-g */}
+                                            {[0, 1, 2, 3, 4, 5, 6].map(segIdx => {
+                                                const isOn = digit && digit.value !== null && SEGMENT_PATTERNS[digit.value]?.[segIdx] === 1;
+                                                return (
+                                                    <div
+                                                        key={segIdx}
+                                                        className={`segment segment-${String.fromCharCode(97 + segIdx)} ${isOn ? 'on' : ''}`}
+                                                    />
+                                                );
+                                            })}
+                                            <div className={`segment-dp ${digit?.dp ? 'on' : ''}`} />
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         );
