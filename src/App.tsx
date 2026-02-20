@@ -150,11 +150,13 @@ function App() {
         <div className="card">
           <HardwarePanel emulator={emulator} />
         </div>
+      </main>
 
-        <div className="card">
+      <aside className="disassembly-sidebar">
+        <div className="card" style={{ height: '100%', display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
           <DisassemblyPanel program={program} pc={debugInfo.pc} />
         </div>
-      </main>
+      </aside>
 
       <aside className="sidebar">
         <div className="card">
