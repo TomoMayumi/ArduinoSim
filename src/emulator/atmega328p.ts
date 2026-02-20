@@ -61,8 +61,11 @@ export class Atmega328P {
     for (let i = 0; i < 50000; i++) {
       avrInstruction(this.cpu);
       this.cpu.tick();
+      // ダイナミック点灯などを正確にサンプリングするため、512サイクル(約32us)毎に状態を更新
+      if ((i & 511) === 0) {
+        this.hardware.update();
+      }
     }
-    // フレーム毎にハードウェアコンポーネントの状態も更新
     this.hardware.update();
   }
 

@@ -31,6 +31,7 @@ export class SevenSegmentComponent implements Component {
     // Internal state to hold the 'persisted' view of the digits
     private digitValues: (number | null)[] = [null, null, null, null];
     private digitDPs: boolean[] = [false, false, false, false];
+    private lastUpdateCycles: number[] = [0, 0, 0, 0];
 
     constructor(id: string, name: string) {
         this.id = id;
@@ -52,22 +53,23 @@ export class SevenSegmentComponent implements Component {
         const dpState = getPinState(cpu, this.pinDP);
 
         // 3. Update active digits
-        // Active LOW for digit selection
-        if (!getPinState(cpu, this.pinD1)) {
-            this.digitValues[0] = displayValue;
-            this.digitDPs[0] = dpState;
-        }
-        if (!getPinState(cpu, this.pinD2)) {
-            this.digitValues[1] = displayValue;
-            this.digitDPs[1] = dpState;
-        }
-        if (!getPinState(cpu, this.pinD3)) {
-            this.digitValues[2] = displayValue;
-            this.digitDPs[2] = dpState;
-        }
-        if (!getPinState(cpu, this.pinD4)) {
-            this.digitValues[3] = displayValue;
-            this.digitDPs[3] = dpState;
+        const currentCycles = cpu.cycles;
+        // 20ms persistence at 16MHz
+        const PERSISTENCE_CYCLES = 320000;
+
+        const digitPins = [this.pinD1, this.pinD2, this.pinD3, this.pinD4];
+
+        for (let i = 0; i < 4; i++) {
+            if (!getPinState(cpu, digitPins[i])) {
+                this.digitValues[i] = displayValue;
+                this.digitDPs[i] = dpState;
+                this.lastUpdateCycles[i] = currentCycles;
+            } else {
+                if (currentCycles - this.lastUpdateCycles[i] > PERSISTENCE_CYCLES) {
+                    this.digitValues[i] = null;
+                    this.digitDPs[i] = false;
+                }
+            }
         }
     }
 
