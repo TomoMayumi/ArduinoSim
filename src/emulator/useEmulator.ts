@@ -66,11 +66,21 @@ export function useEmulator(program: Uint16Array | null) {
         };
     }, [isRunning, emulator]); // Re-run effect when isRunning or emulator instance changes
 
+    const step = useCallback(() => {
+        if (emulator && !isRunning) {
+            emulator.stepInstruction();
+            // Force a state update to refresh UI
+            setEmulator(Object.create(Object.getPrototypeOf(emulator), Object.getOwnPropertyDescriptors(emulator)));
+            setIsRunning(false);
+        }
+    }, [emulator, isRunning]);
+
     return {
         emulator,
         isRunning,
         start,
         stop,
+        step,
         reset,
     };
 }

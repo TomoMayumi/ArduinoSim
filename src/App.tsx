@@ -4,6 +4,7 @@ import { useEmulator } from './emulator/useEmulator';
 import { Pin13Led } from './components/Pin13Led';
 import { SerialConsole } from './components/SerialConsole';
 import { HardwarePanel } from './components/HardwarePanel';
+import { DisassemblyPanel } from './components/DisassemblyPanel';
 import './index.css';
 
 const BLINK_HEX = `
@@ -82,7 +83,7 @@ const SEVEN_SEGMENT_COUNTUP_HEX = `
 function App() {
   const [hexInput, setHexInput] = useState(BLINK_HEX);
   const [program, setProgram] = useState<Uint16Array | null>(null);
-  const { emulator, isRunning, start, stop, reset } = useEmulator(program);
+  const { emulator, isRunning, start, stop, step, reset } = useEmulator(program);
   const [noResetMode, setNoResetMode] = useState(true);
   const [debugInfo, setDebugInfo] = useState({ pc: 0, cycles: 0 });
 
@@ -114,6 +115,9 @@ function App() {
           <button onClick={isRunning ? stop : start}>
             {isRunning ? '一時停止' : '実行'}
           </button>
+          {!isRunning && (
+            <button onClick={step} style={{ marginLeft: '0.5rem' }}>ステップ</button>
+          )}
           <button onClick={reset} style={{ marginLeft: '0.5rem' }}>リセット</button>
         </div>
       </header>
@@ -145,6 +149,10 @@ function App() {
 
         <div className="card">
           <HardwarePanel emulator={emulator} />
+        </div>
+
+        <div className="card">
+          <DisassemblyPanel program={program} pc={debugInfo.pc} />
         </div>
       </main>
 

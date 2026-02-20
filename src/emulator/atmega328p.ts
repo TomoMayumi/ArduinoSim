@@ -69,6 +69,12 @@ export class Atmega328P {
     this.hardware.update();
   }
 
+  public stepInstruction() {
+    avrInstruction(this.cpu);
+    this.cpu.tick();
+    this.hardware.update();
+  }
+
   public stop() {
     // 停止処理が必要な場合は記述
   }
