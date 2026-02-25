@@ -10,7 +10,7 @@ import type { SevenSegmentState } from '../emulator/hardware/SevenSegmentCompone
 import type { MotorState } from '../emulator/hardware/MotorComponent';
 import type { Lcd1602State } from '../emulator/hardware/Lcd1602Component';
 import type { AdKeyboardState, AdKeyboardComponent } from '../emulator/hardware/AdKeyboardComponent';
-import { loadHardwareConfigs, saveHardwareConfigs, FIXED_COMPONENT_IDS } from '../emulator/hardware/HardwareConfig';
+import { loadHardwareConfigs, saveHardwareConfigs } from '../emulator/hardware/HardwareConfig';
 import type { HardwareConfig } from '../emulator/hardware/HardwareConfig';
 import { createComponentFromConfig } from '../emulator/hardware/ComponentFactory';
 import { HardwareConfigDialog } from './HardwareConfigDialog';
@@ -112,12 +112,69 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
 
     if (!emulator) return <div>エミュレータ未接続</div>;
 
-    // 固定IDリストの順序でコンポーネントを描画する
-    const renderComponent = (id: string) => {
+    // --- LED 1アイテム（グループ内子要素）を描画するヘルパー ---
+    const renderLedItem = (id: string) => {
+        const comp = emulator.hardware.getComponent(id);
+        const state = states[id];
+        if (!comp || !state || comp.type !== 'LED') {
+            return (
+                <div key={id} className="hw-group-item" style={{ opacity: 0.3 }}>
+                    <span className="label" style={{ fontSize: '0.75rem' }}>{id}</span>
+                </div>
+            );
+        }
+        const ledState = state as any;
+        const ledComp = comp as LedComponent;
+        return (
+            <div key={comp.id} className="hw-group-item" style={{ position: 'relative' }}>
+                <button className="settings-btn" onClick={() => openConfigFor(comp.id)}>⚙️</button>
+                <div
+                    className={`hw-led ${ledState.isOn ? 'on' : ''}`}
+                    style={{
+                        '--led-color': ledState.color,
+                        boxShadow: ledState.isOn ? `0 0 10px ${ledState.color}, 0 0 20px ${ledState.color}` : 'inset 0 2px 4px rgba(0,0,0,0.5)'
+                    } as React.CSSProperties}
+                />
+                <span className="label" style={{ fontSize: '0.75rem' }}>{comp.name}<br />({ledComp.pin})</span>
+            </div>
+        );
+    };
+
+    // --- Switch 1アイテム（グループ内子要素）を描画するヘルパー ---
+    const renderSwitchItem = (id: string) => {
+        const comp = emulator.hardware.getComponent(id);
+        const state = states[id];
+        if (!comp || !state || comp.type !== 'SWITCH') {
+            return (
+                <div key={id} className="hw-group-item" style={{ opacity: 0.3 }}>
+                    <span className="label" style={{ fontSize: '0.75rem' }}>{id}</span>
+                </div>
+            );
+        }
+        const swState = state as any;
+        const swComp = comp as SwitchComponent;
+        return (
+            <div key={comp.id} className="hw-group-item" style={{ position: 'relative' }}>
+                <button className="settings-btn" onClick={() => openConfigFor(comp.id)}>⚙️</button>
+                <button
+                    className={`hw-btn ${swState.isPressed ? 'pressed' : ''}`}
+                    onMouseDown={() => swState.mode === 'momentary' && handleSwitchAction(comp.id, 'down')}
+                    onMouseUp={() => swState.mode === 'momentary' && handleSwitchAction(comp.id, 'up')}
+                    onMouseLeave={() => swState.mode === 'momentary' && handleSwitchAction(comp.id, 'up')}
+                    onClick={() => swState.mode === 'toggle' && handleSwitchAction(comp.id, 'toggle')}
+                >
+                    {swState.mode === 'momentary' ? 'PUSH' : (swState.isPressed ? 'ON' : 'OFF')}
+                </button>
+                <span className="label" style={{ fontSize: '0.75rem' }}>{comp.name}<br />({swComp.pin})</span>
+            </div>
+        );
+    };
+
+    // --- 個別コンポーネント描画（LED/SWITCH以外） ---
+    const renderSingleComponent = (id: string) => {
         const comp = emulator.hardware.getComponent(id);
         const state = states[id];
 
-        // コンポーネントが存在しない場合はプレースホルダを表示
         if (!comp || !state) {
             return (
                 <div key={id} className="hardware-component" style={{ opacity: 0.3 }}>
@@ -126,41 +183,7 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
             );
         }
 
-        if (comp.type === 'LED') {
-            const ledState = state as any;
-            const ledComp = comp as LedComponent;
-            return (
-                <div key={comp.id} className="hardware-component" style={{ position: 'relative' }}>
-                    <button className="settings-btn" onClick={() => openConfigFor(comp.id)}>⚙️</button>
-                    <span className="label">{comp.name} ({ledComp.pin})</span>
-                    <div
-                        className={`hw-led ${ledState.isOn ? 'on' : ''}`}
-                        style={{
-                            '--led-color': ledState.color,
-                            boxShadow: ledState.isOn ? `0 0 10px ${ledState.color}, 0 0 20px ${ledState.color}` : 'inset 0 2px 4px rgba(0,0,0,0.5)'
-                        } as React.CSSProperties}
-                    />
-                </div>
-            );
-        } else if (comp.type === 'SWITCH') {
-            const swState = state as any;
-            const swComp = comp as SwitchComponent;
-            return (
-                <div key={comp.id} className="hardware-component" style={{ position: 'relative' }}>
-                    <button className="settings-btn" onClick={() => openConfigFor(comp.id)}>⚙️</button>
-                    <span className="label">{comp.name} ({swComp.pin})</span>
-                    <button
-                        className={`hw-btn ${swState.isPressed ? 'pressed' : ''}`}
-                        onMouseDown={() => swState.mode === 'momentary' && handleSwitchAction(comp.id, 'down')}
-                        onMouseUp={() => swState.mode === 'momentary' && handleSwitchAction(comp.id, 'up')}
-                        onMouseLeave={() => swState.mode === 'momentary' && handleSwitchAction(comp.id, 'up')}
-                        onClick={() => swState.mode === 'toggle' && handleSwitchAction(comp.id, 'toggle')}
-                    >
-                        {swState.mode === 'momentary' ? 'PUSH' : (swState.isPressed ? 'ON' : 'OFF')}
-                    </button>
-                </div>
-            );
-        } else if (comp.type === 'POTENTIOMETER') {
+        if (comp.type === 'POTENTIOMETER') {
             const potState = state as any;
             const potComp = comp as PotentiometerComponent;
             return (
@@ -183,7 +206,6 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
             );
         } else if (comp.type === 'SEVEN_SEGMENT') {
             const segState = state as SevenSegmentState;
-
             return (
                 <div key={comp.id} className="hardware-component" style={{ gridColumn: 'span 3', background: '#000', position: 'relative' }}>
                     <button className="settings-btn" onClick={() => openConfigFor(comp.id)} style={{ color: 'white' }}>⚙️</button>
@@ -193,7 +215,6 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
                             const isDim = !isRunning && digit && !digit.active;
                             return (
                                 <div key={idx} className="seven-segment-digit">
-                                    {/* Segments a-g */}
                                     {[0, 1, 2, 3, 4, 5, 6].map(segIdx => {
                                         const isOn = digit && digit.value !== null && SEGMENT_PATTERNS[digit.value]?.[segIdx] === 1;
                                         return (
@@ -205,7 +226,7 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
                                     })}
                                     <div className={`segment-dp ${digit?.dp ? (isDim ? 'dim' : 'on') : ''}`} />
                                 </div>
-                            )
+                            );
                         })}
                     </div>
                 </div>
@@ -213,9 +234,7 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
         } else if (comp.type === 'MOTOR') {
             const motorState = state as MotorState;
             const motorComp = comp as MotorComponent;
-            // 回転速度によるアニメーション速度を計算（0〜2秒/回転、最大速度が速い）
             const animationDuration = motorState.speed > 0.05 ? `${1.0 / motorState.speed}s` : '0s';
-
             return (
                 <div key={comp.id} className="hardware-component" style={{ position: 'relative' }}>
                     <button className="settings-btn" onClick={() => openConfigFor(comp.id)}>⚙️</button>
@@ -305,8 +324,34 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
         <div className="hardware-panel">
             <h3>Breadboard (Hardware Components)</h3>
             <div className="components-grid">
-                {/* 固定IDリストの順序でコンポーネントを描画（設定変更時も順序は変わらない） */}
-                {FIXED_COMPONENT_IDS.map(id => renderComponent(id))}
+                {/* LED 4つをひとつの枠にまとめて横並び表示 */}
+                <div className="hardware-component hw-group" style={{ gridColumn: 'span 2' }}>
+                    <span className="label">LEDs</span>
+                    <div className="hw-group-row">
+                        {renderLedItem('led-1')}
+                        {renderLedItem('led-2')}
+                        {renderLedItem('led-3')}
+                        {renderLedItem('led-4')}
+                    </div>
+                </div>
+
+                {/* スイッチ 4つをひとつの枠にまとめて横並び表示 */}
+                <div className="hardware-component hw-group" style={{ gridColumn: 'span 2' }}>
+                    <span className="label">Switches</span>
+                    <div className="hw-group-row">
+                        {renderSwitchItem('sw-1')}
+                        {renderSwitchItem('sw-2')}
+                        {renderSwitchItem('sw-3')}
+                        {renderSwitchItem('sw-4')}
+                    </div>
+                </div>
+
+                {/* その他の固定コンポーネント（LED/SWITCH以外）を順番に表示 */}
+                {renderSingleComponent('pot-1')}
+                {renderSingleComponent('motor-1')}
+                {renderSingleComponent('sevseg-1')}
+                {renderSingleComponent('lcd-1')}
+                {renderSingleComponent('adkey-1')}
             </div>
             {editingConfig && (
                 <HardwareConfigDialog
