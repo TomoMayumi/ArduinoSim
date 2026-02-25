@@ -4,13 +4,15 @@ import { Atmega328P } from '../emulator/atmega328p';
 import { LedComponent } from '../emulator/hardware/LedComponent';
 import { SwitchComponent } from '../emulator/hardware/SwitchComponent';
 import { PotentiometerComponent } from '../emulator/hardware/PotentiometerComponent';
-import { SevenSegmentComponent } from '../emulator/hardware/SevenSegmentComponent';
 import { MotorComponent } from '../emulator/hardware/MotorComponent';
-import { Lcd1602Component } from '../emulator/hardware/Lcd1602Component';
 import type { ComponentState } from '../emulator/hardware/Component';
 import type { SevenSegmentState } from '../emulator/hardware/SevenSegmentComponent';
 import type { MotorState } from '../emulator/hardware/MotorComponent';
 import type { Lcd1602State } from '../emulator/hardware/Lcd1602Component';
+import { loadHardwareConfigs, saveHardwareConfigs } from '../emulator/hardware/HardwareConfig';
+import type { HardwareConfig } from '../emulator/hardware/HardwareConfig';
+import { createComponentFromConfig } from '../emulator/hardware/ComponentFactory';
+import { HardwareConfigDialog } from './HardwareConfigDialog';
 
 interface HardwarePanelProps {
     emulator: Atmega328P | null;
@@ -34,34 +36,20 @@ const SEGMENT_PATTERNS: { [key: number]: number[] } = {
 
 export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunning }) => {
     const [states, setStates] = useState<{ [id: string]: ComponentState }>({});
+    const [editingConfig, setEditingConfig] = useState<HardwareConfig | null>(null);
 
     useEffect(() => {
         if (!emulator) return;
 
         // 初期コンポーネントのセットアップ
-        // Debug: Blue LED on D12
-        if (!emulator.hardware.getComponent('led-d12')) {
-            emulator.hardware.addComponent(new LedComponent('led-d12', 'Blue LED', 'D12', '#0000ff'));
-        }
-        // Debug: Push Button on D2
-        if (!emulator.hardware.getComponent('sw-d2')) {
-            emulator.hardware.addComponent(new SwitchComponent('sw-d2', 'Button', 'D2', 'momentary'));
-        }
-        // Debug: Potentiometer on A0
-        if (!emulator.hardware.getComponent('pot-a0')) {
-            emulator.hardware.addComponent(new PotentiometerComponent('pot-a0', 'Potentiometer', 'A0', 0));
-        }
-        // Debug: 4-Digit 7-Segment LED
-        if (!emulator.hardware.getComponent('sevseg-1')) {
-            emulator.hardware.addComponent(new SevenSegmentComponent('sevseg-1', '4-Digit 7-Segment'));
-        }
-        // Debug: DC Motor (PWM D9)
-        if (!emulator.hardware.getComponent('motor-1')) {
-            emulator.hardware.addComponent(new MotorComponent('motor-1', 'DC Motor', 'D9'));
-        }
-        // Debug: LCD 1602 (RS=D12, EN=D11, D4=D5, D5=D4, D6=D3, D7=D2)
-        if (!emulator.hardware.getComponent('lcd-1')) {
-            emulator.hardware.addComponent(new Lcd1602Component('lcd-1', 'LCD 1602', 'D12', 'D11', 'D5', 'D4', 'D3', 'D2'));
+        const configs = loadHardwareConfigs();
+        for (const config of configs) {
+            if (!emulator.hardware.getComponent(config.id)) {
+                const comp = createComponentFromConfig(config);
+                if (comp) {
+                    emulator.hardware.addComponent(comp);
+                }
+            }
         }
 
         const interval = setInterval(() => {
@@ -90,6 +78,37 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
         }
     }
 
+    const openConfigFor = (id: string) => {
+        const configs = loadHardwareConfigs();
+        const config = configs.find(c => c.id === id);
+        if (config) {
+            setEditingConfig(config);
+        }
+    }
+
+    const handleSaveConfig = (newConfig: HardwareConfig) => {
+        if (!emulator) return;
+
+        // Save to localStorage
+        const configs = loadHardwareConfigs();
+        const idx = configs.findIndex(c => c.id === newConfig.id);
+        if (idx !== -1) {
+            configs[idx] = newConfig;
+        } else {
+            configs.push(newConfig);
+        }
+        saveHardwareConfigs(configs);
+
+        // Re-instantiate in memory
+        emulator.hardware.removeComponent(newConfig.id);
+        const comp = createComponentFromConfig(newConfig);
+        if (comp) {
+            emulator.hardware.addComponent(comp);
+        }
+
+        setEditingConfig(null);
+    }
+
     if (!emulator) return <div>エミュレータ未接続</div>;
 
     return (
@@ -104,7 +123,8 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
                         const ledState = state as any;
                         const ledComp = comp as LedComponent;
                         return (
-                            <div key={comp.id} className="hardware-component">
+                            <div key={comp.id} className="hardware-component" style={{ position: 'relative' }}>
+                                <button className="settings-btn" onClick={() => openConfigFor(comp.id)}>⚙️</button>
                                 <span className="label">{comp.name} ({ledComp.pin})</span>
                                 <div
                                     className={`hw-led ${ledState.isOn ? 'on' : ''}`}
@@ -119,7 +139,8 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
                         const swState = state as any;
                         const swComp = comp as SwitchComponent;
                         return (
-                            <div key={comp.id} className="hardware-component">
+                            <div key={comp.id} className="hardware-component" style={{ position: 'relative' }}>
+                                <button className="settings-btn" onClick={() => openConfigFor(comp.id)}>⚙️</button>
                                 <span className="label">{comp.name} ({swComp.pin})</span>
                                 <button
                                     className={`hw-btn ${swState.isPressed ? 'pressed' : ''}`}
@@ -136,7 +157,8 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
                         const potState = state as any;
                         const potComp = comp as PotentiometerComponent;
                         return (
-                            <div key={comp.id} className="hardware-component" style={{ gridColumn: 'span 2' }}>
+                            <div key={comp.id} className="hardware-component" style={{ gridColumn: 'span 2', position: 'relative' }}>
+                                <button className="settings-btn" onClick={() => openConfigFor(comp.id)}>⚙️</button>
                                 <span className="label">{comp.name} ({potComp.pin})</span>
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
                                     <span style={{ fontSize: '0.8rem', color: '#38bdf8' }}>{potState.value.toFixed(2)}V</span>
@@ -156,7 +178,8 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
                         const segState = state as SevenSegmentState;
 
                         return (
-                            <div key={comp.id} className="hardware-component" style={{ gridColumn: 'span 3', background: '#000' }}>
+                            <div key={comp.id} className="hardware-component" style={{ gridColumn: 'span 3', background: '#000', position: 'relative' }}>
+                                <button className="settings-btn" onClick={() => openConfigFor(comp.id)} style={{ color: 'white' }}>⚙️</button>
                                 <span className="label" style={{ color: '#fff' }}>{comp.name}</span>
                                 <div className="seven-segment-display">
                                     {segState.digits.map((digit, idx) => {
@@ -187,7 +210,8 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
                         const animationDuration = motorState.speed > 0.05 ? `${1.0 / motorState.speed}s` : '0s';
 
                         return (
-                            <div key={comp.id} className="hardware-component">
+                            <div key={comp.id} className="hardware-component" style={{ position: 'relative' }}>
+                                <button className="settings-btn" onClick={() => openConfigFor(comp.id)}>⚙️</button>
                                 <span className="label">{comp.name} ({motorComp.pin})</span>
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                     <div className="motor-fan" style={{
@@ -205,7 +229,8 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
                     } else if (comp.type === 'LCD1602') {
                         const lcdState = state as Lcd1602State;
                         return (
-                            <div key={comp.id} className="hardware-component" style={{ gridColumn: 'span 3', background: '#849b20' }}>
+                            <div key={comp.id} className="hardware-component" style={{ gridColumn: 'span 3', background: '#849b20', position: 'relative' }}>
+                                <button className="settings-btn" onClick={() => openConfigFor(comp.id)}>⚙️</button>
                                 <span className="label" style={{ color: '#000' }}>{comp.name}</span>
                                 <div className="lcd-display" style={{
                                     background: '#738618', padding: '0.5rem', borderRadius: '0.25rem', fontFamily: 'monospace',
@@ -233,6 +258,13 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
             <div className="add-component-placeholder">
                 <p style={{ fontSize: '0.8rem', color: '#64748b' }}>※ここに今後スイッチや7セグ等が追加されます</p>
             </div>
+            {editingConfig && (
+                <HardwareConfigDialog
+                    config={editingConfig}
+                    onSave={handleSaveConfig}
+                    onClose={() => setEditingConfig(null)}
+                />
+            )}
         </div>
     );
 };

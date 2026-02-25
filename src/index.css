@@ -235,6 +235,25 @@ textarea {
   background: #ef4444;
 }
 
+.settings-btn {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  background: transparent;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+  padding: 0;
+}
+
+.settings-btn:hover {
+  opacity: 1;
+  background: transparent;
+  transform: none;
+}
+
 .hw-slider {
   width: 100%;
   cursor: pointer;
