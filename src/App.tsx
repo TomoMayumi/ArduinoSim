@@ -153,14 +153,11 @@ function App() {
         </div>
       </main>
 
-      <aside className="cpu-state-sidebar">
-        <div className="card" style={{ height: '100%', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', overflowY: 'auto' }}>
+      <aside className="disassembly-sidebar">
+        <div className="card" style={{ display: 'flex', flexDirection: 'column', boxSizing: 'border-box', overflowY: 'auto' }}>
           <CpuStatePanel emulator={emulator} isRunning={isRunning} />
         </div>
-      </aside>
-
-      <aside className="disassembly-sidebar">
-        <div className="card" style={{ height: '100%', display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
+        <div className="card" style={{ display: 'flex', flexDirection: 'column', boxSizing: 'border-box', flex: 1, minHeight: 0 }}>
           <DisassemblyPanel program={program} pc={isRunning ? -1 : debugInfo.pc} isRunning={isRunning} />
         </div>
       </aside>
