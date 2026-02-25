@@ -147,7 +147,7 @@ const ANALOG_A0_TO_7SEG_HEX = `
 function App() {
   const [hexInput, setHexInput] = useState(BLINK_HEX);
   const [program, setProgram] = useState<Uint16Array | null>(null);
-  const { emulator, isRunning, start, stop, step, reset } = useEmulator(program);
+  const { emulator, isRunning, breakpoints, start, stop, step, reset, toggleBreakpoint } = useEmulator(program);
   const [noResetMode, setNoResetMode] = useState(true);
   const [debugInfo, setDebugInfo] = useState({ pc: 0, cycles: 0 });
 
@@ -221,7 +221,13 @@ function App() {
           <CpuStatePanel emulator={emulator} isRunning={isRunning} />
         </div>
         <div className="card" style={{ display: 'flex', flexDirection: 'column', boxSizing: 'border-box', flex: 1, minHeight: 0 }}>
-          <DisassemblyPanel program={program} pc={isRunning ? -1 : debugInfo.pc} isRunning={isRunning} />
+          <DisassemblyPanel
+            program={program}
+            pc={isRunning ? -1 : debugInfo.pc}
+            isRunning={isRunning}
+            breakpoints={breakpoints}
+            onToggleBreakpoint={toggleBreakpoint}
+          />
         </div>
       </aside>
 

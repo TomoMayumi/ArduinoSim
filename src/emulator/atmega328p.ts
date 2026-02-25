@@ -57,16 +57,25 @@ export class Atmega328P {
     this.hardware = new HardwareManager(this.cpu);
   }
 
-  public step() {
+  public step(breakpoints: Set<number> = new Set()): number | null {
     for (let i = 0; i < 50000; i++) {
       avrInstruction(this.cpu);
       this.cpu.tick();
+
+      // PC (Program Counter) はワード単位。バイト単位のアドレスに変換してチェック。
+      const addr = this.cpu.pc * 2;
+      if (breakpoints.has(addr)) {
+        this.hardware.update();
+        return addr;
+      }
+
       // ダイナミック点灯などを正確にサンプリングするため、512サイクル(約32us)毎に状態を更新
       if ((i & 511) === 0) {
         this.hardware.update();
       }
     }
     this.hardware.update();
+    return null;
   }
 
   public stepInstruction() {

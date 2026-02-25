@@ -6,9 +6,11 @@ interface DisassemblyPanelProps {
     program: Uint16Array | null;
     pc: number;
     isRunning: boolean;
+    breakpoints: Set<number>;
+    onToggleBreakpoint: (address: number) => void;
 }
 
-export const DisassemblyPanel: React.FC<DisassemblyPanelProps> = memo(({ program, pc, isRunning }) => {
+export const DisassemblyPanel: React.FC<DisassemblyPanelProps> = memo(({ program, pc, isRunning, breakpoints, onToggleBreakpoint }) => {
     const [instructions, setInstructions] = useState<DisassembledInstruction[]>([]);
     const listRef = useRef<HTMLDivElement>(null);
 
@@ -36,6 +38,7 @@ export const DisassemblyPanel: React.FC<DisassemblyPanelProps> = memo(({ program
     const renderedInstructions = useMemo(() => {
         return instructions.map((inst) => {
             const isActive = inst.address === activePc;
+            const hasBreakpoint = breakpoints.has(inst.address);
 
             return (
                 <div
@@ -43,13 +46,27 @@ export const DisassemblyPanel: React.FC<DisassemblyPanelProps> = memo(({ program
                     className={isActive ? 'active-pc' : ''}
                     style={{
                         display: 'flex',
-                        gap: '1rem',
+                        gap: '0.5rem',
                         padding: '2px 4px',
                         backgroundColor: isActive ? '#3b82f6' : 'transparent',
                         color: isActive ? '#ffffff' : '#94a3b8',
-                        borderRadius: '3px'
+                        borderRadius: '3px',
+                        cursor: 'pointer',
+                        alignItems: 'center'
                     }}
+                    onClick={() => onToggleBreakpoint(inst.address)}
                 >
+                    <div style={{ width: '16px', display: 'flex', justifyContent: 'center' }}>
+                        {hasBreakpoint && (
+                            <div style={{
+                                width: '10px',
+                                height: '10px',
+                                borderRadius: '50%',
+                                backgroundColor: '#ef4444',
+                                border: '1px solid #fca5a1'
+                            }} />
+                        )}
+                    </div>
                     <div style={{ width: '40px', textAlign: 'right', color: isActive ? '#e0e7ff' : '#64748b' }}>
                         {inst.address.toString(16).padStart(4, '0').toUpperCase()}
                     </div>
@@ -62,7 +79,7 @@ export const DisassemblyPanel: React.FC<DisassemblyPanelProps> = memo(({ program
                 </div>
             );
         });
-    }, [instructions, activePc]);
+    }, [instructions, activePc, breakpoints, onToggleBreakpoint]);
 
     if (!program) {
         return <div className="disassembly-panel">プログラムがロードされていません</div>;

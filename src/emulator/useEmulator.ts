@@ -4,6 +4,7 @@ import { Atmega328P } from './atmega328p';
 export function useEmulator(program: Uint16Array | null) {
     const [emulator, setEmulator] = useState<Atmega328P | null>(null);
     const [isRunning, setIsRunning] = useState(false);
+    const [breakpoints, setBreakpoints] = useState<Set<number>>(new Set());
     const requestRef = useRef<number>(0);
 
     const start = useCallback(() => {
@@ -25,6 +26,18 @@ export function useEmulator(program: Uint16Array | null) {
         }
     }, [emulator]);
 
+    const toggleBreakpoint = useCallback((address: number) => {
+        setBreakpoints((prev) => {
+            const next = new Set(prev);
+            if (next.has(address)) {
+                next.delete(address);
+            } else {
+                next.add(address);
+            }
+            return next;
+        });
+    }, []);
+
     useEffect(() => {
         if (program) {
             const newEmulator = new Atmega328P(program);
@@ -36,6 +49,7 @@ export function useEmulator(program: Uint16Array | null) {
 
     const isRunningRef = useRef(isRunning);
     const emulatorRef = useRef<Atmega328P | null>(null);
+    const breakpointsRef = useRef(breakpoints);
 
     useEffect(() => {
         isRunningRef.current = isRunning;
@@ -46,12 +60,27 @@ export function useEmulator(program: Uint16Array | null) {
     }, [emulator]);
 
     useEffect(() => {
+        breakpointsRef.current = breakpoints;
+    }, [breakpoints]);
+
+    useEffect(() => {
         const loop = () => {
             if (isRunningRef.current && emulatorRef.current) {
+                // Breakpoint check logic
+                let hitBreakpoint = false;
                 for (let i = 0; i < 5; i++) {
-                    emulatorRef.current.step();
+                    const hitAddress = emulatorRef.current.step(breakpointsRef.current);
+                    if (hitAddress !== null) {
+                        hitBreakpoint = true;
+                        break;
+                    }
                 }
-                requestRef.current = requestAnimationFrame(loop);
+
+                if (hitBreakpoint) {
+                    setIsRunning(false);
+                } else {
+                    requestRef.current = requestAnimationFrame(loop);
+                }
             }
         };
 
@@ -78,9 +107,11 @@ export function useEmulator(program: Uint16Array | null) {
     return {
         emulator,
         isRunning,
+        breakpoints,
         start,
         stop,
         step,
         reset,
+        toggleBreakpoint,
     };
 }
