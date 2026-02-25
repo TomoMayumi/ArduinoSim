@@ -9,6 +9,7 @@ import type { ComponentState } from '../emulator/hardware/Component';
 import type { SevenSegmentState } from '../emulator/hardware/SevenSegmentComponent';
 import type { MotorState } from '../emulator/hardware/MotorComponent';
 import type { Lcd1602State } from '../emulator/hardware/Lcd1602Component';
+import type { AdKeyboardState, AdKeyboardComponent } from '../emulator/hardware/AdKeyboardComponent';
 import { loadHardwareConfigs, saveHardwareConfigs } from '../emulator/hardware/HardwareConfig';
 import type { HardwareConfig } from '../emulator/hardware/HardwareConfig';
 import { createComponentFromConfig } from '../emulator/hardware/ComponentFactory';
@@ -246,6 +247,45 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
                                                     textDecoration: (lcdState.cursorRow === row && lcdState.cursorCol === col) ? 'underline' : 'none'
                                                 }}>{char}</span>
                                             ))}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        );
+                    } else if (comp.type === 'AD_KEYBOARD') {
+                        const adState = state as AdKeyboardState;
+                        const adComp = comp as AdKeyboardComponent;
+                        return (
+                            <div key={comp.id} className="hardware-component" style={{ gridColumn: 'span 2', position: 'relative' }}>
+                                <button className="settings-btn" onClick={() => openConfigFor(comp.id)}>⚙️</button>
+                                <span className="label" style={{ display: 'block', marginBottom: '0.5rem' }}>{comp.name} ({adComp.pin})</span>
+                                <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                                    {[4, 3, 2, 1].map((keyIndex) => (
+                                        <div key={keyIndex} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                            <button
+                                                className={`hw-btn ${adState.pressedKey === keyIndex ? 'pressed' : ''}`}
+                                                style={{ width: '30px', height: '30px', padding: 0 }}
+                                                onMouseDown={() => {
+                                                    if (emulator) {
+                                                        const target = emulator.hardware.getComponent(comp.id) as AdKeyboardComponent;
+                                                        target.setPressedKey(keyIndex as any);
+                                                    }
+                                                }}
+                                                onMouseUp={() => {
+                                                    if (emulator) {
+                                                        const target = emulator.hardware.getComponent(comp.id) as AdKeyboardComponent;
+                                                        target.setPressedKey(null);
+                                                    }
+                                                }}
+                                                onMouseLeave={() => {
+                                                    if (emulator) {
+                                                        const target = emulator.hardware.getComponent(comp.id) as AdKeyboardComponent;
+                                                        target.setPressedKey(null);
+                                                    }
+                                                }}
+                                            >
+                                                S{keyIndex}
+                                            </button>
                                         </div>
                                     ))}
                                 </div>

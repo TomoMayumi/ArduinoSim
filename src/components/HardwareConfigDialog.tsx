@@ -34,7 +34,10 @@ export const HardwareConfigDialog: React.FC<HardwareConfigDialogProps> = ({ conf
                         <label style={{ display: 'flex', justifyContent: 'space-between' }}>
                             接続ピン:
                             <select value={(edited as any).pin} onChange={e => handleChange('pin', e.target.value)} style={inputStyle}>
-                                {allPins.map(p => <option key={p} value={p}>{p}</option>)}
+                                {config.type === 'AD_KEYBOARD' || config.type === 'POTENTIOMETER'
+                                    ? analogs.map(p => <option key={p} value={p}>{p}</option>)
+                                    : allPins.map(p => <option key={p} value={p}>{p}</option>)
+                                }
                             </select>
                         </label>
                     )}

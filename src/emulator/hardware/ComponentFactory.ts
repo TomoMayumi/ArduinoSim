@@ -6,6 +6,7 @@ import { PotentiometerComponent } from './PotentiometerComponent';
 import { SevenSegmentComponent } from './SevenSegmentComponent';
 import { MotorComponent } from './MotorComponent';
 import { Lcd1602Component } from './Lcd1602Component';
+import { AdKeyboardComponent } from './AdKeyboardComponent';
 
 export function createComponentFromConfig(config: HardwareConfig): Component | null {
     switch (config.type) {
@@ -27,6 +28,8 @@ export function createComponentFromConfig(config: HardwareConfig): Component | n
                 config.rs, config.en,
                 config.d4, config.d5, config.d6, config.d7
             );
+        case 'AD_KEYBOARD':
+            return new AdKeyboardComponent(config.id, config.name, config.pin);
         default:
             console.warn(`Unknown component type in config: ${(config as any).type}`);
             return null;

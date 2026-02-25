@@ -1,4 +1,4 @@
-export type ComponentType = 'LED' | 'SWITCH' | 'POTENTIOMETER' | 'SEVEN_SEGMENT' | 'MOTOR' | 'LCD1602';
+export type ComponentType = 'LED' | 'SWITCH' | 'POTENTIOMETER' | 'SEVEN_SEGMENT' | 'MOTOR' | 'LCD1602' | 'AD_KEYBOARD';
 
 export interface BaseConfig {
     id: string;
@@ -43,7 +43,12 @@ export interface Lcd1602Config extends BaseConfig {
     d7: string;
 }
 
-export type HardwareConfig = LedConfig | SwitchConfig | PotentiometerConfig | SevenSegmentConfig | MotorConfig | Lcd1602Config;
+export interface AdKeyboardConfig extends BaseConfig {
+    type: 'AD_KEYBOARD';
+    pin: string;
+}
+
+export type HardwareConfig = LedConfig | SwitchConfig | PotentiometerConfig | SevenSegmentConfig | MotorConfig | Lcd1602Config | AdKeyboardConfig;
 
 const STORAGE_KEY = 'arduino_sim_hardware_config';
 
@@ -54,7 +59,8 @@ const DEFAULT_CONFIGS: HardwareConfig[] = [
     { id: 'pot-a0', type: 'POTENTIOMETER', name: 'Potentiometer', pin: 'A0' },
     { id: 'sevseg-1', type: 'SEVEN_SEGMENT', name: '4-Digit 7-Segment' },
     { id: 'motor-1', type: 'MOTOR', name: 'DC Motor', pin: 'D9' },
-    { id: 'lcd-1', type: 'LCD1602', name: 'LCD 1602', rs: 'D12', en: 'D11', d4: 'D5', d5: 'D4', d6: 'D3', d7: 'D2' }
+    { id: 'lcd-1', type: 'LCD1602', name: 'LCD 1602', rs: 'D12', en: 'D11', d4: 'D5', d5: 'D4', d6: 'D3', d7: 'D2' },
+    { id: 'adkey-a1', type: 'AD_KEYBOARD', name: 'AD Keyboard', pin: 'A1' }
 ];
 
 export function loadHardwareConfigs(): HardwareConfig[] {
