@@ -148,7 +148,7 @@ function App() {
         </div>
 
         <div className="card">
-          <HardwarePanel emulator={emulator} />
+          <HardwarePanel emulator={emulator} isRunning={isRunning} />
         </div>
       </main>
 

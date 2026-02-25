@@ -4,7 +4,7 @@ import type { Component, ComponentState } from './Component';
 import { getPinState } from '../PinMappings';
 
 export interface SevenSegmentState extends ComponentState {
-    digits: ({ value: number | null, dp: boolean } | null)[]; // 4 digits. value: 0-9 or null (blank). null entry means digit is off? No, let's say value is what is displayed.
+    digits: ({ value: number | null, dp: boolean, active: boolean } | null)[]; // 4 digits.
 }
 
 export class SevenSegmentComponent implements Component {
@@ -31,6 +31,7 @@ export class SevenSegmentComponent implements Component {
     // Internal state to hold the 'persisted' view of the digits
     private digitValues: (number | null)[] = [null, null, null, null];
     private digitDPs: boolean[] = [false, false, false, false];
+    private digitActive: boolean[] = [false, false, false, false];
     private lastUpdateCycles: number[] = [0, 0, 0, 0];
 
     constructor(id: string, name: string) {
@@ -60,7 +61,9 @@ export class SevenSegmentComponent implements Component {
         const digitPins = [this.pinD1, this.pinD2, this.pinD3, this.pinD4];
 
         for (let i = 0; i < 4; i++) {
-            if (!getPinState(cpu, digitPins[i])) {
+            const isActive = !getPinState(cpu, digitPins[i]);
+            this.digitActive[i] = isActive;
+            if (isActive) {
                 this.digitValues[i] = displayValue;
                 this.digitDPs[i] = dpState;
                 this.lastUpdateCycles[i] = currentCycles;
@@ -77,7 +80,8 @@ export class SevenSegmentComponent implements Component {
         return {
             digits: this.digitValues.map((val, idx) => ({
                 value: val,
-                dp: this.digitDPs[idx]
+                dp: this.digitDPs[idx],
+                active: this.digitActive[idx]
             }))
         };
     }

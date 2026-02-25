@@ -10,6 +10,7 @@ import type { SevenSegmentState } from '../emulator/hardware/SevenSegmentCompone
 
 interface HardwarePanelProps {
     emulator: Atmega328P | null;
+    isRunning?: boolean;
 }
 
 // 7セグメントのパターン定義 (a-g)
@@ -27,7 +28,7 @@ const SEGMENT_PATTERNS: { [key: number]: number[] } = {
     9: [1, 1, 1, 1, 0, 1, 1],
 };
 
-export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator }) => {
+export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunning }) => {
     const [states, setStates] = useState<{ [id: string]: ComponentState }>({});
 
     useEffect(() => {
@@ -146,21 +147,24 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator }) => {
                             <div key={comp.id} className="hardware-component" style={{ gridColumn: 'span 3', background: '#000' }}>
                                 <span className="label" style={{ color: '#fff' }}>{comp.name}</span>
                                 <div className="seven-segment-display">
-                                    {segState.digits.map((digit, idx) => (
-                                        <div key={idx} className="seven-segment-digit">
-                                            {/* Segments a-g */}
-                                            {[0, 1, 2, 3, 4, 5, 6].map(segIdx => {
-                                                const isOn = digit && digit.value !== null && SEGMENT_PATTERNS[digit.value]?.[segIdx] === 1;
-                                                return (
-                                                    <div
-                                                        key={segIdx}
-                                                        className={`segment segment-${String.fromCharCode(97 + segIdx)} ${isOn ? 'on' : ''}`}
-                                                    />
-                                                );
-                                            })}
-                                            <div className={`segment-dp ${digit?.dp ? 'on' : ''}`} />
-                                        </div>
-                                    ))}
+                                    {segState.digits.map((digit, idx) => {
+                                        const isDim = !isRunning && digit && !digit.active;
+                                        return (
+                                            <div key={idx} className="seven-segment-digit">
+                                                {/* Segments a-g */}
+                                                {[0, 1, 2, 3, 4, 5, 6].map(segIdx => {
+                                                    const isOn = digit && digit.value !== null && SEGMENT_PATTERNS[digit.value]?.[segIdx] === 1;
+                                                    return (
+                                                        <div
+                                                            key={segIdx}
+                                                            className={`segment segment-${String.fromCharCode(97 + segIdx)} ${isOn ? (isDim ? 'dim' : 'on') : ''}`}
+                                                        />
+                                                    );
+                                                })}
+                                                <div className={`segment-dp ${digit?.dp ? (isDim ? 'dim' : 'on') : ''}`} />
+                                            </div>
+                                        )
+                                    })}
                                 </div>
                             </div>
                         );

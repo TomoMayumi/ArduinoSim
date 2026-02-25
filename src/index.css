@@ -249,6 +249,11 @@ textarea {
   box-shadow: 0 0 5px #f00;
 }
 
+.segment.dim {
+  background: #800000;
+  box-shadow: none;
+}
+
 /* Horizontal segments: a, g, d */
 .segment-a {
   top: 0;
