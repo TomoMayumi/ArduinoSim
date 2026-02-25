@@ -5,6 +5,7 @@ import { Pin13Led } from './components/Pin13Led';
 import { SerialConsole } from './components/SerialConsole';
 import { HardwarePanel } from './components/HardwarePanel';
 import { DisassemblyPanel } from './components/DisassemblyPanel';
+import { CpuStatePanel } from './components/CpuStatePanel';
 import './index.css';
 
 const BLINK_HEX = `
@@ -152,6 +153,12 @@ function App() {
         </div>
       </main>
 
+      <aside className="cpu-state-sidebar">
+        <div className="card" style={{ height: '100%', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', overflowY: 'auto' }}>
+          <CpuStatePanel emulator={emulator} isRunning={isRunning} />
+        </div>
+      </aside>
+
       <aside className="disassembly-sidebar">
         <div className="card" style={{ height: '100%', display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
           <DisassemblyPanel program={program} pc={isRunning ? -1 : debugInfo.pc} isRunning={isRunning} />
@@ -173,26 +180,26 @@ function App() {
 
         <div className="card hex-upload">
           <h3>HEX プログラム</h3>
-          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-            <button onClick={() => setHexInput(BLINK_HEX)} style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}>
+          <div className="buttons">
+            <button onClick={() => setHexInput(BLINK_HEX)}>
               Blink (Lチカ)
             </button>
-            <button onClick={() => setHexInput(SERIAL_ECHO_HEX)} style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}>
+            <button onClick={() => setHexInput(SERIAL_ECHO_HEX)}>
               Serial Echo (エコーバック)
             </button>
-            <button onClick={() => setHexInput(BLINK2_HEX)} style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}>
+            <button onClick={() => setHexInput(BLINK2_HEX)}>
               Blink2 (Lチカ)
             </button>
-            <button onClick={() => setHexInput(PUSH_SWITCH_HEX)} style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}>
+            <button onClick={() => setHexInput(PUSH_SWITCH_HEX)}>
               Push Switch (プッシュスイッチ)
             </button>
-            <button onClick={() => setHexInput(POT_BLINK_HEX)} style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}>
+            <button onClick={() => setHexInput(POT_BLINK_HEX)}>
               Potentiometer (可変抵抗)
             </button>
-            <button onClick={() => setHexInput(SEVEN_SEGMENT_HEX)} style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}>
+            <button onClick={() => setHexInput(SEVEN_SEGMENT_HEX)}>
               7-Segment (7セグ)
             </button>
-            <button onClick={() => setHexInput(SEVEN_SEGMENT_COUNTUP_HEX)} style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}>
+            <button onClick={() => setHexInput(SEVEN_SEGMENT_COUNTUP_HEX)}>
               7-Segment Countup (7セグカウントアップ)
             </button>
           </div>
