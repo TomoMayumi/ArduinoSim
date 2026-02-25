@@ -111,6 +111,69 @@ export class Disassembler {
                 const r = ((opcode >> 5) & 0x10) | (opcode & 0x0f);
                 const d = ((opcode >> 4) & 0x1f);
                 instruction = `MOV r${d}, r${r}`;
+            } else if ((opcode & 0xf000) === 0x5000) {
+                const k = ((opcode >> 4) & 0xf0) | (opcode & 0x0f);
+                const d = ((opcode >> 4) & 0x0f) + 16;
+                instruction = `SUBI r${d}, 0x${k.toString(16).toUpperCase()}`;
+            } else if ((opcode & 0xf000) === 0x4000) {
+                const k = ((opcode >> 4) & 0xf0) | (opcode & 0x0f);
+                const d = ((opcode >> 4) & 0x0f) + 16;
+                instruction = `SBCI r${d}, 0x${k.toString(16).toUpperCase()}`;
+            } else if ((opcode & 0xf000) === 0x7000) {
+                const k = ((opcode >> 4) & 0xf0) | (opcode & 0x0f);
+                const d = ((opcode >> 4) & 0x0f) + 16;
+                instruction = `ANDI r${d}, 0x${k.toString(16).toUpperCase()}`;
+            } else if ((opcode & 0xf000) === 0x6000) {
+                const k = ((opcode >> 4) & 0xf0) | (opcode & 0x0f);
+                const d = ((opcode >> 4) & 0x0f) + 16;
+                instruction = `ORI r${d}, 0x${k.toString(16).toUpperCase()}`;
+            } else if ((opcode & 0xff00) === 0x9900) {
+                const a = (opcode >> 3) & 0x1f;
+                const b = opcode & 7;
+                instruction = `SBIC 0x${a.toString(16).toUpperCase()}, ${b}`;
+            } else if ((opcode & 0xff00) === 0x9b00) {
+                const a = (opcode >> 3) & 0x1f;
+                const b = opcode & 7;
+                instruction = `SBIS 0x${a.toString(16).toUpperCase()}, ${b}`;
+            } else if ((opcode & 0xfe08) === 0xfe00) {
+                const d = (opcode >> 4) & 0x1f;
+                const b = opcode & 7;
+                instruction = `SBRS r${d}, ${b}`;
+            } else if ((opcode & 0xfe08) === 0xfc00) {
+                const d = (opcode >> 4) & 0x1f;
+                const b = opcode & 7;
+                instruction = `SBRC r${d}, ${b}`;
+            } else if ((opcode & 0xfe08) === 0xfa00) {
+                const d = (opcode >> 4) & 0x1f;
+                const b = opcode & 7;
+                instruction = `BST r${d}, ${b}`;
+            } else if ((opcode & 0xfc00) === 0x2800) {
+                const r = ((opcode >> 5) & 0x10) | (opcode & 0x0f);
+                const d = ((opcode >> 4) & 0x1f);
+                instruction = `OR r${d}, r${r}`;
+            } else if ((opcode & 0xfe0f) === 0x9402) {
+                const d = (opcode >> 4) & 0x1f;
+                instruction = `SWAP r${d}`;
+            } else if ((opcode & 0xfe0f) === 0x920f) {
+                const d = (opcode >> 4) & 0x1f;
+                instruction = `PUSH r${d}`;
+            } else if ((opcode & 0xfe0f) === 0x900f) {
+                const d = (opcode >> 4) & 0x1f;
+                instruction = `POP r${d}`;
+            } else if (opcode === 0x9478) {
+                instruction = "SEI";
+            } else if (opcode === 0x94f8) {
+                instruction = "CLI";
+            } else if ((opcode & 0xd200) === 0x8000) {
+                const d = (opcode >> 4) & 0x1f;
+                const q = ((opcode >> 8) & 0x20) | ((opcode >> 7) & 0x18) | (opcode & 7);
+                const isY = (opcode & 0x0008) !== 0;
+                instruction = `LDD r${d}, ${isY ? 'Y' : 'Z'}+${q}`;
+            } else if ((opcode & 0xd200) === 0x8200) {
+                const d = (opcode >> 4) & 0x1f;
+                const q = ((opcode >> 8) & 0x20) | ((opcode >> 7) & 0x18) | (opcode & 7);
+                const isY = (opcode & 0x0008) !== 0;
+                instruction = `STD ${isY ? 'Y' : 'Z'}+${q}, r${d}`;
             } else if ((opcode & 0xfe0f) === 0x9000) {
                 wordCount = 2;
                 if (pc + 1 < program.length) {
