@@ -204,14 +204,25 @@ function App() {
       <aside className="sidebar">
         <div className="card">
           <h3>設定</h3>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-            <input
-              type="checkbox"
-              checked={noResetMode}
-              onChange={(e) => setNoResetMode(e.target.checked)}
-            />
-            RESET EN 切断モード (リセットなし)
-          </label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={noResetMode}
+                onChange={(e) => setNoResetMode(e.target.checked)}
+              />
+              RESET EN 切断モード (リセットなし)
+            </label>
+            <button
+              onClick={() => {
+                localStorage.removeItem('arduino_sim_hardware_config');
+                window.location.reload();
+              }}
+              style={{ background: '#475569', fontSize: '0.8rem', padding: '0.5rem' }}
+            >
+              ハードウェア設定を初期化
+            </button>
+          </div>
         </div>
 
         <div className="card hex-upload">

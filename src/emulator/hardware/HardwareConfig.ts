@@ -50,6 +50,7 @@ const STORAGE_KEY = 'arduino_sim_hardware_config';
 const DEFAULT_CONFIGS: HardwareConfig[] = [
     { id: 'led-d12', type: 'LED', name: 'Blue LED', pin: 'D12', color: '#0000ff' },
     { id: 'sw-d2', type: 'SWITCH', name: 'Button', pin: 'D2', mode: 'momentary' },
+    { id: 'sw-d3', type: 'SWITCH', name: 'Toggle Switch', pin: 'D3', mode: 'toggle' },
     { id: 'pot-a0', type: 'POTENTIOMETER', name: 'Potentiometer', pin: 'A0' },
     { id: 'sevseg-1', type: 'SEVEN_SEGMENT', name: '4-Digit 7-Segment' },
     { id: 'motor-1', type: 'MOTOR', name: 'DC Motor', pin: 'D9' },
