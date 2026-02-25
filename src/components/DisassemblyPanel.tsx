@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useMemo } from 'react';
+import React, { useEffect, useState, useRef, useMemo, memo } from 'react';
 import { Disassembler } from '../emulator/Disassembler';
 import type { DisassembledInstruction } from '../emulator/Disassembler';
 
@@ -8,7 +8,7 @@ interface DisassemblyPanelProps {
     isRunning: boolean;
 }
 
-export const DisassemblyPanel: React.FC<DisassemblyPanelProps> = ({ program, pc, isRunning }) => {
+export const DisassemblyPanel: React.FC<DisassemblyPanelProps> = memo(({ program, pc, isRunning }) => {
     const [instructions, setInstructions] = useState<DisassembledInstruction[]>([]);
     const listRef = useRef<HTMLDivElement>(null);
 
@@ -87,4 +87,4 @@ export const DisassemblyPanel: React.FC<DisassemblyPanelProps> = ({ program, pc,
             </div>
         </div>
     );
-};
+});

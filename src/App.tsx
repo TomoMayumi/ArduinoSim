@@ -154,7 +154,7 @@ function App() {
 
       <aside className="disassembly-sidebar">
         <div className="card" style={{ height: '100%', display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
-          <DisassemblyPanel program={program} pc={debugInfo.pc} isRunning={isRunning} />
+          <DisassemblyPanel program={program} pc={isRunning ? -1 : debugInfo.pc} isRunning={isRunning} />
         </div>
       </aside>
 
