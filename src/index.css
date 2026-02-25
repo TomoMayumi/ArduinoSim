@@ -338,3 +338,13 @@ textarea {
   background: #f00;
   box-shadow: 0 0 5px #f00;
 }
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}

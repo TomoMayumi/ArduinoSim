@@ -5,8 +5,12 @@ import { LedComponent } from '../emulator/hardware/LedComponent';
 import { SwitchComponent } from '../emulator/hardware/SwitchComponent';
 import { PotentiometerComponent } from '../emulator/hardware/PotentiometerComponent';
 import { SevenSegmentComponent } from '../emulator/hardware/SevenSegmentComponent';
+import { MotorComponent } from '../emulator/hardware/MotorComponent';
+import { Lcd1602Component } from '../emulator/hardware/Lcd1602Component';
 import type { ComponentState } from '../emulator/hardware/Component';
 import type { SevenSegmentState } from '../emulator/hardware/SevenSegmentComponent';
+import type { MotorState } from '../emulator/hardware/MotorComponent';
+import type { Lcd1602State } from '../emulator/hardware/Lcd1602Component';
 
 interface HardwarePanelProps {
     emulator: Atmega328P | null;
@@ -50,6 +54,14 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
         // Debug: 4-Digit 7-Segment LED
         if (!emulator.hardware.getComponent('sevseg-1')) {
             emulator.hardware.addComponent(new SevenSegmentComponent('sevseg-1', '4-Digit 7-Segment'));
+        }
+        // Debug: DC Motor (PWM D9)
+        if (!emulator.hardware.getComponent('motor-1')) {
+            emulator.hardware.addComponent(new MotorComponent('motor-1', 'DC Motor', 'D9'));
+        }
+        // Debug: LCD 1602 (RS=D12, EN=D11, D4=D5, D5=D4, D6=D3, D7=D2)
+        if (!emulator.hardware.getComponent('lcd-1')) {
+            emulator.hardware.addComponent(new Lcd1602Component('lcd-1', 'LCD 1602', 'D12', 'D11', 'D5', 'D4', 'D3', 'D2'));
         }
 
         const interval = setInterval(() => {
@@ -165,6 +177,52 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
                                             </div>
                                         )
                                     })}
+                                </div>
+                            </div>
+                        );
+                    } else if (comp.type === 'MOTOR') {
+                        const motorState = state as MotorState;
+                        const motorComp = comp as MotorComponent;
+                        // Determine rotation speed for animation (0 to 2s per rotation, max speed is faster)
+                        const animationDuration = motorState.speed > 0.05 ? `${1.0 / motorState.speed}s` : '0s';
+
+                        return (
+                            <div key={comp.id} className="hardware-component">
+                                <span className="label">{comp.name} ({motorComp.pin})</span>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <div className="motor-fan" style={{
+                                        width: '40px', height: '40px', borderRadius: '50%', border: '2px solid #64748b',
+                                        position: 'relative', overflow: 'hidden', background: '#e2e8f0',
+                                        animation: motorState.speed > 0.05 ? `spin ${animationDuration} linear infinite` : 'none'
+                                    }}>
+                                        <div style={{ position: 'absolute', top: 0, left: '50%', width: '2px', height: '100%', background: '#334155' }}></div>
+                                        <div style={{ position: 'absolute', top: '50%', left: 0, width: '100%', height: '2px', background: '#334155' }}></div>
+                                    </div>
+                                    <span style={{ fontSize: '0.7rem', color: '#38bdf8', marginTop: '0.2rem' }}>{(motorState.speed * 100).toFixed(0)}%</span>
+                                </div>
+                            </div>
+                        );
+                    } else if (comp.type === 'LCD1602') {
+                        const lcdState = state as Lcd1602State;
+                        return (
+                            <div key={comp.id} className="hardware-component" style={{ gridColumn: 'span 3', background: '#849b20' }}>
+                                <span className="label" style={{ color: '#000' }}>{comp.name}</span>
+                                <div className="lcd-display" style={{
+                                    background: '#738618', padding: '0.5rem', borderRadius: '0.25rem', fontFamily: 'monospace',
+                                    color: '#000', fontSize: '1rem', lineHeight: '1.2', border: '2px solid #5a6a12',
+                                    boxShadow: 'inset 0 0 10px rgba(0,0,0,0.5)', width: 'fit-content'
+                                }}>
+                                    {lcdState.lines.map((line, row) => (
+                                        <div key={row} style={{ display: 'flex' }}>
+                                            {line.split('').map((char, col) => (
+                                                <span key={col} style={{
+                                                    display: 'inline-block', width: '12px', height: '18px', textAlign: 'center',
+                                                    background: (lcdState.cursorRow === row && lcdState.cursorCol === col) ? 'rgba(0,0,0,0.3)' : 'transparent',
+                                                    textDecoration: (lcdState.cursorRow === row && lcdState.cursorCol === col) ? 'underline' : 'none'
+                                                }}>{char}</span>
+                                            ))}
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         );
