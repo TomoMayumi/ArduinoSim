@@ -18,7 +18,8 @@ export const HardwareConfigDialog: React.FC<HardwareConfigDialogProps> = ({ conf
     // Common pin options
     const digitals = Array.from({ length: 14 }, (_, i) => `D${i}`);
     const analogs = Array.from({ length: 6 }, (_, i) => `A${i}`);
-    const allPins = [...digitals, ...analogs];
+    const allPins = ['NC', ...digitals, ...analogs];
+    const analogPins = ['NC', ...analogs];
 
     return (
         <div style={{
@@ -35,8 +36,8 @@ export const HardwareConfigDialog: React.FC<HardwareConfigDialogProps> = ({ conf
                             接続ピン:
                             <select value={(edited as any).pin} onChange={e => handleChange('pin', e.target.value)} style={inputStyle}>
                                 {config.type === 'AD_KEYBOARD' || config.type === 'POTENTIOMETER'
-                                    ? analogs.map(p => <option key={p} value={p}>{p}</option>)
-                                    : allPins.map(p => <option key={p} value={p}>{p}</option>)
+                                    ? analogPins.map(p => <option key={p} value={p}>{p === 'NC' ? '未接続 (NC)' : p}</option>)
+                                    : allPins.map(p => <option key={p} value={p}>{p === 'NC' ? '未接続 (NC)' : p}</option>)
                                 }
                             </select>
                         </label>
@@ -65,11 +66,24 @@ export const HardwareConfigDialog: React.FC<HardwareConfigDialogProps> = ({ conf
                                 <label key={p} style={{ display: 'flex', justifyContent: 'space-between' }}>
                                     {p.toUpperCase()}:
                                     <select value={(edited as any)[p]} onChange={e => handleChange(p, e.target.value)} style={inputStyle}>
-                                        {allPins.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                                        {allPins.map(opt => <option key={opt} value={opt}>{opt === 'NC' ? '未接続 (NC)' : opt}</option>)}
                                     </select>
                                 </label>
                             ))}
                         </>
+                    )}
+
+                    {config.type === 'SEVEN_SEGMENT' && (
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                            {['pinA', 'pinB', 'pinC', 'pinD', 'pinD1', 'pinD2', 'pinD3', 'pinD4', 'pinDP'].map(p => (
+                                <label key={p} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                                    {p.replace('pin', '')}:
+                                    <select value={(edited as any)[p]} onChange={e => handleChange(p, e.target.value)} style={{ ...inputStyle, width: '60px' }}>
+                                        {allPins.map(opt => <option key={opt} value={opt}>{opt === 'NC' ? 'NC' : opt}</option>)}
+                                    </select>
+                                </label>
+                            ))}
+                        </div>
                     )}
 
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '1rem' }}>

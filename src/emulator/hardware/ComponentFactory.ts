@@ -18,8 +18,12 @@ export function createComponentFromConfig(config: HardwareConfig): Component | n
             // Start potentiometers at 0V
             return new PotentiometerComponent(config.id, config.name, config.pin, 0);
         case 'SEVEN_SEGMENT':
-            // Notice: SevenSegment internally hardcodes pins right now
-            return new SevenSegmentComponent(config.id, config.name);
+            return new SevenSegmentComponent(
+                config.id, config.name,
+                config.pinA, config.pinB, config.pinC, config.pinD,
+                config.pinD1, config.pinD2, config.pinD3, config.pinD4,
+                config.pinDP
+            );
         case 'MOTOR':
             return new MotorComponent(config.id, config.name, config.pin);
         case 'LCD1602':

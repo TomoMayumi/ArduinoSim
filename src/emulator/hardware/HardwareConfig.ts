@@ -30,7 +30,15 @@ export interface MotorConfig extends BaseConfig {
 
 export interface SevenSegmentConfig extends BaseConfig {
     type: 'SEVEN_SEGMENT';
-    // currently hardcoded internally in SevenSegmentComponent, but could make it configurable later
+    pinA: string;
+    pinB: string;
+    pinC: string;
+    pinD: string;
+    pinD1: string;
+    pinD2: string;
+    pinD3: string;
+    pinD4: string;
+    pinDP: string;
 }
 
 export interface Lcd1602Config extends BaseConfig {
@@ -57,7 +65,7 @@ const DEFAULT_CONFIGS: HardwareConfig[] = [
     { id: 'sw-d2', type: 'SWITCH', name: 'Button', pin: 'D2', mode: 'momentary' },
     { id: 'sw-d3', type: 'SWITCH', name: 'Toggle Switch', pin: 'D3', mode: 'toggle' },
     { id: 'pot-a0', type: 'POTENTIOMETER', name: 'Potentiometer', pin: 'A0' },
-    { id: 'sevseg-1', type: 'SEVEN_SEGMENT', name: '4-Digit 7-Segment' },
+    { id: 'sevseg-1', type: 'SEVEN_SEGMENT', name: '4-Digit 7-Segment', pinA: 'D4', pinB: 'D5', pinC: 'D6', pinD: 'D7', pinD1: 'D8', pinD2: 'D9', pinD3: 'D10', pinD4: 'D11', pinDP: 'D3' },
     { id: 'motor-1', type: 'MOTOR', name: 'DC Motor', pin: 'D9' },
     { id: 'lcd-1', type: 'LCD1602', name: 'LCD 1602', rs: 'D12', en: 'D11', d4: 'D5', d5: 'D4', d6: 'D3', d7: 'D2' },
     { id: 'adkey-a1', type: 'AD_KEYBOARD', name: 'AD Keyboard', pin: 'A1' }

@@ -14,19 +14,19 @@ export class SevenSegmentComponent implements Component {
 
     // Pin definitions
     // BCD Inputs
-    readonly pinA = 'D4';
-    readonly pinB = 'D5';
-    readonly pinC = 'D6';
-    readonly pinD = 'D7';
+    readonly pinA: string;
+    readonly pinB: string;
+    readonly pinC: string;
+    readonly pinD: string;
 
     // Digit Selects (Active LOW)
-    readonly pinD1 = 'D8';
-    readonly pinD2 = 'D9';
-    readonly pinD3 = 'D10';
-    readonly pinD4 = 'D11';
+    readonly pinD1: string;
+    readonly pinD2: string;
+    readonly pinD3: string;
+    readonly pinD4: string;
 
     // Decimal Point
-    readonly pinDP = 'D3';
+    readonly pinDP: string;
 
     // Internal state to hold the 'persisted' view of the digits
     private digitValues: (number | null)[] = [null, null, null, null];
@@ -34,9 +34,23 @@ export class SevenSegmentComponent implements Component {
     private digitActive: boolean[] = [false, false, false, false];
     private lastUpdateCycles: number[] = [0, 0, 0, 0];
 
-    constructor(id: string, name: string) {
+    constructor(
+        id: string, name: string,
+        pinA: string, pinB: string, pinC: string, pinD: string,
+        pinD1: string, pinD2: string, pinD3: string, pinD4: string,
+        pinDP: string
+    ) {
         this.id = id;
         this.name = name;
+        this.pinA = pinA;
+        this.pinB = pinB;
+        this.pinC = pinC;
+        this.pinD = pinD;
+        this.pinD1 = pinD1;
+        this.pinD2 = pinD2;
+        this.pinD3 = pinD3;
+        this.pinD4 = pinD4;
+        this.pinDP = pinDP;
     }
 
     update(cpu: CPU): void {
@@ -61,7 +75,10 @@ export class SevenSegmentComponent implements Component {
         const digitPins = [this.pinD1, this.pinD2, this.pinD3, this.pinD4];
 
         for (let i = 0; i < 4; i++) {
-            const isActive = !getPinState(cpu, digitPins[i]);
+            let isActive = false;
+            if (digitPins[i] !== 'NC') {
+                isActive = !getPinState(cpu, digitPins[i]);
+            }
             this.digitActive[i] = isActive;
             if (isActive) {
                 this.digitValues[i] = displayValue;
