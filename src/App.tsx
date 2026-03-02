@@ -145,6 +145,221 @@ const ANALOG_A0_TO_7SEG_HEX = `
 :00000001FF
 `.trim();
 
+const C_SAMPLE_HEX = `
+:100000000C9434000C943E000C943E000C943E0082
+:100010000C943E000C943E000C943E000C943E0068
+:100020000C943E000C943E000C943E000C943E0058
+:100030000C943E000C943E000C943E000C943E0048
+:100040000C943E000C943E000C943E000C943E0038
+:100050000C943E000C943E000C943E000C943E0028
+:100060000C943E000C943E0011241FBECFEFD8E04C
+:10007000DEBFCDBF0E9440000C9457000C940000DE
+:100080008FEF8AB91BB882E084BD89EF87BD16BCAB
+:1000900083E085BD22E031E089EE93E0A99BFECFAD
+:1000A00025BB0197D9F78BB183278BB9F5CFF8948E
+:0200B000FFCF80
+:00000001FF
+`.trim();
+
+const C_SAMPLE_LSS = `
+C:\\temp\\atmega168\\2_c\\GccApplication\\Debug\\GccApplication.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .data         00000000  00800100  00800100  00000106  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  1 .text         000000b2  00000000  00000000  00000054  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+__vectors():
+  0:	0c 94 34 00 	jmp	0x68	; 0x68 <__ctors_end>
+  4:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  8:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+
+00000068 <__ctors_end>:
+__trampolines_start():
+  68:	11 24       	eor	r1, r1
+  6a:	1f be       	out	0x3f, r1	; 63
+  6c:	cf ef       	ldi	r28, 0xFF	; 255
+  6e:	d8 e0       	ldi	r29, 0x08	; 8
+  70:	de bf       	out	0x3e, r29	; 62
+  72:	cd bf       	out	0x3d, r28	; 61
+  74:	0e 94 40 00 	call	0x80	; 0x80 <main>
+  78:	0c 94 57 00 	jmp	0xae	; 0xae <_exit>
+
+0000007c <__bad_interrupt>:
+__vector_22():
+  7c:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
+
+00000080 <main>:
+main():
+C:\\temp\\atmega168\\2_c\\GccApplication\\Debug/../src/main.c:13
+
+int main(void)
+{
+	int cnt;
+	/* ポート初期化 */
+	DDRD   = (U1)0xFFU; /* DDRD   :PORTD0-7出力設定 */
+  80:	8f ef       	ldi	r24, 0xFF	; 255
+  82:	8a b9       	out	0x0a, r24	; 10
+C:\\temp\\atmega168\\2_c\\GccApplication\\Debug/../src/main.c:14
+	PORTD  = (U1)0x00U; /* PORTD  :PORTD0-7出力Low  */
+  84:	1b b8       	out	0x0b, r1	; 11
+init_timer():
+C:\\temp\\atmega168\\2_c\\GccApplication\\Debug/../src/main.c:51
+}
+
+/* タイマ初期化 */
+static void init_timer(void)
+{
+	TCCR0A = (U1)0x02U;	 /* TCCR0A :OC0A,OC0B出力使用しない */
+  86:	82 e0       	ldi	r24, 0x02	; 2
+  88:	84 bd       	out	0x24, r24	; 36
+C:\\temp\\atmega168\\2_c\\GccApplication\\Debug/../src/main.c:52
+	OCR0A  = (U1)0xF9U;	 /* OCR0A  :250カウント */
+  8a:	89 ef       	ldi	r24, 0xF9	; 249
+  8c:	87 bd       	out	0x27, r24	; 39
+C:\\temp\\atmega168\\2_c\\GccApplication\\Debug/../src/main.c:53
+	TCNT0  = (U1)0x00U;	 /* TCNT0  :カウント初期値0 */
+  8e:	16 bc       	out	0x26, r1	; 38
+C:\\temp\\atmega168\\2_c\\GccApplication\\Debug/../src/main.c:54
+	TCCR0B = (U1)0x03U;	 /* TCCR0B :64分周, CTCモード */
+  90:	83 e0       	ldi	r24, 0x03	; 3
+  92:	85 bd       	out	0x25, r24	; 37
+wait_1ms():
+C:\\temp\\atmega168\\2_c\\GccApplication\\Debug/../src/main.c:43
+{
+	/* 1ms経過判断(TIFR0.OCF0Aのbit値) */
+	while((TIFR0 & (U1)_BV(OCF0A)) == (U1)0U);
+	
+	/* TIFR0.OCF0Aを0クリアする */
+	TIFR0 = (U1)_BV(OCF0A);
+  94:	22 e0       	ldi	r18, 0x02	; 2
+main():
+C:\\temp\\atmega168\\2_c\\GccApplication\\Debug/../src/main.c:29
+		cnt++;
+		
+		if(cnt>1000){
+			cnt=0;
+			/* PORTD0を反転出力する */
+			PORTD ^= (U1)_BV(PORTD0);
+  96:	31 e0       	ldi	r19, 0x01	; 1
+C:\\temp\\atmega168\\2_c\\GccApplication\\Debug/../src/main.c:10
+/* 関数プロトタイプ宣言 */
+static void wait_1ms(void);
+static void init_timer(void);
+
+int main(void)
+{
+  98:	89 ee       	ldi	r24, 0xE9	; 233
+  9a:	93 e0       	ldi	r25, 0x03	; 3
+wait_1ms():
+C:\\temp\\atmega168\\2_c\\GccApplication\\Debug/../src/main.c:40
+
+/* 1msカウント */
+static void wait_1ms(void)
+{
+	/* 1ms経過判断(TIFR0.OCF0Aのbit値) */
+	while((TIFR0 & (U1)_BV(OCF0A)) == (U1)0U);
+  9c:	a9 9b       	sbis	0x15, 1	; 21
+  9e:	fe cf       	rjmp	.-4      	; 0x9c <main+0x1c>
+C:\\temp\\atmega168\\2_c\\GccApplication\\Debug/../src/main.c:43
+	
+	/* TIFR0.OCF0Aを0クリアする */
+	TIFR0 = (U1)_BV(OCF0A);
+  a0:	25 bb       	out	0x15, r18	; 21
+  a2:	01 97       	sbiw	r24, 0x01	; 1
+main():
+C:\\temp\\atmega168\\2_c\\GccApplication\\Debug/../src/main.c:26
+	{
+		/* 1ms経過まで待機する */
+		wait_1ms();
+		cnt++;
+		
+		if(cnt>1000){
+  a4:	d9 f7       	brne	.-10     	; 0x9c <main+0x1c>
+C:\\temp\\atmega168\\2_c\\GccApplication\\Debug/../src/main.c:29
+			cnt=0;
+			/* PORTD0を反転出力する */
+			PORTD ^= (U1)_BV(PORTD0);
+  a6:	8b b1       	in	r24, 0x0b	; 11
+  a8:	83 27       	eor	r24, r19
+  aa:	8b b9       	out	0x0b, r24	; 11
+  ac:	f5 cf       	rjmp	.-22     	; 0x98 <main+0x18>
+
+000000ae <_exit>:
+exit():
+  ae:	f8 94       	cli
+
+000000b0 <__stop_program>:
+__stop_program():
+  b0:	ff cf       	rjmp	.-2      	; 0xb0 <__stop_program>
+`.trim();
+
+const C_SAMPLE_MAIN_CODE = `
+#include "type_common.h"
+
+#include <avr/io.h>
+
+/* 関数プロトタイプ宣言 */
+static void wait_1ms(void);
+static void init_timer(void);
+
+int main(void)
+{
+	int cnt;
+	/* ポート初期化 */
+	DDRD   = (U1)0xFFU; /* DDRD   :PORTD0-7出力設定 */
+	PORTD  = (U1)0x00U; /* PORTD  :PORTD0-7出力Low  */
+	
+	/* タイマ初期化 */
+	init_timer();
+
+	cnt=0;
+	while(1)
+	{
+		/* 1ms経過まで待機する */
+		wait_1ms();
+		cnt++;
+		
+		if(cnt>1000){
+			cnt=0;
+			/* PORTD0を反転出力する */
+			PORTD ^= (U1)_BV(PORTD0);
+		}
+	}
+	
+	return 0;
+}
+
+/* 1msカウント */
+static void wait_1ms(void)
+{
+	/* 1ms経過判断(TIFR0.OCF0Aのbit値) */
+	while((TIFR0 & (U1)_BV(OCF0A)) == (U1)0U);
+	
+	/* TIFR0.OCF0Aを0クリアする */
+	TIFR0 = (U1)_BV(OCF0A);
+	
+	return;
+}
+
+/* タイマ初期化 */
+static void init_timer(void)
+{
+	TCCR0A = (U1)0x02U;	 /* TCCR0A :OC0A,OC0B出力使用しない */
+	OCR0A  = (U1)0xF9U;	 /* OCR0A  :250カウント */
+	TCNT0  = (U1)0x00U;	 /* TCNT0  :カウント初期値0 */
+	TCCR0B = (U1)0x03U;	 /* TCCR0B :64分周, CTCモード */
+	/* TCCR0B.CS0設定後にタイマ始動。カウントスタート */
+	
+	return;
+}
+`.trim();
+
 function App() {
   const [hexInput, setHexInput] = useState(BLINK_HEX);
   const [lssInput, setLssInput] = useState('');
@@ -337,6 +552,14 @@ function App() {
             </button>
             <button onClick={() => { setHexInput(ANALOG_A0_TO_7SEG_HEX); setLssInput(''); setSourceFiles([]); }}>
               Analog A0 to 7-Segment (アナログA0から7セグ)
+            </button>
+            <button onClick={() => {
+              setHexInput(C_SAMPLE_HEX);
+              setLssInput(C_SAMPLE_LSS);
+              setSourceFiles([{ name: 'main.c', content: C_SAMPLE_MAIN_CODE }]);
+              setActiveTabFilename('main.c');
+            }} style={{ background: '#059669' }}>
+              C Sample (Lチカ) ★NEW
             </button>
           </div>
           <div style={{ marginTop: '1rem' }}>
