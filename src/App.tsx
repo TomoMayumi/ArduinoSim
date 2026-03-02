@@ -496,241 +496,243 @@ function App() {
         </div>
       </header>
 
-      <main className="main-content">
-        <div className="card">
-          <h2>Arduino Board (Emulated)</h2>
-          <div style={{ display: 'flex', gap: '2rem', alignItems: 'center', padding: '1rem' }}>
-            <Pin13Led portB={emulator?.portB} />
-            <div className="board-info">
-              <p>MCU: ATmega328P</p>
-              <p>Clock: 16MHz</p>
-              <p>Status: {isRunning ? 'Running' : 'Stopped'}</p>
-              <p style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: '#94a3b8' }}>
-                PC: 0x{debugInfo.pc.toString(16).padStart(4, '0')} |
-                Cycles: {debugInfo.cycles.toLocaleString()}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="card">
-          <SerialConsole
-            uart={emulator?.uart}
-            onReset={reset}
-            noResetMode={noResetMode}
-          />
-        </div>
-
-        <div className="card">
-          <HardwarePanel emulator={emulator} isRunning={isRunning} />
-        </div>
-      </main>
-
-      <aside className="disassembly-sidebar">
-        <div className="card" style={{ display: 'flex', flexDirection: 'column', boxSizing: 'border-box', overflowY: 'auto' }}>
-          <CpuStatePanel emulator={emulator} isRunning={isRunning} />
-        </div>
-        <div className="card" style={{ display: 'flex', flexDirection: 'column', boxSizing: 'border-box', flex: 1, minHeight: 0 }}>
-          <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.5rem', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', gap: '1rem' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
-                <input type="radio" value="source" checked={viewMode === 'source'} onChange={(e) => setViewMode(e.target.value as any)} /> Source
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
-                <input type="radio" value="disassembly" checked={viewMode === 'disassembly'} onChange={(e) => setViewMode(e.target.value as any)} /> Disassembly
-              </label>
-            </div>
-            {viewMode === 'source' && (
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer', fontSize: '0.8rem', color: '#94a3b8' }}>
-                <input type="checkbox" checked={showAsmInSource} onChange={(e) => setShowAsmInSource(e.target.checked)} /> Show ASM
-              </label>
-            )}
-          </div>
-          {viewMode === 'source' ? (
-            <SourceViewer
-              sourceMapper={sourceMapper}
-              fileManager={fileManager}
-              pc={isRunning ? -1 : debugInfo.pc}
-              isRunning={isRunning}
-              breakpoints={breakpoints}
-              onToggleBreakpoint={toggleBreakpoint}
-              onToggleLineBreakpoint={toggleLineBreakpoint}
-              showAssembly={showAsmInSource}
-            />
-          ) : (
-            <DisassemblyPanel
-              program={program}
-              pc={isRunning ? -1 : debugInfo.pc}
-              isRunning={isRunning}
-              breakpoints={breakpoints}
-              onToggleBreakpoint={toggleBreakpoint}
-            />
-          )}
-        </div>
-      </aside>
-
-      <aside className="sidebar">
-        <div className="card">
-          <h3>設定</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-              <input
-                type="checkbox"
-                checked={noResetMode}
-                onChange={(e) => setNoResetMode(e.target.checked)}
-              />
-              RESET EN 切断モード (リセットなし)
-            </label>
-            <button
-              onClick={() => {
-                localStorage.removeItem('arduino_sim_hardware_config');
-                window.location.reload();
-              }}
-              style={{ background: '#475569', fontSize: '0.8rem', padding: '0.5rem' }}
-            >
-              ハードウェア設定を初期化
-            </button>
-          </div>
-        </div>
-
-        <div className="card hex-upload">
-          <h3>HEX & LSS プログラム</h3>
-          <div className="buttons">
-            <button onClick={() => { setHexInput(BLINK_HEX); setLssInput(''); setSourceFiles([]); }}>
-              Blink (Lチカ)
-            </button>
-            <button onClick={() => { setHexInput(SERIAL_ECHO_HEX); setLssInput(''); setSourceFiles([]); }}>
-              Serial Echo (エコーバック)
-            </button>
-            <button onClick={() => { setHexInput(BLINK2_HEX); setLssInput(''); setSourceFiles([]); }}>
-              Blink2 (Lチカ)
-            </button>
-            <button onClick={() => { setHexInput(PUSH_SWITCH_HEX); setLssInput(''); setSourceFiles([]); }}>
-              Push Switch (プッシュスイッチ)
-            </button>
-            <button onClick={() => { setHexInput(POT_BLINK_HEX); setLssInput(''); setSourceFiles([]); }}>
-              Potentiometer (可変抵抗)
-            </button>
-            <button onClick={() => { setHexInput(SEVEN_SEGMENT_HEX); setLssInput(''); setSourceFiles([]); }}>
-              7-Segment (7セグ)
-            </button>
-            <button onClick={() => { setHexInput(SEVEN_SEGMENT_COUNTUP_HEX); setLssInput(''); setSourceFiles([]); }}>
-              7-Segment Countup (7セグカウントアップ)
-            </button>
-            <button onClick={() => { setHexInput(MOTOR_PWM_HEX); setLssInput(''); setSourceFiles([]); }}>
-              DC Motor PWM (モーター)
-            </button>
-            <button onClick={() => { setHexInput(LCD_HELLO_HEX); setLssInput(''); setSourceFiles([]); }}>
-              LCD 1602 Hello (液晶)
-            </button>
-            <button onClick={() => { setHexInput(ANALOG_A0_TO_7SEG_HEX); setLssInput(''); setSourceFiles([]); }}>
-              Analog A0 to 7-Segment (アナログA0から7セグ)
-            </button>
-            <button onClick={() => {
-              setHexInput(C_SAMPLE_HEX);
-              setLssInput(C_SAMPLE_LSS);
-              setSourceFiles([{ name: 'main.c', content: C_SAMPLE_MAIN_CODE }]);
-              setActiveTabFilename('main.c');
-            }} style={{ background: '#059669' }}>
-              C Sample (Lチカ) ★NEW
-            </button>
-            <button onClick={async () => {
-              try {
-                const response = await fetch('/samples/hybrid_system.json');
-                const data = await response.json();
-                setHexInput(data.hex);
-                setLssInput(data.lss);
-                setSourceFiles(data.sourceFiles);
-                if (data.sourceFiles.length > 0) {
-                  setActiveTabFilename(data.sourceFiles[0].name);
-                }
-                alert('Hybrid System プリセットをロードしました');
-              } catch (e) {
-                console.error('Preset Load Error:', e);
-                alert('プリセットのロードに失敗しました');
-              }
-            }} style={{ background: '#7c3aed' }}>
-              Hybrid System ★PRESET
-            </button>
-          </div>
-          <div style={{ marginTop: '1rem' }}>
-            <label style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Intel HEX:</label>
-            <textarea
-              rows={3}
-              value={hexInput}
-              onChange={(e) => setHexInput(e.target.value)}
-              placeholder="Intel HEX"
-            />
-          </div>
-          <div style={{ marginTop: '0.5rem' }}>
-            <label style={{ fontSize: '0.8rem', color: '#94a3b8' }}>LSSファイル:</label>
-            <textarea
-              rows={3}
-              value={lssInput}
-              onChange={(e) => setLssInput(e.target.value)}
-              placeholder="LSSファイル"
-            />
-          </div>
-
-          <div style={{ marginTop: '1rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-              <label style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Cソースコード群:</label>
-              <div style={{ display: 'flex', gap: '4px' }}>
-                <button onClick={addSourceFile} style={{ fontSize: '0.7rem', padding: '2px 8px', background: '#3b82f6' }}>追加</button>
-                <button
-                  onClick={() => document.getElementById('folder-upload')?.click()}
-                  style={{ fontSize: '0.7rem', padding: '2px 8px', background: '#10b981' }}
-                >
-                  フォルダを追加
-                </button>
-                <input
-                  id="folder-upload"
-                  type="file"
-                  onChange={handleFolderUpload}
-                  style={{ display: 'none' }}
-                  {...({ webkitdirectory: "", directory: "" } as any)}
-                />
+      <div className="main-layout">
+        <main className="main-content">
+          <div className="card">
+            <h2>Arduino Board (Emulated)</h2>
+            <div style={{ display: 'flex', gap: '2rem', alignItems: 'center', padding: '1rem' }}>
+              <Pin13Led portB={emulator?.portB} />
+              <div className="board-info">
+                <p>MCU: ATmega328P</p>
+                <p>Clock: 16MHz</p>
+                <p>Status: {isRunning ? 'Running' : 'Stopped'}</p>
+                <p style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: '#94a3b8' }}>
+                  PC: 0x{debugInfo.pc.toString(16).padStart(4, '0')} |
+                  Cycles: {debugInfo.cycles.toLocaleString()}
+                </p>
               </div>
             </div>
+          </div>
 
-            <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
-              {sourceFiles.map(file => (
-                <div
-                  key={file.name}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    background: activeTabFilename === file.name ? '#3b82f6' : '#334155',
-                    fontSize: '0.75rem',
-                    padding: '2px 6px',
-                    borderRadius: '3px',
-                    cursor: 'pointer'
-                  }}
-                  onClick={() => setActiveTabFilename(file.name)}
-                >
-                  <span style={{ maxWidth: '80px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{file.name}</span>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); removeSourceFile(file.name); }}
-                    style={{ background: 'transparent', border: 'none', color: '#fff', marginLeft: '4px', padding: '0 2px', cursor: 'pointer' }}
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
+          <div className="card">
+            <SerialConsole
+              uart={emulator?.uart}
+              onReset={reset}
+              noResetMode={noResetMode}
+            />
+          </div>
+
+          <div className="card">
+            <HardwarePanel emulator={emulator} isRunning={isRunning} />
+          </div>
+        </main>
+
+        <aside className="disassembly-sidebar">
+          <div className="card" style={{ display: 'flex', flexDirection: 'column', boxSizing: 'border-box', overflowY: 'auto' }}>
+            <CpuStatePanel emulator={emulator} isRunning={isRunning} />
+          </div>
+          <div className="card" style={{ display: 'flex', flexDirection: 'column', boxSizing: 'border-box', flex: 1, minHeight: 0 }}>
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.5rem', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
+                  <input type="radio" value="source" checked={viewMode === 'source'} onChange={(e) => setViewMode(e.target.value as any)} /> Source
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
+                  <input type="radio" value="disassembly" checked={viewMode === 'disassembly'} onChange={(e) => setViewMode(e.target.value as any)} /> Disassembly
+                </label>
+              </div>
+              {viewMode === 'source' && (
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer', fontSize: '0.8rem', color: '#94a3b8' }}>
+                  <input type="checkbox" checked={showAsmInSource} onChange={(e) => setShowAsmInSource(e.target.checked)} /> Show ASM
+                </label>
+              )}
             </div>
-
-            {activeTabFilename && (
-              <textarea
-                rows={10}
-                value={sourceFiles.find(f => f.name === activeTabFilename)?.content || ''}
-                onChange={(e) => updateSourceFileContent(e.target.value)}
-                placeholder={`${activeTabFilename} の内容を入力...`}
-                style={{ fontSize: '0.8rem', fontFamily: 'monospace' }}
+            {viewMode === 'source' ? (
+              <SourceViewer
+                sourceMapper={sourceMapper}
+                fileManager={fileManager}
+                pc={isRunning ? -1 : debugInfo.pc}
+                isRunning={isRunning}
+                breakpoints={breakpoints}
+                onToggleBreakpoint={toggleBreakpoint}
+                onToggleLineBreakpoint={toggleLineBreakpoint}
+                showAssembly={showAsmInSource}
+              />
+            ) : (
+              <DisassemblyPanel
+                program={program}
+                pc={isRunning ? -1 : debugInfo.pc}
+                isRunning={isRunning}
+                breakpoints={breakpoints}
+                onToggleBreakpoint={toggleBreakpoint}
               />
             )}
           </div>
-        </div>
-      </aside>
+        </aside>
+
+        <aside className="sidebar">
+          <div className="card">
+            <h3>設定</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={noResetMode}
+                  onChange={(e) => setNoResetMode(e.target.checked)}
+                />
+                RESET EN 切断モード (リセットなし)
+              </label>
+              <button
+                onClick={() => {
+                  localStorage.removeItem('arduino_sim_hardware_config');
+                  window.location.reload();
+                }}
+                style={{ background: '#475569', fontSize: '0.8rem', padding: '0.5rem' }}
+              >
+                ハードウェア設定を初期化
+              </button>
+            </div>
+          </div>
+
+          <div className="card hex-upload">
+            <h3>HEX & LSS プログラム</h3>
+            <div className="buttons">
+              <button onClick={() => { setHexInput(BLINK_HEX); setLssInput(''); setSourceFiles([]); }}>
+                Blink (Lチカ)
+              </button>
+              <button onClick={() => { setHexInput(SERIAL_ECHO_HEX); setLssInput(''); setSourceFiles([]); }}>
+                Serial Echo (エコーバック)
+              </button>
+              <button onClick={() => { setHexInput(BLINK2_HEX); setLssInput(''); setSourceFiles([]); }}>
+                Blink2 (Lチカ)
+              </button>
+              <button onClick={() => { setHexInput(PUSH_SWITCH_HEX); setLssInput(''); setSourceFiles([]); }}>
+                Push Switch (プッシュスイッチ)
+              </button>
+              <button onClick={() => { setHexInput(POT_BLINK_HEX); setLssInput(''); setSourceFiles([]); }}>
+                Potentiometer (可変抵抗)
+              </button>
+              <button onClick={() => { setHexInput(SEVEN_SEGMENT_HEX); setLssInput(''); setSourceFiles([]); }}>
+                7-Segment (7セグ)
+              </button>
+              <button onClick={() => { setHexInput(SEVEN_SEGMENT_COUNTUP_HEX); setLssInput(''); setSourceFiles([]); }}>
+                7-Segment Countup (7セグカウントアップ)
+              </button>
+              <button onClick={() => { setHexInput(MOTOR_PWM_HEX); setLssInput(''); setSourceFiles([]); }}>
+                DC Motor PWM (モーター)
+              </button>
+              <button onClick={() => { setHexInput(LCD_HELLO_HEX); setLssInput(''); setSourceFiles([]); }}>
+                LCD 1602 Hello (液晶)
+              </button>
+              <button onClick={() => { setHexInput(ANALOG_A0_TO_7SEG_HEX); setLssInput(''); setSourceFiles([]); }}>
+                Analog A0 to 7-Segment (アナログA0から7セグ)
+              </button>
+              <button onClick={() => {
+                setHexInput(C_SAMPLE_HEX);
+                setLssInput(C_SAMPLE_LSS);
+                setSourceFiles([{ name: 'main.c', content: C_SAMPLE_MAIN_CODE }]);
+                setActiveTabFilename('main.c');
+              }} style={{ background: '#059669' }}>
+                C Sample (Lチカ) ★NEW
+              </button>
+              <button onClick={async () => {
+                try {
+                  const response = await fetch('/samples/hybrid_system.json');
+                  const data = await response.json();
+                  setHexInput(data.hex);
+                  setLssInput(data.lss);
+                  setSourceFiles(data.sourceFiles);
+                  if (data.sourceFiles.length > 0) {
+                    setActiveTabFilename(data.sourceFiles[0].name);
+                  }
+                  alert('Hybrid System プリセットをロードしました');
+                } catch (e) {
+                  console.error('Preset Load Error:', e);
+                  alert('プリセットのロードに失敗しました');
+                }
+              }} style={{ background: '#7c3aed' }}>
+                Hybrid System ★PRESET
+              </button>
+            </div>
+            <div style={{ marginTop: '1rem' }}>
+              <label style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Intel HEX:</label>
+              <textarea
+                rows={3}
+                value={hexInput}
+                onChange={(e) => setHexInput(e.target.value)}
+                placeholder="Intel HEX"
+              />
+            </div>
+            <div style={{ marginTop: '0.5rem' }}>
+              <label style={{ fontSize: '0.8rem', color: '#94a3b8' }}>LSSファイル:</label>
+              <textarea
+                rows={3}
+                value={lssInput}
+                onChange={(e) => setLssInput(e.target.value)}
+                placeholder="LSSファイル"
+              />
+            </div>
+
+            <div style={{ marginTop: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <label style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Cソースコード群:</label>
+                <div style={{ display: 'flex', gap: '4px' }}>
+                  <button onClick={addSourceFile} style={{ fontSize: '0.7rem', padding: '2px 8px', background: '#3b82f6' }}>追加</button>
+                  <button
+                    onClick={() => document.getElementById('folder-upload')?.click()}
+                    style={{ fontSize: '0.7rem', padding: '2px 8px', background: '#10b981' }}
+                  >
+                    フォルダを追加
+                  </button>
+                  <input
+                    id="folder-upload"
+                    type="file"
+                    onChange={handleFolderUpload}
+                    style={{ display: 'none' }}
+                    {...({ webkitdirectory: "", directory: "" } as any)}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+                {sourceFiles.map(file => (
+                  <div
+                    key={file.name}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      background: activeTabFilename === file.name ? '#3b82f6' : '#334155',
+                      fontSize: '0.75rem',
+                      padding: '2px 6px',
+                      borderRadius: '3px',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => setActiveTabFilename(file.name)}
+                  >
+                    <span style={{ maxWidth: '80px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{file.name}</span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); removeSourceFile(file.name); }}
+                      style={{ background: 'transparent', border: 'none', color: '#fff', marginLeft: '4px', padding: '0 2px', cursor: 'pointer' }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {activeTabFilename && (
+                <textarea
+                  rows={10}
+                  value={sourceFiles.find(f => f.name === activeTabFilename)?.content || ''}
+                  onChange={(e) => updateSourceFileContent(e.target.value)}
+                  placeholder={`${activeTabFilename} の内容を入力...`}
+                  style={{ fontSize: '0.8rem', fontFamily: 'monospace' }}
+                />
+              )}
+            </div>
+          </div>
+        </aside>
+      </div>
     </div>
   );
 }
