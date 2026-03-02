@@ -1,17 +1,20 @@
 export interface SourceLine {
     lineNumber: number;       // 表示上の行番号 (1-indexed)
     text: string;             // 行のテキスト
-    addresses: number[];      // この行に含まれるPCアドレス(ワード単位)のリスト
+    addresses: number[];      // この行に含まれるPCアドレス(バイト単位)のリスト
+    isAssembly: boolean;      // アセンブリ(逆アセ)行かどうか
 }
 
 export class SourceMapper {
     public sourceLines: SourceLine[] = [];
-    public addressToLine: Map<number, number> = new Map(); // PC address (word) -> lineNumber
+    public addressToRawLine: Map<number, number> = new Map(); // PC address (byte) -> Raw LSS lineNumber
+    public addressToSourceLine: Map<number, number> = new Map(); // PC address (byte) -> C source lineNumber
     public hasSource: boolean = false;
 
     public parseLss(lssText: string) {
         this.sourceLines = [];
-        this.addressToLine.clear();
+        this.addressToRawLine.clear();
+        this.addressToSourceLine.clear();
         this.hasSource = false;
 
         const lines = lssText.split(/\r?\n/);
@@ -20,27 +23,37 @@ export class SourceMapper {
         // LSSファイルの解析
         const addressRowRegex = /^\s*([0-9a-fA-F]+):\s+([0-9a-fA-F]{2}\s+)+/;
 
+        let lastSourceLineNumber = -1;
+
         for (const line of lines) {
             const match = line.match(addressRowRegex);
             const addresses: number[] = [];
+            let isAssembly = false;
 
             if (match) {
                 // アドレス行の場合
+                isAssembly = true;
                 const byteAddress = parseInt(match[1], 16);
                 addresses.push(byteAddress);
 
-                // 命令が複数ワードにまたがる場合（簡易対応：LSSの次の行で続くことは少ないが、
-                // opcodeから推測する必要がある。ここではこの行に表示されている最初のアドレスだけを記録しておく）
-                this.addressToLine.set(byteAddress, currentLineNumber);
+                this.addressToRawLine.set(byteAddress, currentLineNumber);
+                if (lastSourceLineNumber !== -1) {
+                    this.addressToSourceLine.set(byteAddress, lastSourceLineNumber);
+                    this.sourceLines[lastSourceLineNumber - 1].addresses.push(byteAddress);
+                }
             } else {
                 // アドレス以外の行（Cのソースコード、セクションラベル、空行など）
-                // ただし、関数ラベル `00000092 <main>:` などの形式はアドレスを持たない純粋な行として扱う
+                isAssembly = false;
+                if (line.trim() !== '') {
+                    lastSourceLineNumber = currentLineNumber;
+                }
             }
 
             this.sourceLines.push({
                 lineNumber: currentLineNumber,
                 text: line,
-                addresses: addresses
+                addresses: addresses,
+                isAssembly
             });
 
             currentLineNumber++;
@@ -50,7 +63,11 @@ export class SourceMapper {
     }
 
     public getLineForAddress(address: number): number | undefined {
-        return this.addressToLine.get(address);
+        return this.addressToRawLine.get(address);
+    }
+
+    public getSourceLineForAddress(address: number): number | undefined {
+        return this.addressToSourceLine.get(address);
     }
 
     public getAddressesForLine(lineNumber: number): number[] {

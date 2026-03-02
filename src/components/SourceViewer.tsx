@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useMemo, memo } from 'react';
+import React, { useEffect, useRef, useMemo, memo, useState } from 'react';
 import { SourceMapper } from '../emulator/SourceMapper';
 
 interface SourceViewerProps {
@@ -12,13 +12,16 @@ interface SourceViewerProps {
 export const SourceViewer: React.FC<SourceViewerProps> = memo(({ sourceMapper, pc, isRunning, breakpoints, onToggleBreakpoint }) => {
     const listRef = useRef<HTMLDivElement>(null);
 
+    const [showAssembly, setShowAssembly] = useState(false);
+
     const activeAddress = isRunning ? -1 : pc * 2;
     const activeLineNumber = useMemo(() => {
         if (!sourceMapper.hasSource || activeAddress === -1) return -1;
-        // Exact match
-        let line = sourceMapper.getLineForAddress(activeAddress);
+        let line = showAssembly
+            ? sourceMapper.getLineForAddress(activeAddress)
+            : sourceMapper.getSourceLineForAddress(activeAddress);
         return line ?? -1;
-    }, [activeAddress, sourceMapper]);
+    }, [activeAddress, sourceMapper, showAssembly]);
 
     useEffect(() => {
         if (!isRunning && listRef.current && activeLineNumber !== -1) {
@@ -35,7 +38,13 @@ export const SourceViewer: React.FC<SourceViewerProps> = memo(({ sourceMapper, p
 
     return (
         <div className="source-viewer" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <h3 style={{ margin: '0 0 0.5rem 0' }}>C Source (LSS)</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '0 0 0.5rem 0' }}>
+                <h3 style={{ margin: 0 }}>C Source (LSS)</h3>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+                    <input type="checkbox" checked={showAssembly} onChange={(e) => setShowAssembly(e.target.checked)} />
+                    アセンブリも表示
+                </label>
+            </div>
             <div
                 ref={listRef}
                 style={{
@@ -49,7 +58,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = memo(({ sourceMapper, p
                     whiteSpace: 'pre'
                 }}
             >
-                {sourceMapper.sourceLines.map((line) => {
+                {sourceMapper.sourceLines.filter(line => showAssembly || !line.isAssembly).map((line) => {
                     const isActive = line.lineNumber === activeLineNumber;
                     // Check if *any* address in this line has a breakpoint
                     const hasBreakpoint = line.addresses.some(addr => breakpoints.has(addr));
