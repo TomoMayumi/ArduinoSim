@@ -18,6 +18,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = memo(({
     onToggleBreakpoint, onToggleLineBreakpoint, showAssembly = false
 }) => {
     const listRef = useRef<HTMLDivElement>(null);
+    const prevPcRef = useRef<number>(pc);
     const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
 
     const activeByteAddress = isRunning ? -1 : pc * 2;
@@ -27,10 +28,14 @@ export const SourceViewer: React.FC<SourceViewerProps> = memo(({
 
     // PCが変わったら、自動的にファイルを選択する (Auto-follow)
     useEffect(() => {
-        if (currentLocation && currentLocation.fileName !== selectedFileName) {
-            setSelectedFileName(currentLocation.fileName);
+        // PCが実際に移動したときだけ、かつ実行中でないときだけ追従
+        if (!isRunning && pc !== prevPcRef.current) {
+            if (currentLocation && currentLocation.fileName !== selectedFileName) {
+                setSelectedFileName(currentLocation.fileName);
+            }
+            prevPcRef.current = pc;
         }
-    }, [currentLocation, selectedFileName]);
+    }, [pc, isRunning, currentLocation, selectedFileName]);
 
     // 初回ロード時に最初のファイルを選択する
     useEffect(() => {
