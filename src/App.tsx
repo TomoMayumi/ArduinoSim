@@ -634,6 +634,24 @@ function App() {
             }} style={{ background: '#059669' }}>
               C Sample (Lチカ) ★NEW
             </button>
+            <button onClick={async () => {
+              try {
+                const response = await fetch('/samples/hybrid_system.json');
+                const data = await response.json();
+                setHexInput(data.hex);
+                setLssInput(data.lss);
+                setSourceFiles(data.sourceFiles);
+                if (data.sourceFiles.length > 0) {
+                  setActiveTabFilename(data.sourceFiles[0].name);
+                }
+                alert('Hybrid System プリセットをロードしました');
+              } catch (e) {
+                console.error('Preset Load Error:', e);
+                alert('プリセットのロードに失敗しました');
+              }
+            }} style={{ background: '#7c3aed' }}>
+              Hybrid System ★PRESET
+            </button>
           </div>
           <div style={{ marginTop: '1rem' }}>
             <label style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Intel HEX:</label>
