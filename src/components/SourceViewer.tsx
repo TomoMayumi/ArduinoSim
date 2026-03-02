@@ -9,16 +9,17 @@ interface SourceViewerProps {
     isRunning: boolean;
     breakpoints: Set<number>;
     onToggleBreakpoint: (address: number) => void;
+    showAssembly?: boolean;
 }
 
-export const SourceViewer: React.FC<SourceViewerProps> = memo(({ sourceMapper, fileManager, pc, isRunning, breakpoints, onToggleBreakpoint }) => {
+export const SourceViewer: React.FC<SourceViewerProps> = memo(({ sourceMapper, fileManager, pc, isRunning, breakpoints, onToggleBreakpoint, showAssembly = false }) => {
     const listRef = useRef<HTMLDivElement>(null);
     const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
 
-    const activeAddress = isRunning ? -1 : pc * 2;
+    const activeByteAddress = isRunning ? -1 : pc * 2;
     const currentLocation = useMemo(() => {
-        return sourceMapper.getLocationForAddress(activeAddress);
-    }, [activeAddress, sourceMapper]);
+        return sourceMapper.getLocationForAddress(activeByteAddress);
+    }, [activeByteAddress, sourceMapper]);
 
     // PCが変わったら、自動的にファイルを選択する (Auto-follow)
     useEffect(() => {
@@ -104,44 +105,68 @@ export const SourceViewer: React.FC<SourceViewerProps> = memo(({ sourceMapper, f
                         const lineAddresses = sourceMapper.getAddressesForLocation(selectedFileName!, lineNumber);
                         const hasBreakpoint = lineAddresses.some(addr => breakpoints.has(addr));
                         const isCodeLine = lineAddresses.length > 0;
+                        const asmLines = showAssembly ? sourceMapper.getAsmForLocation(selectedFileName!, lineNumber) : [];
 
                         return (
-                            <div
-                                key={lineNumber}
-                                className={isActive ? 'active-source-line' : ''}
-                                style={{
-                                    display: 'flex',
-                                    padding: '1px 4px',
-                                    backgroundColor: isActive ? '#3b82f6' : 'transparent',
-                                    color: isActive ? '#ffffff' : (isCodeLine ? '#cbd5e1' : '#64748b'),
-                                    borderRadius: '2px',
-                                    cursor: isCodeLine ? 'pointer' : 'default',
-                                    alignItems: 'center'
-                                }}
-                                onClick={() => {
-                                    if (isCodeLine) {
-                                        onToggleBreakpoint(lineAddresses[0]);
-                                    }
-                                }}
-                            >
-                                <div style={{ width: '30px', textAlign: 'right', paddingRight: '10px', color: '#475569', userSelect: 'none' }}>
-                                    {lineNumber}
+                            <React.Fragment key={lineNumber}>
+                                <div
+                                    className={isActive ? 'active-source-line' : ''}
+                                    style={{
+                                        display: 'flex',
+                                        padding: '1px 4px',
+                                        backgroundColor: isActive ? '#3b82f6' : 'transparent',
+                                        color: isActive ? '#ffffff' : (isCodeLine ? '#cbd5e1' : '#64748b'),
+                                        borderRadius: '2px',
+                                        cursor: isCodeLine ? 'pointer' : 'default',
+                                        alignItems: 'center'
+                                    }}
+                                    onClick={() => {
+                                        if (isCodeLine) {
+                                            onToggleBreakpoint(lineAddresses[0]);
+                                        }
+                                    }}
+                                >
+                                    <div style={{ width: '30px', textAlign: 'right', paddingRight: '10px', color: '#475569', userSelect: 'none' }}>
+                                        {lineNumber}
+                                    </div>
+                                    <div style={{ width: '16px', display: 'flex', justifyContent: 'center' }}>
+                                        {hasBreakpoint && (
+                                            <div style={{
+                                                width: '8px',
+                                                height: '8px',
+                                                borderRadius: '50%',
+                                                backgroundColor: '#ef4444',
+                                                border: '1px solid #fca5a1'
+                                            }} />
+                                        )}
+                                    </div>
+                                    <div style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                        {text || ' '}
+                                    </div>
                                 </div>
-                                <div style={{ width: '16px', display: 'flex', justifyContent: 'center' }}>
-                                    {hasBreakpoint && (
-                                        <div style={{
-                                            width: '8px',
-                                            height: '8px',
-                                            borderRadius: '50%',
-                                            backgroundColor: '#ef4444',
-                                            border: '1px solid #fca5a1'
-                                        }} />
-                                    )}
-                                </div>
-                                <div style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                    {text || ' '}
-                                </div>
-                            </div>
+                                {asmLines.map((asmLine, asmIdx) => {
+                                    // アドレス部分を抽出して、現在のPCと一致するか確認
+                                    const addrMatch = asmLine.match(/^\s*([0-9a-fA-F]+):/);
+                                    const asmByteAddr = addrMatch ? parseInt(addrMatch[1], 16) : -1;
+                                    const isAsmActive = activeByteAddress === asmByteAddr;
+
+                                    return (
+                                        <div
+                                            key={`asm-${lineNumber}-${asmIdx}`}
+                                            style={{
+                                                display: 'flex',
+                                                padding: '0 4px 0 54px',
+                                                fontSize: '0.75rem',
+                                                color: isAsmActive ? '#fbbf24' : '#64748b',
+                                                backgroundColor: isAsmActive ? 'rgba(251, 191, 36, 0.1)' : 'transparent',
+                                                fontStyle: 'italic'
+                                            }}
+                                        >
+                                            {asmLine}
+                                        </div>
+                                    );
+                                })}
+                            </React.Fragment>
                         );
                     })}
                 </div>

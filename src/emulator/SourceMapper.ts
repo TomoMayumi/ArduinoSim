@@ -8,11 +8,13 @@ export interface SourceMapLocation {
 export class SourceMapper {
     public addressToLocation: Map<number, SourceMapLocation> = new Map(); // PC address (byte) -> Location
     public fileToLineToAddresses: Map<string, Map<number, number[]>> = new Map(); // fileName -> lineNumber -> addresses
+    public fileToLineToAsmText: Map<string, Map<number, string[]>> = new Map(); // fileName -> lineNumber -> assembly strings
     public hasSource: boolean = false;
 
     public parseLss(lssText: string, fileManager: SourceFileManager) {
         this.addressToLocation.clear();
         this.fileToLineToAddresses.clear();
+        this.fileToLineToAsmText.clear();
         this.hasSource = false;
 
         const lines = lssText.split(/\r?\n/);
@@ -57,7 +59,7 @@ export class SourceMapper {
             if (addrMatch) {
                 const byteAddress = parseInt(addrMatch[1], 16);
                 if (currentFile && currentLineNumber !== -1) {
-                    this.mapAddress(byteAddress, currentFile, currentLineNumber);
+                    this.mapAddress(byteAddress, currentFile, currentLineNumber, line.trim());
                 }
             } else {
                 // 4. 空行でない場合、Cソースコードそのものが書かれている可能性があるため、照合を試みる
@@ -75,7 +77,7 @@ export class SourceMapper {
         this.hasSource = this.addressToLocation.size > 0;
     }
 
-    private mapAddress(address: number, fileName: string, lineNumber: number) {
+    private mapAddress(address: number, fileName: string, lineNumber: number, asmText: string) {
         this.addressToLocation.set(address, { fileName, lineNumber });
 
         if (!this.fileToLineToAddresses.has(fileName)) {
@@ -86,6 +88,16 @@ export class SourceMapper {
             lineMap.set(lineNumber, []);
         }
         lineMap.get(lineNumber)!.push(address);
+
+        // Save assembly text for MIX display
+        if (!this.fileToLineToAsmText.has(fileName)) {
+            this.fileToLineToAsmText.set(fileName, new Map());
+        }
+        const asmMap = this.fileToLineToAsmText.get(fileName)!;
+        if (!asmMap.has(lineNumber)) {
+            asmMap.set(lineNumber, []);
+        }
+        asmMap.get(lineNumber)!.push(asmText);
     }
 
     public getLocationForAddress(address: number): SourceMapLocation | undefined {
@@ -94,5 +106,9 @@ export class SourceMapper {
 
     public getAddressesForLocation(fileName: string, lineNumber: number): number[] {
         return this.fileToLineToAddresses.get(fileName)?.get(lineNumber) || [];
+    }
+
+    public getAsmForLocation(fileName: string, lineNumber: number): string[] {
+        return this.fileToLineToAsmText.get(fileName)?.get(lineNumber) || [];
     }
 }

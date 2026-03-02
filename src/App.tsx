@@ -369,6 +369,7 @@ function App() {
   const [noResetMode, setNoResetMode] = useState(true);
   const [debugInfo, setDebugInfo] = useState({ pc: 0, cycles: 0 });
   const [viewMode, setViewMode] = useState<'disassembly' | 'source'>('source');
+  const [showAsmInSource, setShowAsmInSource] = useState(false);
 
   const [activeTabFilename, setActiveTabFilename] = useState<string | null>(null);
 
@@ -467,13 +468,20 @@ function App() {
           <CpuStatePanel emulator={emulator} isRunning={isRunning} />
         </div>
         <div className="card" style={{ display: 'flex', flexDirection: 'column', boxSizing: 'border-box', flex: 1, minHeight: 0 }}>
-          <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.5rem' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
-              <input type="radio" value="source" checked={viewMode === 'source'} onChange={(e) => setViewMode(e.target.value as any)} /> Source
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
-              <input type="radio" value="disassembly" checked={viewMode === 'disassembly'} onChange={(e) => setViewMode(e.target.value as any)} /> Disassembly
-            </label>
+          <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.5rem', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
+                <input type="radio" value="source" checked={viewMode === 'source'} onChange={(e) => setViewMode(e.target.value as any)} /> Source
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
+                <input type="radio" value="disassembly" checked={viewMode === 'disassembly'} onChange={(e) => setViewMode(e.target.value as any)} /> Disassembly
+              </label>
+            </div>
+            {viewMode === 'source' && (
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer', fontSize: '0.8rem', color: '#94a3b8' }}>
+                <input type="checkbox" checked={showAsmInSource} onChange={(e) => setShowAsmInSource(e.target.checked)} /> Show ASM
+              </label>
+            )}
           </div>
           {viewMode === 'source' ? (
             <SourceViewer
@@ -483,6 +491,7 @@ function App() {
               isRunning={isRunning}
               breakpoints={breakpoints}
               onToggleBreakpoint={toggleBreakpoint}
+              showAssembly={showAsmInSource}
             />
           ) : (
             <DisassemblyPanel
