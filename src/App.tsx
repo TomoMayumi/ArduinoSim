@@ -425,11 +425,27 @@ function App() {
     const newSourceFiles: { name: string; content: string }[] = [];
     const validExtensions = ['.c', '.h', '.cpp', '.hpp', '.s', '.asm'];
 
+    // デコード用の関数
+    const decodeFile = async (file: File): Promise<string> => {
+      const buffer = await file.arrayBuffer();
+      const uint8Array = new Uint8Array(buffer);
+
+      try {
+        // まずは UTF-8 で試行 (fatal: true にして不正なバイトがあれば例外を投げさせる)
+        const utf8Decoder = new TextDecoder('utf-8', { fatal: true });
+        return utf8Decoder.decode(uint8Array);
+      } catch (e) {
+        // UTF-8 で失敗した場合は Shift-JIS (Windows-31j) を試す
+        const sjisDecoder = new TextDecoder('windows-31j');
+        return sjisDecoder.decode(uint8Array);
+      }
+    };
+
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
       if (validExtensions.includes(ext)) {
-        const content = await file.text();
+        const content = await decodeFile(file);
         newSourceFiles.push({ name: file.name, content });
       }
     }
