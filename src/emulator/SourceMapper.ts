@@ -1,79 +1,98 @@
-export interface SourceLine {
-    lineNumber: number;       // 表示上の行番号 (1-indexed)
-    text: string;             // 行のテキスト
-    addresses: number[];      // この行に含まれるPCアドレス(バイト単位)のリスト
-    isAssembly: boolean;      // アセンブリ(逆アセ)行かどうか
+import { SourceFileManager } from './SourceFileManager';
+
+export interface SourceMapLocation {
+    fileName: string;
+    lineNumber: number;
 }
 
 export class SourceMapper {
-    public sourceLines: SourceLine[] = [];
-    public addressToRawLine: Map<number, number> = new Map(); // PC address (byte) -> Raw LSS lineNumber
-    public addressToSourceLine: Map<number, number> = new Map(); // PC address (byte) -> C source lineNumber
+    public addressToLocation: Map<number, SourceMapLocation> = new Map(); // PC address (byte) -> Location
+    public fileToLineToAddresses: Map<string, Map<number, number[]>> = new Map(); // fileName -> lineNumber -> addresses
     public hasSource: boolean = false;
 
-    public parseLss(lssText: string) {
-        this.sourceLines = [];
-        this.addressToRawLine.clear();
-        this.addressToSourceLine.clear();
+    public parseLss(lssText: string, fileManager: SourceFileManager) {
+        this.addressToLocation.clear();
+        this.fileToLineToAddresses.clear();
         this.hasSource = false;
 
         const lines = lssText.split(/\r?\n/);
-        let currentLineNumber = 1;
 
-        // LSSファイルの解析
+        let currentFile: string | undefined = undefined;
+        let currentLineNumber: number = -1;
+
+        // LSS解析用の正規表現
         const addressRowRegex = /^\s*([0-9a-fA-F]+):\s+([0-9a-fA-F]{2}\s+)+/;
-
-        let lastSourceLineNumber = -1;
+        const functionLabelRegex = /^[0-9a-fA-F]+\s+<([^>]+)>:$/;
+        const fileLineDirectiveRegex = /^([^:]+\.[chSH]):(\d+)(?:\s*(.*))?$/;
 
         for (const line of lines) {
-            const match = line.match(addressRowRegex);
-            const addresses: number[] = [];
-            let isAssembly = false;
+            // 1. ファイル:行番号 ディレクティブのチェック (avr-objdump -l の場合)
+            const fileLineMatch = line.match(fileLineDirectiveRegex);
+            if (fileLineMatch) {
+                const fullPath = fileLineMatch[1];
+                const fileName = fullPath.split(/[/\\]/).pop() || fullPath;
+                const lineNum = parseInt(fileLineMatch[2], 10);
 
-            if (match) {
-                // アドレス行の場合
-                isAssembly = true;
-                const byteAddress = parseInt(match[1], 16);
-                addresses.push(byteAddress);
-
-                this.addressToRawLine.set(byteAddress, currentLineNumber);
-                if (lastSourceLineNumber !== -1) {
-                    this.addressToSourceLine.set(byteAddress, lastSourceLineNumber);
-                    this.sourceLines[lastSourceLineNumber - 1].addresses.push(byteAddress);
+                if (fileManager.getFile(fileName)) {
+                    currentFile = fileName;
+                    currentLineNumber = lineNum;
                 }
-            } else {
-                // アドレス以外の行（Cのソースコード、セクションラベル、空行など）
-                isAssembly = false;
-                if (line.trim() !== '') {
-                    lastSourceLineNumber = currentLineNumber;
-                }
+                continue;
             }
 
-            this.sourceLines.push({
-                lineNumber: currentLineNumber,
-                text: line,
-                addresses: addresses,
-                isAssembly
-            });
+            // 2. 関数ラベルのチェック (00000080 <main>:)
+            const funcMatch = line.match(functionLabelRegex);
+            if (funcMatch) {
+                const funcName = funcMatch[1];
+                const def = fileManager.findFunctionDefinition(funcName);
+                if (def) {
+                    currentFile = def.fileName;
+                    currentLineNumber = def.lineNumber;
+                }
+                continue;
+            }
 
-            currentLineNumber++;
+            // 3. アドレス行のチェック
+            const addrMatch = line.match(addressRowRegex);
+            if (addrMatch) {
+                const byteAddress = parseInt(addrMatch[1], 16);
+                if (currentFile && currentLineNumber !== -1) {
+                    this.mapAddress(byteAddress, currentFile, currentLineNumber);
+                }
+            } else {
+                // 4. 空行でない場合、Cソースコードそのものが書かれている可能性があるため、照合を試みる
+                const trimmed = line.trim();
+                if (trimmed !== '' && !line.startsWith('Sections:') && !line.startsWith('Disassembly')) {
+                    const found = fileManager.findCodeFragment(line, currentFile);
+                    if (found) {
+                        currentFile = found.fileName;
+                        currentLineNumber = found.lineNumber;
+                    }
+                }
+            }
         }
 
-        this.hasSource = this.sourceLines.length > 0;
+        this.hasSource = this.addressToLocation.size > 0;
     }
 
-    public getLineForAddress(address: number): number | undefined {
-        return this.addressToRawLine.get(address);
-    }
+    private mapAddress(address: number, fileName: string, lineNumber: number) {
+        this.addressToLocation.set(address, { fileName, lineNumber });
 
-    public getSourceLineForAddress(address: number): number | undefined {
-        return this.addressToSourceLine.get(address);
-    }
-
-    public getAddressesForLine(lineNumber: number): number[] {
-        if (lineNumber >= 1 && lineNumber <= this.sourceLines.length) {
-            return this.sourceLines[lineNumber - 1].addresses;
+        if (!this.fileToLineToAddresses.has(fileName)) {
+            this.fileToLineToAddresses.set(fileName, new Map());
         }
-        return [];
+        const lineMap = this.fileToLineToAddresses.get(fileName)!;
+        if (!lineMap.has(lineNumber)) {
+            lineMap.set(lineNumber, []);
+        }
+        lineMap.get(lineNumber)!.push(address);
+    }
+
+    public getLocationForAddress(address: number): SourceMapLocation | undefined {
+        return this.addressToLocation.get(address);
+    }
+
+    public getAddressesForLocation(fileName: string, lineNumber: number): number[] {
+        return this.fileToLineToAddresses.get(fileName)?.get(lineNumber) || [];
     }
 }

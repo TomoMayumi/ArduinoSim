@@ -1,12 +1,14 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { Atmega328P } from './atmega328p';
 import { SourceMapper } from './SourceMapper';
+import { SourceFileManager } from './SourceFileManager';
 
-export function useEmulator(program: Uint16Array | null, lssText: string | null = null) {
+export function useEmulator(program: Uint16Array | null, lssText: string | null = null, sourceFiles: { name: string, content: string }[] = []) {
     const [emulator, setEmulator] = useState<Atmega328P | null>(null);
     const [isRunning, setIsRunning] = useState(false);
     const [breakpoints, setBreakpoints] = useState<Set<number>>(new Set());
     const [sourceMapper, setSourceMapper] = useState<SourceMapper>(new SourceMapper());
+    const [fileManager, setFileManager] = useState<SourceFileManager>(new SourceFileManager());
     const requestRef = useRef<number>(0);
 
     const start = useCallback(() => {
@@ -50,12 +52,19 @@ export function useEmulator(program: Uint16Array | null, lssText: string | null 
     }, [program]);
 
     useEffect(() => {
+        const fm = new SourceFileManager();
+        for (const file of sourceFiles) {
+            fm.addFile(file.name, file.content);
+        }
+
         const mapper = new SourceMapper();
         if (lssText) {
-            mapper.parseLss(lssText);
+            mapper.parseLss(lssText, fm);
         }
+
+        setFileManager(fm);
         setSourceMapper(mapper);
-    }, [lssText]);
+    }, [lssText, sourceFiles]);
 
     const isRunningRef = useRef(isRunning);
     const emulatorRef = useRef<Atmega328P | null>(null);
@@ -119,6 +128,7 @@ export function useEmulator(program: Uint16Array | null, lssText: string | null 
         isRunning,
         breakpoints,
         sourceMapper,
+        fileManager,
         start,
         stop,
         step,

@@ -148,11 +148,14 @@ const ANALOG_A0_TO_7SEG_HEX = `
 function App() {
   const [hexInput, setHexInput] = useState(BLINK_HEX);
   const [lssInput, setLssInput] = useState('');
+  const [sourceFiles, setSourceFiles] = useState<{ name: string, content: string }[]>([]);
   const [program, setProgram] = useState<Uint16Array | null>(null);
-  const { emulator, isRunning, breakpoints, sourceMapper, start, stop, step, reset, toggleBreakpoint } = useEmulator(program, lssInput);
+  const { emulator, isRunning, breakpoints, sourceMapper, fileManager, start, stop, step, reset, toggleBreakpoint } = useEmulator(program, lssInput, sourceFiles);
   const [noResetMode, setNoResetMode] = useState(true);
   const [debugInfo, setDebugInfo] = useState({ pc: 0, cycles: 0 });
   const [viewMode, setViewMode] = useState<'disassembly' | 'source'>('source');
+
+  const [activeTabFilename, setActiveTabFilename] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -173,6 +176,31 @@ function App() {
     }, 100);
     return () => clearInterval(interval);
   }, [emulator]);
+
+  const addSourceFile = () => {
+    const name = prompt('ファイル名を入力してください (例: main.c):');
+    if (name) {
+      if (sourceFiles.find(f => f.name === name)) {
+        alert('そのファイル名は既に存在します');
+        return;
+      }
+      setSourceFiles([...sourceFiles, { name, content: '' }]);
+      setActiveTabFilename(name);
+    }
+  };
+
+  const removeSourceFile = (name: string) => {
+    setSourceFiles(sourceFiles.filter(f => f.name !== name));
+    if (activeTabFilename === name) {
+      setActiveTabFilename(null);
+    }
+  };
+
+  const updateSourceFileContent = (content: string) => {
+    if (activeTabFilename) {
+      setSourceFiles(sourceFiles.map(f => f.name === activeTabFilename ? { ...f, content } : f));
+    }
+  };
 
   return (
     <div className="app-container">
@@ -235,6 +263,7 @@ function App() {
           {viewMode === 'source' ? (
             <SourceViewer
               sourceMapper={sourceMapper}
+              fileManager={fileManager}
               pc={isRunning ? -1 : debugInfo.pc}
               isRunning={isRunning}
               breakpoints={breakpoints}
@@ -279,50 +308,98 @@ function App() {
         <div className="card hex-upload">
           <h3>HEX & LSS プログラム</h3>
           <div className="buttons">
-            <button onClick={() => { setHexInput(BLINK_HEX); setLssInput(''); }}>
+            <button onClick={() => { setHexInput(BLINK_HEX); setLssInput(''); setSourceFiles([]); }}>
               Blink (Lチカ)
             </button>
-            <button onClick={() => { setHexInput(SERIAL_ECHO_HEX); setLssInput(''); }}>
+            <button onClick={() => { setHexInput(SERIAL_ECHO_HEX); setLssInput(''); setSourceFiles([]); }}>
               Serial Echo (エコーバック)
             </button>
-            <button onClick={() => { setHexInput(BLINK2_HEX); setLssInput(''); }}>
+            <button onClick={() => { setHexInput(BLINK2_HEX); setLssInput(''); setSourceFiles([]); }}>
               Blink2 (Lチカ)
             </button>
-            <button onClick={() => { setHexInput(PUSH_SWITCH_HEX); setLssInput(''); }}>
+            <button onClick={() => { setHexInput(PUSH_SWITCH_HEX); setLssInput(''); setSourceFiles([]); }}>
               Push Switch (プッシュスイッチ)
             </button>
-            <button onClick={() => { setHexInput(POT_BLINK_HEX); setLssInput(''); }}>
+            <button onClick={() => { setHexInput(POT_BLINK_HEX); setLssInput(''); setSourceFiles([]); }}>
               Potentiometer (可変抵抗)
             </button>
-            <button onClick={() => { setHexInput(SEVEN_SEGMENT_HEX); setLssInput(''); }}>
+            <button onClick={() => { setHexInput(SEVEN_SEGMENT_HEX); setLssInput(''); setSourceFiles([]); }}>
               7-Segment (7セグ)
             </button>
-            <button onClick={() => { setHexInput(SEVEN_SEGMENT_COUNTUP_HEX); setLssInput(''); }}>
+            <button onClick={() => { setHexInput(SEVEN_SEGMENT_COUNTUP_HEX); setLssInput(''); setSourceFiles([]); }}>
               7-Segment Countup (7セグカウントアップ)
             </button>
-            <button onClick={() => { setHexInput(MOTOR_PWM_HEX); setLssInput(''); }}>
+            <button onClick={() => { setHexInput(MOTOR_PWM_HEX); setLssInput(''); setSourceFiles([]); }}>
               DC Motor PWM (モーター)
             </button>
-            <button onClick={() => { setHexInput(LCD_HELLO_HEX); setLssInput(''); }}>
+            <button onClick={() => { setHexInput(LCD_HELLO_HEX); setLssInput(''); setSourceFiles([]); }}>
               LCD 1602 Hello (液晶)
             </button>
-            <button onClick={() => { setHexInput(ANALOG_A0_TO_7SEG_HEX); setLssInput(''); }}>
+            <button onClick={() => { setHexInput(ANALOG_A0_TO_7SEG_HEX); setLssInput(''); setSourceFiles([]); }}>
               Analog A0 to 7-Segment (アナログA0から7セグ)
             </button>
           </div>
-          <textarea
-            rows={5}
-            value={hexInput}
-            onChange={(e) => setHexInput(e.target.value)}
-            placeholder="ここにIntel HEXを貼り付けてください"
-          />
-          <textarea
-            rows={5}
-            value={lssInput}
-            onChange={(e) => setLssInput(e.target.value)}
-            placeholder="ここにLSSファイルの内容を貼り付けてください"
-            style={{ marginTop: '0.5rem' }}
-          />
+          <div style={{ marginTop: '1rem' }}>
+            <label style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Intel HEX:</label>
+            <textarea
+              rows={3}
+              value={hexInput}
+              onChange={(e) => setHexInput(e.target.value)}
+              placeholder="Intel HEX"
+            />
+          </div>
+          <div style={{ marginTop: '0.5rem' }}>
+            <label style={{ fontSize: '0.8rem', color: '#94a3b8' }}>LSSファイル:</label>
+            <textarea
+              rows={3}
+              value={lssInput}
+              onChange={(e) => setLssInput(e.target.value)}
+              placeholder="LSSファイル"
+            />
+          </div>
+
+          <div style={{ marginTop: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+              <label style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Cソースコード群:</label>
+              <button onClick={addSourceFile} style={{ fontSize: '0.7rem', padding: '2px 8px', background: '#3b82f6' }}>追加</button>
+            </div>
+
+            <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+              {sourceFiles.map(file => (
+                <div
+                  key={file.name}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    background: activeTabFilename === file.name ? '#3b82f6' : '#334155',
+                    fontSize: '0.75rem',
+                    padding: '2px 6px',
+                    borderRadius: '3px',
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => setActiveTabFilename(file.name)}
+                >
+                  <span style={{ maxWidth: '80px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{file.name}</span>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); removeSourceFile(file.name); }}
+                    style={{ background: 'transparent', border: 'none', color: '#fff', marginLeft: '4px', padding: '0 2px', cursor: 'pointer' }}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {activeTabFilename && (
+              <textarea
+                rows={10}
+                value={sourceFiles.find(f => f.name === activeTabFilename)?.content || ''}
+                onChange={(e) => updateSourceFileContent(e.target.value)}
+                placeholder={`${activeTabFilename} の内容を入力...`}
+                style={{ fontSize: '0.8rem', fontFamily: 'monospace' }}
+              />
+            )}
+          </div>
         </div>
       </aside>
     </div>
