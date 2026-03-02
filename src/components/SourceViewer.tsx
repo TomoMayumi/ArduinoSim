@@ -9,10 +9,14 @@ interface SourceViewerProps {
     isRunning: boolean;
     breakpoints: Set<number>;
     onToggleBreakpoint: (address: number) => void;
+    onToggleLineBreakpoint: (addresses: number[]) => void;
     showAssembly?: boolean;
 }
 
-export const SourceViewer: React.FC<SourceViewerProps> = memo(({ sourceMapper, fileManager, pc, isRunning, breakpoints, onToggleBreakpoint, showAssembly = false }) => {
+export const SourceViewer: React.FC<SourceViewerProps> = memo(({
+    sourceMapper, fileManager, pc, isRunning, breakpoints,
+    onToggleBreakpoint, onToggleLineBreakpoint, showAssembly = false
+}) => {
     const listRef = useRef<HTMLDivElement>(null);
     const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
 
@@ -122,7 +126,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = memo(({ sourceMapper, f
                                     }}
                                     onClick={() => {
                                         if (isCodeLine) {
-                                            onToggleBreakpoint(lineAddresses[0]);
+                                            onToggleLineBreakpoint(lineAddresses);
                                         }
                                     }}
                                 >
@@ -149,19 +153,32 @@ export const SourceViewer: React.FC<SourceViewerProps> = memo(({ sourceMapper, f
                                     const addrMatch = asmLine.match(/^\s*([0-9a-fA-F]+):/);
                                     const asmByteAddr = addrMatch ? parseInt(addrMatch[1], 16) : -1;
                                     const isAsmActive = activeByteAddress === asmByteAddr;
+                                    const hasAsmBreakpoint = asmByteAddr !== -1 && breakpoints.has(asmByteAddr);
 
                                     return (
                                         <div
                                             key={`asm-${lineNumber}-${asmIdx}`}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                if (asmByteAddr !== -1) {
+                                                    onToggleBreakpoint(asmByteAddr);
+                                                }
+                                            }}
                                             style={{
                                                 display: 'flex',
                                                 padding: '0 4px 0 54px',
                                                 fontSize: '0.75rem',
-                                                color: isAsmActive ? '#fbbf24' : '#64748b',
+                                                color: hasAsmBreakpoint ? '#ef4444' : (isAsmActive ? '#fbbf24' : '#64748b'),
                                                 backgroundColor: isAsmActive ? 'rgba(251, 191, 36, 0.1)' : 'transparent',
-                                                fontStyle: 'italic'
+                                                fontStyle: 'italic',
+                                                cursor: 'pointer'
                                             }}
                                         >
+                                            <div style={{ width: '16px', display: 'flex', justifyContent: 'center', marginRight: '4px' }}>
+                                                {hasAsmBreakpoint && (
+                                                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#ef4444' }} />
+                                                )}
+                                            </div>
                                             {asmLine}
                                         </div>
                                     );

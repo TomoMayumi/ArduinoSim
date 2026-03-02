@@ -42,6 +42,37 @@ export function useEmulator(program: Uint16Array | null, lssText: string | null 
         });
     }, []);
 
+    const toggleLineBreakpoint = useCallback((addresses: number[]) => {
+        if (addresses.length === 0) return;
+
+        const starts = getBlockStarts(addresses);
+        setBreakpoints((prev) => {
+            const next = new Set(prev);
+            // 行内のいずれかのアドレスにBPが貼られていれば、その行のすべてのBPを解除する
+            const anySet = addresses.some(addr => next.has(addr));
+            if (anySet) {
+                addresses.forEach(addr => next.delete(addr));
+            } else {
+                // そうでなければ、すべてのブロックの先頭にBPを貼る
+                starts.forEach(addr => next.add(addr));
+            }
+            return next;
+        });
+    }, []);
+
+    function getBlockStarts(addresses: number[]): number[] {
+        if (addresses.length === 0) return [];
+        const sorted = [...addresses].sort((a, b) => a - b);
+        const starts = [sorted[0]];
+        for (let i = 1; i < sorted.length; i++) {
+            // AVRの命令サイズ（2 or 4バイト）を考慮し、4バイトを超える隙間があれば別ブロックとみなす
+            if (sorted[i] > sorted[i - 1] + 4) {
+                starts.push(sorted[i]);
+            }
+        }
+        return starts;
+    }
+
     useEffect(() => {
         if (program) {
             const newEmulator = new Atmega328P(program);
@@ -134,5 +165,6 @@ export function useEmulator(program: Uint16Array | null, lssText: string | null 
         step,
         reset,
         toggleBreakpoint,
+        toggleLineBreakpoint,
     };
 }

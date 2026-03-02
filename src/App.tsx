@@ -365,7 +365,7 @@ function App() {
   const [lssInput, setLssInput] = useState('');
   const [sourceFiles, setSourceFiles] = useState<{ name: string, content: string }[]>([]);
   const [program, setProgram] = useState<Uint16Array | null>(null);
-  const { emulator, isRunning, breakpoints, sourceMapper, fileManager, start, stop, step, reset, toggleBreakpoint } = useEmulator(program, lssInput, sourceFiles);
+  const { emulator, isRunning, breakpoints, sourceMapper, fileManager, start, stop, step, reset, toggleBreakpoint, toggleLineBreakpoint } = useEmulator(program, lssInput, sourceFiles);
   const [noResetMode, setNoResetMode] = useState(true);
   const [debugInfo, setDebugInfo] = useState({ pc: 0, cycles: 0 });
   const [viewMode, setViewMode] = useState<'disassembly' | 'source'>('source');
@@ -491,6 +491,7 @@ function App() {
               isRunning={isRunning}
               breakpoints={breakpoints}
               onToggleBreakpoint={toggleBreakpoint}
+              onToggleLineBreakpoint={toggleLineBreakpoint}
               showAssembly={showAsmInSource}
             />
           ) : (
