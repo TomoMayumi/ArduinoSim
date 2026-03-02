@@ -1,0 +1,1247 @@
+Archive member included to satisfy reference by file (symbol)
+
+C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+                              hybridsystem.o (adc_init)
+C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_toggle.o)
+                              hybridsystem.o (toggle_init)
+C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+                              hybridsystem.o (lcd_init)
+C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led7seg.o)
+                              hybridsystem.o (led7seg_init)
+C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led.o)
+                              car/indicator.o (led_set_bit)
+C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_pwm.o)
+                              hybridsystem.o (pwm_init)
+C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(timer.o)
+                              hybridsystem.o (timer_init)
+c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_mulsi3.o)
+                              C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_pwm.o) (__mulsi3)
+c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_udivmodhi4.o)
+                              C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o) (__udivmodhi4)
+c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_udivmodsi4.o)
+                              C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_pwm.o) (__udivmodsi4)
+c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_exit.o)
+                              C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.3.300/gcc/dev/atmega328p/avr5/crtatmega328p.o (exit)
+c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_tablejump2.o)
+                              C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o) (__tablejump2__)
+c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_copy_data.o)
+                              car/info_meter.o (__do_copy_data)
+c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_clear_bss.o)
+                              car/accelerator_pedal.o (__do_clear_bss)
+c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_umulhisi3.o)
+                              car/accelerator_pedal.o (__umulhisi3)
+c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_muluhisi3.o)
+                              c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_mulsi3.o) (__muluhisi3)
+c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_adddi3.o)
+                              C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(timer.o) (__adddi3)
+c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_adddi3_s8.o)
+                              C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(timer.o) (__adddi3_s8)
+c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_cmpdi2.o)
+                              C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(timer.o) (__cmpdi2)
+
+Discarded input sections
+
+ .data          0x00000000        0x0 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.3.300/gcc/dev/atmega328p/avr5/crtatmega328p.o
+ .bss           0x00000000        0x0 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.3.300/gcc/dev/atmega328p/avr5/crtatmega328p.o
+ .text          0x00000000        0x0 car/accelerator_pedal.o
+ .data          0x00000000        0x0 car/accelerator_pedal.o
+ .bss           0x00000000        0x0 car/accelerator_pedal.o
+ .text          0x00000000        0x0 car/ev_engine.o
+ .data          0x00000000        0x0 car/ev_engine.o
+ .bss           0x00000000        0x0 car/ev_engine.o
+ .text          0x00000000        0x0 car/indicator.o
+ .data          0x00000000        0x0 car/indicator.o
+ .bss           0x00000000        0x0 car/indicator.o
+ .text.indicator_init
+                0x00000000        0x2 car/indicator.o
+ .text.indicator_output
+                0x00000000        0x2 car/indicator.o
+ .text.engine_display_on
+                0x00000000        0x8 car/indicator.o
+ .text.engine_display_off
+                0x00000000        0x8 car/indicator.o
+ .text.ready_display_on
+                0x00000000        0x8 car/indicator.o
+ .text.ready_display_off
+                0x00000000        0x8 car/indicator.o
+ .text.ig_on_display_on
+                0x00000000        0x8 car/indicator.o
+ .text.ig_on_display_off
+                0x00000000        0x8 car/indicator.o
+ .text.acc_display_on
+                0x00000000        0x8 car/indicator.o
+ .text.acc_display_off
+                0x00000000        0x8 car/indicator.o
+ .debug_info    0x00000000      0x1c7 car/indicator.o
+ .debug_abbrev  0x00000000       0x7c car/indicator.o
+ .debug_aranges
+                0x00000000       0x68 car/indicator.o
+ .debug_ranges  0x00000000       0x58 car/indicator.o
+ .debug_line    0x00000000      0x121 car/indicator.o
+ .debug_str     0x00000000      0x1b0 car/indicator.o
+ .comment       0x00000000       0x31 car/indicator.o
+ .debug_frame   0x00000000       0xb4 car/indicator.o
+ .text          0x00000000        0x0 car/info_meter.o
+ .data          0x00000000        0x0 car/info_meter.o
+ .bss           0x00000000        0x0 car/info_meter.o
+ .text          0x00000000        0x0 car/parking_break.o
+ .data          0x00000000        0x0 car/parking_break.o
+ .bss           0x00000000        0x0 car/parking_break.o
+ .text          0x00000000        0x0 car/power_switch.o
+ .data          0x00000000        0x0 car/power_switch.o
+ .bss           0x00000000        0x0 car/power_switch.o
+ .text          0x00000000        0x0 car/shift_position.o
+ .data          0x00000000        0x0 car/shift_position.o
+ .bss           0x00000000        0x0 car/shift_position.o
+ .text          0x00000000        0x0 car/speed_meter.o
+ .data          0x00000000        0x0 car/speed_meter.o
+ .bss           0x00000000        0x0 car/speed_meter.o
+ .text          0x00000000        0x0 drivers/input_adc_config.o
+ .data          0x00000000        0x0 drivers/input_adc_config.o
+ .bss           0x00000000        0x0 drivers/input_adc_config.o
+ .text          0x00000000        0x0 hybridsystem.o
+ .data          0x00000000        0x0 hybridsystem.o
+ .bss           0x00000000        0x0 hybridsystem.o
+ .text          0x00000000        0x0 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+ .data          0x00000000        0x0 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+ .bss           0x00000000        0x0 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+ .text.adc_get_vr
+                0x00000000        0x6 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+ .text.adc_chk_event_adkey
+                0x00000000        0xa C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+ .text.adc_clr_event_adkey
+                0x00000000        0xa C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+ .text.adc_get_adkeycode
+                0x00000000        0x6 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+ .text.adc_get_value
+                0x00000000       0x30 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+ .text          0x00000000        0x0 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_toggle.o)
+ .data          0x00000000        0x0 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_toggle.o)
+ .bss           0x00000000        0x0 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_toggle.o)
+ .text.toggle_check_event
+                0x00000000        0x6 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_toggle.o)
+ .text.toggle_clear_event
+                0x00000000        0x6 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_toggle.o)
+ .text          0x00000000        0x0 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .data          0x00000000        0x0 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .bss           0x00000000        0x0 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .text.lcd_output_string
+                0x00000000       0x4c C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .text.lcd_display_sample
+                0x00000000       0x16 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .text.lcd_set_dot_pattern
+                0x00000000       0x32 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .text.lcd_put_num
+                0x00000000      0x12e C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .text.lcd_put_num_char
+                0x00000000        0xc C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .text.lcd_put_num_short
+                0x00000000        0xa C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .text.lcd_set_cursor_home
+                0x00000000        0x6 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .text.lcd_clear_line
+                0x00000000       0x34 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .rodata.lcd_sample_data
+                0x00000000       0x20 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .text          0x00000000        0x0 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led7seg.o)
+ .data          0x00000000        0x0 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led7seg.o)
+ .bss           0x00000000        0x0 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led7seg.o)
+ .text.led7seg_set_blink_duty
+                0x00000000       0x1a C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led7seg.o)
+ .text.led7seg_set_blink_target
+                0x00000000        0x6 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led7seg.o)
+ .text.led7seg_start_blink
+                0x00000000        0x8 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led7seg.o)
+ .text.led7seg_stop_blink
+                0x00000000        0x6 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led7seg.o)
+ .text          0x00000000        0x0 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led.o)
+ .data          0x00000000        0x0 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led.o)
+ .bss           0x00000000        0x0 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led.o)
+ .text.led_init
+                0x00000000       0x12 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led.o)
+ .text.led_display
+                0x00000000       0x10 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led.o)
+ .text.led_set_data
+                0x00000000        0x8 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led.o)
+ .text.led_set_bit
+                0x00000000        0xc C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led.o)
+ .text.led_clear_bit
+                0x00000000        0xe C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led.o)
+ .bss.led_data_buf
+                0x00000000        0x1 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led.o)
+ .debug_info    0x00000000      0x165 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led.o)
+ .debug_abbrev  0x00000000       0x98 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led.o)
+ .debug_loc     0x00000000       0xfa C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led.o)
+ .debug_aranges
+                0x00000000       0x40 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led.o)
+ .debug_ranges  0x00000000       0x30 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led.o)
+ .debug_line    0x00000000      0x149 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led.o)
+ .debug_str     0x00000000      0x1d3 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led.o)
+ .comment       0x00000000       0x31 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led.o)
+ .debug_frame   0x00000000       0x64 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led.o)
+ .text          0x00000000        0x0 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_pwm.o)
+ .data          0x00000000        0x0 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_pwm.o)
+ .bss           0x00000000        0x0 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_pwm.o)
+ .text.pwm_motor_off
+                0x00000000        0xa C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_pwm.o)
+ .text.pwm_motor_stop_urgently
+                0x00000000       0x12 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_pwm.o)
+ .text          0x00000000        0x0 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(timer.o)
+ .data          0x00000000        0x0 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(timer.o)
+ .bss           0x00000000        0x0 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(timer.o)
+ .text          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_mulsi3.o)
+ .data          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_mulsi3.o)
+ .bss           0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_mulsi3.o)
+ .text.libgcc.div
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_mulsi3.o)
+ .text.libgcc   0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_mulsi3.o)
+ .text.libgcc.prologue
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_mulsi3.o)
+ .text.libgcc.builtins
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_mulsi3.o)
+ .text.libgcc.fmul
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_mulsi3.o)
+ .text.libgcc.fixed
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_mulsi3.o)
+ .text          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_udivmodhi4.o)
+ .data          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_udivmodhi4.o)
+ .bss           0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_udivmodhi4.o)
+ .text.libgcc.mul
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_udivmodhi4.o)
+ .text.libgcc   0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_udivmodhi4.o)
+ .text.libgcc.prologue
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_udivmodhi4.o)
+ .text.libgcc.builtins
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_udivmodhi4.o)
+ .text.libgcc.fmul
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_udivmodhi4.o)
+ .text.libgcc.fixed
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_udivmodhi4.o)
+ .text          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_udivmodsi4.o)
+ .data          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_udivmodsi4.o)
+ .bss           0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_udivmodsi4.o)
+ .text.libgcc.mul
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_udivmodsi4.o)
+ .text.libgcc   0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_udivmodsi4.o)
+ .text.libgcc.prologue
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_udivmodsi4.o)
+ .text.libgcc.builtins
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_udivmodsi4.o)
+ .text.libgcc.fmul
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_udivmodsi4.o)
+ .text.libgcc.fixed
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_udivmodsi4.o)
+ .text          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_exit.o)
+ .data          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_exit.o)
+ .bss           0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_exit.o)
+ .text.libgcc.mul
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_exit.o)
+ .text.libgcc.div
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_exit.o)
+ .text.libgcc   0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_exit.o)
+ .text.libgcc.prologue
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_exit.o)
+ .text.libgcc.builtins
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_exit.o)
+ .text.libgcc.fmul
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_exit.o)
+ .text.libgcc.fixed
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_exit.o)
+ .text          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_tablejump2.o)
+ .data          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_tablejump2.o)
+ .bss           0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_tablejump2.o)
+ .text.libgcc.mul
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_tablejump2.o)
+ .text.libgcc.div
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_tablejump2.o)
+ .text.libgcc.prologue
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_tablejump2.o)
+ .text.libgcc.builtins
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_tablejump2.o)
+ .text.libgcc.fmul
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_tablejump2.o)
+ .text.libgcc.fixed
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_tablejump2.o)
+ .text          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_copy_data.o)
+ .data          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_copy_data.o)
+ .bss           0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_copy_data.o)
+ .text.libgcc.mul
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_copy_data.o)
+ .text.libgcc.div
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_copy_data.o)
+ .text.libgcc   0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_copy_data.o)
+ .text.libgcc.prologue
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_copy_data.o)
+ .text.libgcc.builtins
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_copy_data.o)
+ .text.libgcc.fmul
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_copy_data.o)
+ .text.libgcc.fixed
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_copy_data.o)
+ .text          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_clear_bss.o)
+ .data          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_clear_bss.o)
+ .bss           0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_clear_bss.o)
+ .text.libgcc.mul
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_clear_bss.o)
+ .text.libgcc.div
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_clear_bss.o)
+ .text.libgcc   0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_clear_bss.o)
+ .text.libgcc.prologue
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_clear_bss.o)
+ .text.libgcc.builtins
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_clear_bss.o)
+ .text.libgcc.fmul
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_clear_bss.o)
+ .text.libgcc.fixed
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_clear_bss.o)
+ .text          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_umulhisi3.o)
+ .data          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_umulhisi3.o)
+ .bss           0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_umulhisi3.o)
+ .text.libgcc.div
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_umulhisi3.o)
+ .text.libgcc   0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_umulhisi3.o)
+ .text.libgcc.prologue
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_umulhisi3.o)
+ .text.libgcc.builtins
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_umulhisi3.o)
+ .text.libgcc.fmul
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_umulhisi3.o)
+ .text.libgcc.fixed
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_umulhisi3.o)
+ .text          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_muluhisi3.o)
+ .data          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_muluhisi3.o)
+ .bss           0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_muluhisi3.o)
+ .text.libgcc.div
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_muluhisi3.o)
+ .text.libgcc   0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_muluhisi3.o)
+ .text.libgcc.prologue
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_muluhisi3.o)
+ .text.libgcc.builtins
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_muluhisi3.o)
+ .text.libgcc.fmul
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_muluhisi3.o)
+ .text.libgcc.fixed
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_muluhisi3.o)
+ .text          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_adddi3.o)
+ .data          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_adddi3.o)
+ .bss           0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_adddi3.o)
+ .text.libgcc.mul
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_adddi3.o)
+ .text.libgcc.div
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_adddi3.o)
+ .text.libgcc.prologue
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_adddi3.o)
+ .text.libgcc.builtins
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_adddi3.o)
+ .text.libgcc.fmul
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_adddi3.o)
+ .text.libgcc.fixed
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_adddi3.o)
+ .text          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_adddi3_s8.o)
+ .data          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_adddi3_s8.o)
+ .bss           0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_adddi3_s8.o)
+ .text.libgcc.mul
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_adddi3_s8.o)
+ .text.libgcc.div
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_adddi3_s8.o)
+ .text.libgcc.prologue
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_adddi3_s8.o)
+ .text.libgcc.builtins
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_adddi3_s8.o)
+ .text.libgcc.fmul
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_adddi3_s8.o)
+ .text.libgcc.fixed
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_adddi3_s8.o)
+ .text          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_cmpdi2.o)
+ .data          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_cmpdi2.o)
+ .bss           0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_cmpdi2.o)
+ .text.libgcc.mul
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_cmpdi2.o)
+ .text.libgcc.div
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_cmpdi2.o)
+ .text.libgcc.prologue
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_cmpdi2.o)
+ .text.libgcc.builtins
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_cmpdi2.o)
+ .text.libgcc.fmul
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_cmpdi2.o)
+ .text.libgcc.fixed
+                0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_cmpdi2.o)
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+text             0x00000000         0x00020000         xr
+data             0x00800060         0x0000ffa0         rw !x
+eeprom           0x00810000         0x00010000         rw !x
+fuse             0x00820000         0x00000003         rw !x
+lock             0x00830000         0x00000400         rw !x
+signature        0x00840000         0x00000400         rw !x
+user_signatures  0x00850000         0x00000400         rw !x
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+Address of section .data set to 0x800100
+LOAD C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.3.300/gcc/dev/atmega328p/avr5/crtatmega328p.o
+LOAD car/accelerator_pedal.o
+LOAD car/ev_engine.o
+LOAD car/indicator.o
+LOAD car/info_meter.o
+LOAD car/parking_break.o
+LOAD car/power_switch.o
+LOAD car/shift_position.o
+LOAD car/speed_meter.o
+LOAD drivers/input_adc_config.o
+LOAD hybridsystem.o
+START GROUP
+LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr5\libm.a
+LOAD C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a
+END GROUP
+START GROUP
+LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a
+LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr5\libm.a
+LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr5\libc.a
+LOAD C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.3.300/gcc/dev/atmega328p/avr5\libatmega328p.a
+END GROUP
+                0x00000000                __TEXT_REGION_ORIGIN__ = DEFINED (__TEXT_REGION_ORIGIN__)?__TEXT_REGION_ORIGIN__:0x0
+                0x00800060                __DATA_REGION_ORIGIN__ = DEFINED (__DATA_REGION_ORIGIN__)?__DATA_REGION_ORIGIN__:0x800060
+                0x00020000                __TEXT_REGION_LENGTH__ = DEFINED (__TEXT_REGION_LENGTH__)?__TEXT_REGION_LENGTH__:0x20000
+                0x0000ffa0                __DATA_REGION_LENGTH__ = DEFINED (__DATA_REGION_LENGTH__)?__DATA_REGION_LENGTH__:0xffa0
+                0x00010000                __EEPROM_REGION_LENGTH__ = DEFINED (__EEPROM_REGION_LENGTH__)?__EEPROM_REGION_LENGTH__:0x10000
+                [0x00000003]                __FUSE_REGION_LENGTH__ = DEFINED (__FUSE_REGION_LENGTH__)?__FUSE_REGION_LENGTH__:0x400
+                0x00000400                __LOCK_REGION_LENGTH__ = DEFINED (__LOCK_REGION_LENGTH__)?__LOCK_REGION_LENGTH__:0x400
+                0x00000400                __SIGNATURE_REGION_LENGTH__ = DEFINED (__SIGNATURE_REGION_LENGTH__)?__SIGNATURE_REGION_LENGTH__:0x400
+                0x00000400                __USER_SIGNATURE_REGION_LENGTH__ = DEFINED (__USER_SIGNATURE_REGION_LENGTH__)?__USER_SIGNATURE_REGION_LENGTH__:0x400
+
+.hash
+ *(.hash)
+
+.dynsym
+ *(.dynsym)
+
+.dynstr
+ *(.dynstr)
+
+.gnu.version
+ *(.gnu.version)
+
+.gnu.version_d
+ *(.gnu.version_d)
+
+.gnu.version_r
+ *(.gnu.version_r)
+
+.rel.init
+ *(.rel.init)
+
+.rela.init
+ *(.rela.init)
+
+.rel.text
+ *(.rel.text)
+ *(.rel.text.*)
+ *(.rel.gnu.linkonce.t*)
+
+.rela.text
+ *(.rela.text)
+ *(.rela.text.*)
+ *(.rela.gnu.linkonce.t*)
+
+.rel.fini
+ *(.rel.fini)
+
+.rela.fini
+ *(.rela.fini)
+
+.rel.rodata
+ *(.rel.rodata)
+ *(.rel.rodata.*)
+ *(.rel.gnu.linkonce.r*)
+
+.rela.rodata
+ *(.rela.rodata)
+ *(.rela.rodata.*)
+ *(.rela.gnu.linkonce.r*)
+
+.rel.data
+ *(.rel.data)
+ *(.rel.data.*)
+ *(.rel.gnu.linkonce.d*)
+
+.rela.data
+ *(.rela.data)
+ *(.rela.data.*)
+ *(.rela.gnu.linkonce.d*)
+
+.rel.ctors
+ *(.rel.ctors)
+
+.rela.ctors
+ *(.rela.ctors)
+
+.rel.dtors
+ *(.rel.dtors)
+
+.rela.dtors
+ *(.rela.dtors)
+
+.rel.got
+ *(.rel.got)
+
+.rela.got
+ *(.rela.got)
+
+.rel.bss
+ *(.rel.bss)
+
+.rela.bss
+ *(.rela.bss)
+
+.rel.plt
+ *(.rel.plt)
+
+.rela.plt
+ *(.rela.plt)
+
+.text           0x00000000     0x137c
+ *(.vectors)
+ .vectors       0x00000000       0x68 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.3.300/gcc/dev/atmega328p/avr5/crtatmega328p.o
+                0x00000000                __vector_default
+                0x00000000                __vectors
+ *(.vectors)
+ *(.progmem.gcc*)
+ .progmem.gcc_sw_table.lcd_init_seq
+                0x00000068       0x10 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+                0x00000078                . = ALIGN (0x2)
+                0x00000078                __trampolines_start = .
+ *(.trampolines)
+ .trampolines   0x00000078        0x0 linker stubs
+ *(.trampolines*)
+                0x00000078                __trampolines_end = .
+ *libprintf_flt.a:*(.progmem.data)
+ *libc.a:*(.progmem.data)
+ *(.progmem*)
+                0x00000078                . = ALIGN (0x2)
+ *(.jumptables)
+ *(.jumptables*)
+ *(.lowtext)
+ *(.lowtext*)
+                0x00000078                __ctors_start = .
+ *(.ctors)
+                0x00000078                __ctors_end = .
+                0x00000078                __dtors_start = .
+ *(.dtors)
+                0x00000078                __dtors_end = .
+ SORT(*)(.ctors)
+ SORT(*)(.dtors)
+ *(.init0)
+ .init0         0x00000078        0x0 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.3.300/gcc/dev/atmega328p/avr5/crtatmega328p.o
+                0x00000078                __init
+ *(.init0)
+ *(.init1)
+ *(.init1)
+ *(.init2)
+ .init2         0x00000078        0xc C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.3.300/gcc/dev/atmega328p/avr5/crtatmega328p.o
+ *(.init2)
+ *(.init3)
+ *(.init3)
+ *(.init4)
+ .init4         0x00000084       0x16 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_copy_data.o)
+                0x00000084                __do_copy_data
+ .init4         0x0000009a       0x10 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_clear_bss.o)
+                0x0000009a                __do_clear_bss
+ *(.init4)
+ *(.init5)
+ *(.init5)
+ *(.init6)
+ *(.init6)
+ *(.init7)
+ *(.init7)
+ *(.init8)
+ *(.init8)
+ *(.init9)
+ .init9         0x000000aa        0x8 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.3.300/gcc/dev/atmega328p/avr5/crtatmega328p.o
+ *(.init9)
+ *(.text)
+ .text          0x000000b2        0x4 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.3.300/gcc/dev/atmega328p/avr5/crtatmega328p.o
+                0x000000b2                __vector_22
+                0x000000b2                __vector_1
+                0x000000b2                __vector_24
+                0x000000b2                __vector_12
+                0x000000b2                __bad_interrupt
+                0x000000b2                __vector_6
+                0x000000b2                __vector_3
+                0x000000b2                __vector_23
+                0x000000b2                __vector_25
+                0x000000b2                __vector_11
+                0x000000b2                __vector_13
+                0x000000b2                __vector_17
+                0x000000b2                __vector_19
+                0x000000b2                __vector_7
+                0x000000b2                __vector_5
+                0x000000b2                __vector_4
+                0x000000b2                __vector_9
+                0x000000b2                __vector_2
+                0x000000b2                __vector_21
+                0x000000b2                __vector_15
+                0x000000b2                __vector_8
+                0x000000b2                __vector_14
+                0x000000b2                __vector_10
+                0x000000b2                __vector_16
+                0x000000b2                __vector_18
+                0x000000b2                __vector_20
+                0x000000b6                . = ALIGN (0x2)
+ *(.text.*)
+ .text.accelpedal_init
+                0x000000b6        0x6 car/accelerator_pedal.o
+                0x000000b6                accelpedal_init
+ .text.accelpedal_input
+                0x000000bc       0x24 car/accelerator_pedal.o
+                0x000000bc                accelpedal_input
+ .text.accelpedal_get
+                0x000000e0        0x6 car/accelerator_pedal.o
+                0x000000e0                accelpedal_get
+ .text.engine_init
+                0x000000e6       0x18 car/ev_engine.o
+                0x000000e6                engine_init
+ .text.engine_output
+                0x000000fe       0x12 car/ev_engine.o
+                0x000000fe                engine_output
+ .text.engine_set
+                0x00000110        0x6 car/ev_engine.o
+                0x00000110                engine_set
+ .text.str_copy
+                0x00000116       0x18 car/info_meter.o
+ .text.display  0x0000012e       0x48 car/info_meter.o
+ .text.info_meter_init
+                0x00000176       0x2e car/info_meter.o
+                0x00000176                info_meter_init
+ .text.info_meter_output
+                0x000001a4        0x6 car/info_meter.o
+                0x000001a4                info_meter_output
+ .text.info_meter_on
+                0x000001aa        0x8 car/info_meter.o
+                0x000001aa                info_meter_on
+ .text.info_meter_off
+                0x000001b2        0x6 car/info_meter.o
+                0x000001b2                info_meter_off
+ .text.ready_display_set
+                0x000001b8        0xa car/info_meter.o
+                0x000001b8                ready_display_set
+ .text.mode_display_set
+                0x000001c2        0xa car/info_meter.o
+                0x000001c2                mode_display_set
+ .text.shift_display_set
+                0x000001cc        0xa car/info_meter.o
+                0x000001cc                shift_display_set
+ .text.pbreak_init
+                0x000001d6        0x2 car/parking_break.o
+                0x000001d6                pbreak_init
+ .text.pbreak_get
+                0x000001d8        0xc car/parking_break.o
+                0x000001d8                pbreak_get
+ .text.pswitch_init
+                0x000001e4       0x1c car/power_switch.o
+                0x000001e4                pswitch_init
+ .text.pswitch_input
+                0x00000200       0x3c car/power_switch.o
+                0x00000200                pswitch_input
+ .text.pswitch_get
+                0x0000023c        0xa car/power_switch.o
+                0x0000023c                pswitch_get
+ .text.pswitch_check_event
+                0x00000246        0xa car/power_switch.o
+                0x00000246                pswitch_check_event
+ .text.pswitch_clear_event
+                0x00000250        0xa car/power_switch.o
+                0x00000250                pswitch_clear_event
+ .text.shiftpos_init
+                0x0000025a        0x2 car/shift_position.o
+                0x0000025a                shiftpos_init
+ .text.shiftpos_get
+                0x0000025c        0xe car/shift_position.o
+                0x0000025c                shiftpos_get
+ .text.display  0x0000026a       0x5e car/speed_meter.o
+ .text.speed_meter_init
+                0x000002c8       0x12 car/speed_meter.o
+                0x000002c8                speed_meter_init
+ .text.speed_meter_output
+                0x000002da        0x6 car/speed_meter.o
+                0x000002da                speed_meter_output
+ .text.speed_meter_on
+                0x000002e0        0x8 car/speed_meter.o
+                0x000002e0                speed_meter_on
+ .text.speed_meter_off
+                0x000002e8        0x6 car/speed_meter.o
+                0x000002e8                speed_meter_off
+ .text.speed_meter_set
+                0x000002ee        0xc car/speed_meter.o
+                0x000002ee                speed_meter_set
+ .text.calc_output
+                0x000002fa       0x32 hybridsystem.o
+ .text.hybridsystem_init
+                0x0000032c       0x38 hybridsystem.o
+                0x0000032c                hybridsystem_init
+ .text.initialize
+                0x00000364       0x3e hybridsystem.o
+                0x00000364                initialize
+ .text.hybridsystem_task
+                0x000003a2      0x302 hybridsystem.o
+                0x000003a2                hybridsystem_task
+ .text.main_task
+                0x000006a4       0x32 hybridsystem.o
+                0x000006a4                main_task
+ .text.main     0x000006d6        0xe hybridsystem.o
+                0x000006d6                main
+ .text.adc_decode_adkey
+                0x000006e4       0xbe C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+ .text.adc_decode_vr
+                0x000007a2       0x34 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+ .text.adc_init
+                0x000007d6       0x52 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+                0x000007d6                adc_init
+ .text.adc_start
+                0x00000828       0x20 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+                0x00000828                adc_start
+ .text.adc_convert
+                0x00000848       0x66 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+                0x00000848                adc_convert
+ .text.adc_get_vr_nrm
+                0x000008ae       0x44 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+                0x000008ae                adc_get_vr_nrm
+ .text.toggle_init
+                0x000008f2       0x24 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_toggle.o)
+                0x000008f2                toggle_init
+ .text.toggle_scan
+                0x00000916       0x5e C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_toggle.o)
+                0x00000916                toggle_scan
+ .text.toggle_get_state
+                0x00000974        0x6 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_toggle.o)
+                0x00000974                toggle_get_state
+ .text.lcd_wait_us
+                0x0000097a       0x22 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .text.lcd_out_lcd4bit
+                0x0000099c       0x2a C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .text.lcd_out_init_command
+                0x000009c6       0x12 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .text.lcd_out_data8bit
+                0x000009d8       0x22 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .text.lcd_out_command8bit
+                0x000009fa       0x22 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .text.lcd_init
+                0x00000a1c       0x6c C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+                0x00000a1c                lcd_init
+ .text.lcd_init_seq
+                0x00000a88       0xe2 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+                0x00000a88                lcd_init_seq
+ .text.lcd_display
+                0x00000b6a      0x132 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+                0x00000b6a                lcd_display
+ .text.lcd_on   0x00000c9c        0xe C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+                0x00000c9c                lcd_on
+ .text.lcd_off  0x00000caa        0xa C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+                0x00000caa                lcd_off
+ .text.lcd_put_char
+                0x00000cb4       0x48 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+                0x00000cb4                lcd_put_char
+ .text.lcd_put_string
+                0x00000cfc       0x1e C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+                0x00000cfc                lcd_put_string
+ .text.lcd_clear_all
+                0x00000d1a       0x22 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+                0x00000d1a                lcd_clear_all
+ .text.lcd_set_cursor
+                0x00000d3c       0x16 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+                0x00000d3c                lcd_set_cursor
+ .text.led7seg_init
+                0x00000d52       0x58 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led7seg.o)
+                0x00000d52                led7seg_init
+ .text.led7seg_display
+                0x00000daa       0xa2 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led7seg.o)
+                0x00000daa                led7seg_display
+ .text.led7seg_set_number
+                0x00000e4c       0x32 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led7seg.o)
+                0x00000e4c                led7seg_set_number
+ .text.led7seg_set_value
+                0x00000e7e      0x10a C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led7seg.o)
+                0x00000e7e                led7seg_set_value
+ .text.pwm_init
+                0x00000f88       0x56 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_pwm.o)
+                0x00000f88                pwm_init
+ .text.pwm_output
+                0x00000fde       0xa0 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_pwm.o)
+                0x00000fde                pwm_output
+ .text.pwm_motor_on
+                0x0000107e        0xe C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_pwm.o)
+                0x0000107e                pwm_motor_on
+ .text.pwm_set_duty
+                0x0000108c       0xa4 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_pwm.o)
+                0x0000108c                pwm_set_duty
+ .text.timer_init
+                0x00001130       0x32 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(timer.o)
+                0x00001130                timer_init
+ .text.timer_tick
+                0x00001162       0x48 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(timer.o)
+                0x00001162                timer_tick
+ .text.timer_set
+                0x000011aa       0x58 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(timer.o)
+                0x000011aa                timer_set
+ .text.timer_is_finished
+                0x00001202       0x64 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(timer.o)
+                0x00001202                timer_is_finished
+ .text.timer_wait_1ms
+                0x00001266        0xa C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(timer.o)
+                0x00001266                timer_wait_1ms
+ .text.libgcc.mul
+                0x00001270       0x20 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_mulsi3.o)
+                0x00001270                __mulsi3
+ .text.libgcc.div
+                0x00001290       0x28 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_udivmodhi4.o)
+                0x00001290                __udivmodhi4
+ .text.libgcc.div
+                0x000012b8       0x44 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_udivmodsi4.o)
+                0x000012b8                __udivmodsi4
+ .text.libgcc   0x000012fc        0xc c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_tablejump2.o)
+                0x000012fc                __tablejump2__
+ .text.libgcc.mul
+                0x00001308       0x1e c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_umulhisi3.o)
+                0x00001308                __umulhisi3
+ .text.libgcc.mul
+                0x00001326       0x16 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_muluhisi3.o)
+                0x00001326                __muluhisi3
+ .text.libgcc   0x0000133c       0x12 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_adddi3.o)
+                0x0000133c                __adddi3
+ .text.libgcc   0x0000134e       0x18 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_adddi3_s8.o)
+                0x0000134e                __adddi3_s8
+ .text.libgcc   0x00001366       0x12 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_cmpdi2.o)
+                0x00001366                __cmpdi2
+                0x00001378                . = ALIGN (0x2)
+ *(.fini9)
+ .fini9         0x00001378        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_exit.o)
+                0x00001378                _exit
+                0x00001378                exit
+ *(.fini9)
+ *(.fini8)
+ *(.fini8)
+ *(.fini7)
+ *(.fini7)
+ *(.fini6)
+ *(.fini6)
+ *(.fini5)
+ *(.fini5)
+ *(.fini4)
+ *(.fini4)
+ *(.fini3)
+ *(.fini3)
+ *(.fini2)
+ *(.fini2)
+ *(.fini1)
+ *(.fini1)
+ *(.fini0)
+ .fini0         0x00001378        0x4 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_exit.o)
+ *(.fini0)
+                0x0000137c                _etext = .
+
+.data           0x00800100       0x2a load address 0x0000137c
+                0x00800100                PROVIDE (__data_start, .)
+ *(.data)
+ *(.data*)
+ *(.gnu.linkonce.d*)
+ *(.rodata)
+ *(.rodata*)
+ .rodata.str1.1
+                0x00800100        0x0 car/info_meter.o
+                                  0x1 (size before relaxing)
+ .rodata.adc_vr_val_min
+                0x00800100        0x1 drivers/input_adc_config.o
+                0x00800100                adc_vr_val_min
+ .rodata.adc_vr_val_max
+                0x00800101        0x1 drivers/input_adc_config.o
+                0x00800101                adc_vr_val_max
+ .rodata.str1.1
+                0x00800102       0x1b hybridsystem.o
+                                 0x1c (size before relaxing)
+ .rodata.adc_phych
+                0x0080011d        0x2 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+ .rodata.adc_decode_func
+                0x0080011f        0x4 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+ .rodata.lcd_row_offset_address
+                0x00800123        0x2 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .rodata.led7seg_digreg1_tbl
+                0x00800125        0x5 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led7seg.o)
+ *(.gnu.linkonce.r*)
+                0x0080012a                . = ALIGN (0x2)
+                0x0080012a                _edata = .
+                0x0080012a                PROVIDE (__data_end, .)
+
+.bss            0x0080012a       0xa8
+                0x0080012a                PROVIDE (__bss_start, .)
+ *(.bss)
+ *(.bss*)
+ .bss.position  0x0080012a        0x1 car/accelerator_pedal.o
+ .bss.ouput_ratio
+                0x0080012b        0x1 car/ev_engine.o
+ .bss.shift_str
+                0x0080012c        0x2 car/info_meter.o
+ .bss.mode_str  0x0080012e        0x6 car/info_meter.o
+ .bss.ready_str
+                0x00800134        0x6 car/info_meter.o
+ .bss.display_state
+                0x0080013a        0x1 car/info_meter.o
+ .bss.sw_event  0x0080013b        0x2 car/power_switch.o
+ .bss.sw_status
+                0x0080013d        0x2 car/power_switch.o
+ .bss.display_speed
+                0x0080013f        0x2 car/speed_meter.o
+ .bss.state     0x00800141        0x1 car/speed_meter.o
+ .bss.auto_off_timer
+                0x00800142        0x8 hybridsystem.o
+ .bss.state     0x0080014a        0x2 hybridsystem.o
+ .bss.adc_vr_value
+                0x0080014c        0x1 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+ .bss.adc_adkey_continue_time
+                0x0080014d        0x2 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+ .bss.adc_adkey_pending_count
+                0x0080014f        0x1 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+ .bss.adc_adkey_pending
+                0x00800150        0x1 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+ .bss.adc_event_adkey
+                0x00800151        0x2 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+ .bss.adc_adkey_confirm
+                0x00800153        0x1 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+ .bss.adc_bank  0x00800154        0x1 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+ .bss.adc_channel
+                0x00800155        0x1 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+ .bss.adc_buffer
+                0x00800156        0x8 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+ .bss.toggle_first_boot
+                0x0080015e        0x1 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_toggle.o)
+ .bss.toggle_pending_count
+                0x0080015f        0x1 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_toggle.o)
+ .bss.toggle_state_pending
+                0x00800160        0x1 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_toggle.o)
+ .bss.toggle_state
+                0x00800161        0x1 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_toggle.o)
+ .bss.toggle_event
+                0x00800162        0x1 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_toggle.o)
+ .bss.lcd_buf   0x00800163       0x20 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .bss.lcd_buf_pending
+                0x00800183       0x20 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .bss.lcd_disp_updating
+                0x008001a3        0x1 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .bss.lcd_output_cursor
+                0x008001a4        0x1 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .bss.lcd_input_cursor
+                0x008001a5        0x1 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .bss.lcd_init_cmd_wait_cnt
+                0x008001a6        0x1 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .bss.lcd_init_seq_cnt
+                0x008001a7        0x1 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .bss.lcd_state_pending
+                0x008001a8        0x2 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .bss.lcd_state
+                0x008001aa        0x2 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .bss.blink_info_7seg
+                0x008001ac        0x8 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led7seg.o)
+ .bss.led7seg_target_dig
+                0x008001b4        0x1 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led7seg.o)
+ .bss.led7seg_data_buf
+                0x008001b5        0xc C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led7seg.o)
+ .bss.changed_duty
+                0x008001c1        0x1 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_pwm.o)
+ .bss.pwm_period
+                0x008001c2        0x2 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_pwm.o)
+ .bss.pwm_duty  0x008001c4        0x2 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_pwm.o)
+ .bss.pwm_state_set
+                0x008001c6        0x2 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_pwm.o)
+ .bss.pwm_state
+                0x008001c8        0x2 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_pwm.o)
+ .bss.timer_counter
+                0x008001ca        0x8 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(timer.o)
+ *(COMMON)
+                0x008001d2                PROVIDE (__bss_end, .)
+                0x0000137c                __data_load_start = LOADADDR (.data)
+                0x000013a6                __data_load_end = (__data_load_start + SIZEOF (.data))
+
+.noinit         0x008001d2        0x0
+                [!provide]                PROVIDE (__noinit_start, .)
+ *(.noinit*)
+                [!provide]                PROVIDE (__noinit_end, .)
+                0x008001d2                _end = .
+                [!provide]                PROVIDE (__heap_start, .)
+
+.eeprom         0x00810000        0x0
+ *(.eeprom*)
+                0x00810000                __eeprom_end = .
+
+.fuse
+ *(.fuse)
+ *(.lfuse)
+ *(.hfuse)
+ *(.efuse)
+
+.lock
+ *(.lock*)
+
+.signature
+ *(.signature*)
+
+.user_signatures
+ *(.user_signatures*)
+
+.stab
+ *(.stab)
+
+.stabstr
+ *(.stabstr)
+
+.stab.excl
+ *(.stab.excl)
+
+.stab.exclstr
+ *(.stab.exclstr)
+
+.stab.index
+ *(.stab.index)
+
+.stab.indexstr
+ *(.stab.indexstr)
+
+.comment        0x00000000       0x30
+ *(.comment)
+ .comment       0x00000000       0x30 car/accelerator_pedal.o
+                                 0x31 (size before relaxing)
+ .comment       0x00000030       0x31 car/ev_engine.o
+ .comment       0x00000030       0x31 car/info_meter.o
+ .comment       0x00000030       0x31 car/parking_break.o
+ .comment       0x00000030       0x31 car/power_switch.o
+ .comment       0x00000030       0x31 car/shift_position.o
+ .comment       0x00000030       0x31 car/speed_meter.o
+ .comment       0x00000030       0x31 drivers/input_adc_config.o
+ .comment       0x00000030       0x31 hybridsystem.o
+ .comment       0x00000030       0x31 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+ .comment       0x00000030       0x31 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_toggle.o)
+ .comment       0x00000030       0x31 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .comment       0x00000030       0x31 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led7seg.o)
+ .comment       0x00000030       0x31 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_pwm.o)
+ .comment       0x00000030       0x31 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(timer.o)
+
+.note.gnu.avr.deviceinfo
+                0x00000000       0x40
+ .note.gnu.avr.deviceinfo
+                0x00000000       0x40 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.3.300/gcc/dev/atmega328p/avr5/crtatmega328p.o
+
+.note.gnu.build-id
+ *(.note.gnu.build-id)
+
+.debug
+ *(.debug)
+
+.line
+ *(.line)
+
+.debug_srcinfo
+ *(.debug_srcinfo)
+
+.debug_sfnames
+ *(.debug_sfnames)
+
+.debug_aranges  0x00000000      0x450
+ *(.debug_aranges)
+ .debug_aranges
+                0x00000000       0x30 car/accelerator_pedal.o
+ .debug_aranges
+                0x00000030       0x30 car/ev_engine.o
+ .debug_aranges
+                0x00000060       0x60 car/info_meter.o
+ .debug_aranges
+                0x000000c0       0x28 car/parking_break.o
+ .debug_aranges
+                0x000000e8       0x40 car/power_switch.o
+ .debug_aranges
+                0x00000128       0x28 car/shift_position.o
+ .debug_aranges
+                0x00000150       0x48 car/speed_meter.o
+ .debug_aranges
+                0x00000198       0x18 drivers/input_adc_config.o
+ .debug_aranges
+                0x000001b0       0x48 hybridsystem.o
+ .debug_aranges
+                0x000001f8       0x70 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+ .debug_aranges
+                0x00000268       0x40 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_toggle.o)
+ .debug_aranges
+                0x000002a8       0xc8 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .debug_aranges
+                0x00000370       0x58 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led7seg.o)
+ .debug_aranges
+                0x000003c8       0x48 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_pwm.o)
+ .debug_aranges
+                0x00000410       0x40 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(timer.o)
+
+.debug_pubnames
+ *(.debug_pubnames)
+
+.debug_info     0x00000000     0x368f
+ *(.debug_info .gnu.linkonce.wi.*)
+ .debug_info    0x00000000      0x5f4 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.3.300/gcc/dev/atmega328p/avr5/crtatmega328p.o
+ .debug_info    0x000005f4       0xb8 car/accelerator_pedal.o
+ .debug_info    0x000006ac      0x108 car/ev_engine.o
+ .debug_info    0x000007b4      0x3fa car/info_meter.o
+ .debug_info    0x00000bae       0xc5 car/parking_break.o
+ .debug_info    0x00000c73      0x1c0 car/power_switch.o
+ .debug_info    0x00000e33       0xc5 car/shift_position.o
+ .debug_info    0x00000ef8      0x25b car/speed_meter.o
+ .debug_info    0x00001153       0x55 drivers/input_adc_config.o
+ .debug_info    0x000011a8      0x96f hybridsystem.o
+ .debug_info    0x00001b17      0x546 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+ .debug_info    0x0000205d      0x17e C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_toggle.o)
+ .debug_info    0x000021db      0xb64 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .debug_info    0x00002d3f      0x5d1 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led7seg.o)
+ .debug_info    0x00003310      0x218 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_pwm.o)
+ .debug_info    0x00003528      0x167 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(timer.o)
+
+.debug_abbrev   0x00000000     0x169a
+ *(.debug_abbrev)
+ .debug_abbrev  0x00000000      0x5a2 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.3.300/gcc/dev/atmega328p/avr5/crtatmega328p.o
+ .debug_abbrev  0x000005a2       0xa8 car/accelerator_pedal.o
+ .debug_abbrev  0x0000064a       0x9a car/ev_engine.o
+ .debug_abbrev  0x000006e4      0x104 car/info_meter.o
+ .debug_abbrev  0x000007e8       0xa6 car/parking_break.o
+ .debug_abbrev  0x0000088e      0x120 car/power_switch.o
+ .debug_abbrev  0x000009ae       0xa6 car/shift_position.o
+ .debug_abbrev  0x00000a54       0xe2 car/speed_meter.o
+ .debug_abbrev  0x00000b36       0x33 drivers/input_adc_config.o
+ .debug_abbrev  0x00000b69      0x19a hybridsystem.o
+ .debug_abbrev  0x00000d03      0x25e C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+ .debug_abbrev  0x00000f61       0xd0 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_toggle.o)
+ .debug_abbrev  0x00001031      0x27c C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .debug_abbrev  0x000012ad      0x216 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led7seg.o)
+ .debug_abbrev  0x000014c3      0x104 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_pwm.o)
+ .debug_abbrev  0x000015c7       0xd3 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(timer.o)
+
+.debug_line     0x00000000     0x1d83
+ *(.debug_line .debug_line.* .debug_line_end)
+ .debug_line    0x00000000      0x133 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.3.300/gcc/dev/atmega328p/avr5/crtatmega328p.o
+ .debug_line    0x00000133       0x9a car/accelerator_pedal.o
+ .debug_line    0x000001cd       0x99 car/ev_engine.o
+ .debug_line    0x00000266      0x179 car/info_meter.o
+ .debug_line    0x000003df       0x90 car/parking_break.o
+ .debug_line    0x0000046f       0xfb car/power_switch.o
+ .debug_line    0x0000056a       0x98 car/shift_position.o
+ .debug_line    0x00000602      0x107 car/speed_meter.o
+ .debug_line    0x00000709       0x3b drivers/input_adc_config.o
+ .debug_line    0x00000744      0x44d hybridsystem.o
+ .debug_line    0x00000b91      0x330 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+ .debug_line    0x00000ec1      0x1b6 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_toggle.o)
+ .debug_line    0x00001077      0x700 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .debug_line    0x00001777      0x2f1 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led7seg.o)
+ .debug_line    0x00001a68      0x1c0 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_pwm.o)
+ .debug_line    0x00001c28      0x15b C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(timer.o)
+
+.debug_frame    0x00000000      0x84c
+ *(.debug_frame)
+ .debug_frame   0x00000000       0x44 car/accelerator_pedal.o
+ .debug_frame   0x00000044       0x44 car/ev_engine.o
+ .debug_frame   0x00000088       0xa4 car/info_meter.o
+ .debug_frame   0x0000012c       0x34 car/parking_break.o
+ .debug_frame   0x00000160       0x70 car/power_switch.o
+ .debug_frame   0x000001d0       0x34 car/shift_position.o
+ .debug_frame   0x00000204       0x74 car/speed_meter.o
+ .debug_frame   0x00000278       0xb8 hybridsystem.o
+ .debug_frame   0x00000330       0xc4 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+ .debug_frame   0x000003f4       0x64 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_toggle.o)
+ .debug_frame   0x00000458      0x204 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .debug_frame   0x0000065c       0xa8 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led7seg.o)
+ .debug_frame   0x00000704       0x94 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_pwm.o)
+ .debug_frame   0x00000798       0xb4 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(timer.o)
+
+.debug_str      0x00000000     0x12c8
+ *(.debug_str)
+ .debug_str     0x00000000      0x208 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.3.300/gcc/dev/atmega328p/avr5/crtatmega328p.o
+ .debug_str     0x00000208      0x133 car/accelerator_pedal.o
+                                0x149 (size before relaxing)
+ .debug_str     0x0000033b       0x5e car/ev_engine.o
+                                0x13d (size before relaxing)
+ .debug_str     0x00000399      0x10d car/info_meter.o
+                                0x200 (size before relaxing)
+ .debug_str     0x000004a6       0x6c car/parking_break.o
+                                0x158 (size before relaxing)
+ .debug_str     0x00000512       0xdb car/power_switch.o
+                                0x1e9 (size before relaxing)
+ .debug_str     0x000005ed       0x54 car/shift_position.o
+                                0x15a (size before relaxing)
+ .debug_str     0x00000641      0x114 car/speed_meter.o
+                                0x21b (size before relaxing)
+ .debug_str     0x00000755       0x3c drivers/input_adc_config.o
+                                0x122 (size before relaxing)
+ .debug_str     0x00000791      0x20d hybridsystem.o
+                                0x54c (size before relaxing)
+ .debug_str     0x0000099e      0x25b C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+                                0x3d5 (size before relaxing)
+ .debug_str     0x00000bf9       0xc8 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_toggle.o)
+                                0x235 (size before relaxing)
+ .debug_str     0x00000cc1      0x303 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+                                0x4e5 (size before relaxing)
+ .debug_str     0x00000fc4      0x1df C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led7seg.o)
+                                0x426 (size before relaxing)
+ .debug_str     0x000011a3       0xeb C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_pwm.o)
+                                0x26f (size before relaxing)
+ .debug_str     0x0000128e       0x3a C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(timer.o)
+                                0x1f5 (size before relaxing)
+
+.debug_loc      0x00000000     0x1b0e
+ *(.debug_loc)
+ .debug_loc     0x00000000       0x13 car/accelerator_pedal.o
+ .debug_loc     0x00000013       0xc2 car/info_meter.o
+ .debug_loc     0x000000d5       0x31 car/parking_break.o
+ .debug_loc     0x00000106       0x42 car/power_switch.o
+ .debug_loc     0x00000148       0x57 car/shift_position.o
+ .debug_loc     0x0000019f      0x2d8 hybridsystem.o
+ .debug_loc     0x00000477      0x3e1 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+ .debug_loc     0x00000858       0x2b C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_toggle.o)
+ .debug_loc     0x00000883      0xd77 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .debug_loc     0x000015fa      0x2c7 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led7seg.o)
+ .debug_loc     0x000018c1       0xb7 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_pwm.o)
+ .debug_loc     0x00001978      0x196 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(timer.o)
+
+.debug_macinfo
+ *(.debug_macinfo)
+
+.debug_weaknames
+ *(.debug_weaknames)
+
+.debug_funcnames
+ *(.debug_funcnames)
+
+.debug_typenames
+ *(.debug_typenames)
+
+.debug_varnames
+ *(.debug_varnames)
+
+.debug_pubtypes
+ *(.debug_pubtypes)
+
+.debug_ranges   0x00000000      0x358
+ *(.debug_ranges)
+ .debug_ranges  0x00000000       0x20 car/accelerator_pedal.o
+ .debug_ranges  0x00000020       0x20 car/ev_engine.o
+ .debug_ranges  0x00000040       0x50 car/info_meter.o
+ .debug_ranges  0x00000090       0x18 car/parking_break.o
+ .debug_ranges  0x000000a8       0x30 car/power_switch.o
+ .debug_ranges  0x000000d8       0x18 car/shift_position.o
+ .debug_ranges  0x000000f0       0x38 car/speed_meter.o
+ .debug_ranges  0x00000128       0x38 hybridsystem.o
+ .debug_ranges  0x00000160       0x60 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_adc.o)
+ .debug_ranges  0x000001c0       0x30 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(input_toggle.o)
+ .debug_ranges  0x000001f0       0xb8 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_lcd.o)
+ .debug_ranges  0x000002a8       0x48 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_led7seg.o)
+ .debug_ranges  0x000002f0       0x38 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(output_pwm.o)
+ .debug_ranges  0x00000328       0x30 C:\work\newface\softstruct\ArduinoEduDriver\Debug\libArduinoEduDriver.a(timer.o)
+
+.debug_macro
+ *(.debug_macro)
+OUTPUT(HybridSystem.elf elf32-avr)
+LOAD linker stubs
