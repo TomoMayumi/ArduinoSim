@@ -11,7 +11,6 @@ export class Disassembler {
         let pc = 0;
 
         while (pc < program.length) {
-            const address = pc;
             const opcode = program[pc];
             let wordCount = 1;
             let instruction = "UNKNOWN";

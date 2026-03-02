@@ -5,6 +5,7 @@ import { Pin13Led } from './components/Pin13Led';
 import { SerialConsole } from './components/SerialConsole';
 import { HardwarePanel } from './components/HardwarePanel';
 import { DisassemblyPanel } from './components/DisassemblyPanel';
+import { SourceViewer } from './components/SourceViewer';
 import { CpuStatePanel } from './components/CpuStatePanel';
 import './index.css';
 
@@ -146,10 +147,12 @@ const ANALOG_A0_TO_7SEG_HEX = `
 
 function App() {
   const [hexInput, setHexInput] = useState(BLINK_HEX);
+  const [lssInput, setLssInput] = useState('');
   const [program, setProgram] = useState<Uint16Array | null>(null);
-  const { emulator, isRunning, breakpoints, start, stop, step, reset, toggleBreakpoint } = useEmulator(program);
+  const { emulator, isRunning, breakpoints, sourceMapper, start, stop, step, reset, toggleBreakpoint } = useEmulator(program, lssInput);
   const [noResetMode, setNoResetMode] = useState(true);
   const [debugInfo, setDebugInfo] = useState({ pc: 0, cycles: 0 });
+  const [viewMode, setViewMode] = useState<'disassembly' | 'source'>('source');
 
   useEffect(() => {
     try {
@@ -221,13 +224,31 @@ function App() {
           <CpuStatePanel emulator={emulator} isRunning={isRunning} />
         </div>
         <div className="card" style={{ display: 'flex', flexDirection: 'column', boxSizing: 'border-box', flex: 1, minHeight: 0 }}>
-          <DisassemblyPanel
-            program={program}
-            pc={isRunning ? -1 : debugInfo.pc}
-            isRunning={isRunning}
-            breakpoints={breakpoints}
-            onToggleBreakpoint={toggleBreakpoint}
-          />
+          <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.5rem' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
+              <input type="radio" value="source" checked={viewMode === 'source'} onChange={(e) => setViewMode(e.target.value as any)} /> Source
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
+              <input type="radio" value="disassembly" checked={viewMode === 'disassembly'} onChange={(e) => setViewMode(e.target.value as any)} /> Disassembly
+            </label>
+          </div>
+          {viewMode === 'source' ? (
+            <SourceViewer
+              sourceMapper={sourceMapper}
+              pc={isRunning ? -1 : debugInfo.pc}
+              isRunning={isRunning}
+              breakpoints={breakpoints}
+              onToggleBreakpoint={toggleBreakpoint}
+            />
+          ) : (
+            <DisassemblyPanel
+              program={program}
+              pc={isRunning ? -1 : debugInfo.pc}
+              isRunning={isRunning}
+              breakpoints={breakpoints}
+              onToggleBreakpoint={toggleBreakpoint}
+            />
+          )}
         </div>
       </aside>
 
@@ -256,44 +277,51 @@ function App() {
         </div>
 
         <div className="card hex-upload">
-          <h3>HEX プログラム</h3>
+          <h3>HEX & LSS プログラム</h3>
           <div className="buttons">
-            <button onClick={() => setHexInput(BLINK_HEX)}>
+            <button onClick={() => { setHexInput(BLINK_HEX); setLssInput(''); }}>
               Blink (Lチカ)
             </button>
-            <button onClick={() => setHexInput(SERIAL_ECHO_HEX)}>
+            <button onClick={() => { setHexInput(SERIAL_ECHO_HEX); setLssInput(''); }}>
               Serial Echo (エコーバック)
             </button>
-            <button onClick={() => setHexInput(BLINK2_HEX)}>
+            <button onClick={() => { setHexInput(BLINK2_HEX); setLssInput(''); }}>
               Blink2 (Lチカ)
             </button>
-            <button onClick={() => setHexInput(PUSH_SWITCH_HEX)}>
+            <button onClick={() => { setHexInput(PUSH_SWITCH_HEX); setLssInput(''); }}>
               Push Switch (プッシュスイッチ)
             </button>
-            <button onClick={() => setHexInput(POT_BLINK_HEX)}>
+            <button onClick={() => { setHexInput(POT_BLINK_HEX); setLssInput(''); }}>
               Potentiometer (可変抵抗)
             </button>
-            <button onClick={() => setHexInput(SEVEN_SEGMENT_HEX)}>
+            <button onClick={() => { setHexInput(SEVEN_SEGMENT_HEX); setLssInput(''); }}>
               7-Segment (7セグ)
             </button>
-            <button onClick={() => setHexInput(SEVEN_SEGMENT_COUNTUP_HEX)}>
+            <button onClick={() => { setHexInput(SEVEN_SEGMENT_COUNTUP_HEX); setLssInput(''); }}>
               7-Segment Countup (7セグカウントアップ)
             </button>
-            <button onClick={() => setHexInput(MOTOR_PWM_HEX)}>
+            <button onClick={() => { setHexInput(MOTOR_PWM_HEX); setLssInput(''); }}>
               DC Motor PWM (モーター)
             </button>
-            <button onClick={() => setHexInput(LCD_HELLO_HEX)}>
+            <button onClick={() => { setHexInput(LCD_HELLO_HEX); setLssInput(''); }}>
               LCD 1602 Hello (液晶)
             </button>
-            <button onClick={() => setHexInput(ANALOG_A0_TO_7SEG_HEX)}>
+            <button onClick={() => { setHexInput(ANALOG_A0_TO_7SEG_HEX); setLssInput(''); }}>
               Analog A0 to 7-Segment (アナログA0から7セグ)
             </button>
           </div>
           <textarea
-            rows={10}
+            rows={5}
             value={hexInput}
             onChange={(e) => setHexInput(e.target.value)}
             placeholder="ここにIntel HEXを貼り付けてください"
+          />
+          <textarea
+            rows={5}
+            value={lssInput}
+            onChange={(e) => setLssInput(e.target.value)}
+            placeholder="ここにLSSファイルの内容を貼り付けてください"
+            style={{ marginTop: '0.5rem' }}
           />
         </div>
       </aside>
