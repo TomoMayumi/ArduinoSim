@@ -418,6 +418,53 @@ function App() {
     }
   };
 
+  const handleFolderUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const newSourceFiles: { name: string; content: string }[] = [];
+    const validExtensions = ['.c', '.h', '.cpp', '.hpp', '.s', '.asm'];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+      if (validExtensions.includes(ext)) {
+        const content = await file.text();
+        newSourceFiles.push({ name: file.name, content });
+      }
+    }
+
+    if (newSourceFiles.length > 0) {
+      const confirmMsg = `${newSourceFiles.length} 個のソースファイルが見つかりました。\n\n「OK」を押すと現在のリストに追加します。\n「キャンセル」を押すと現在のリストをクリアして新しく読み込みます。`;
+      if (window.confirm(confirmMsg)) {
+        // 重複チェック
+        setSourceFiles(prev => {
+          const merged = [...prev];
+          newSourceFiles.forEach(newFile => {
+            const idx = merged.findIndex(f => f.name === newFile.name);
+            if (idx >= 0) {
+              merged[idx] = newFile;
+            } else {
+              merged.push(newFile);
+            }
+          });
+          return merged;
+        });
+      } else {
+        setSourceFiles(newSourceFiles);
+      }
+
+      if (newSourceFiles.length > 0 && !activeTabFilename) {
+        setActiveTabFilename(newSourceFiles[0].name);
+      }
+    } else {
+      alert('有効なソースファイル（.c, .h 等）が見つかりませんでした。');
+    }
+
+    // Reset input
+    e.target.value = '';
+  };
+
   return (
     <div className="app-container">
       <header className="header">
@@ -594,7 +641,22 @@ function App() {
           <div style={{ marginTop: '1rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
               <label style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Cソースコード群:</label>
-              <button onClick={addSourceFile} style={{ fontSize: '0.7rem', padding: '2px 8px', background: '#3b82f6' }}>追加</button>
+              <div style={{ display: 'flex', gap: '4px' }}>
+                <button onClick={addSourceFile} style={{ fontSize: '0.7rem', padding: '2px 8px', background: '#3b82f6' }}>追加</button>
+                <button
+                  onClick={() => document.getElementById('folder-upload')?.click()}
+                  style={{ fontSize: '0.7rem', padding: '2px 8px', background: '#10b981' }}
+                >
+                  フォルダを追加
+                </button>
+                <input
+                  id="folder-upload"
+                  type="file"
+                  onChange={handleFolderUpload}
+                  style={{ display: 'none' }}
+                  {...({ webkitdirectory: "", directory: "" } as any)}
+                />
+              </div>
             </div>
 
             <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
