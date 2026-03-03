@@ -57,7 +57,26 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
             setStates(emulator.hardware.getAllStates());
         }, 50); // 20FPS更新
 
-        return () => clearInterval(interval);
+        const handleConfigChanged = () => {
+            const configs = loadHardwareConfigs();
+            for (const config of configs) {
+                // To force an update even if ID exists, we can remove and re-add.
+                emulator.hardware.removeComponent(config.id);
+                const comp = createComponentFromConfig(config);
+                if (comp) {
+                    emulator.hardware.addComponent(comp);
+                }
+            }
+            // Trigger a re-render
+            setStates(emulator.hardware.getAllStates());
+        };
+
+        window.addEventListener('hardwareConfigChanged', handleConfigChanged);
+
+        return () => {
+            clearInterval(interval);
+            window.removeEventListener('hardwareConfigChanged', handleConfigChanged);
+        };
     }, [emulator]);
 
     const handleSwitchAction = (id: string, action: 'down' | 'up' | 'toggle') => {

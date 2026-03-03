@@ -645,6 +645,10 @@ function App() {
                   if (data.sourceFiles.length > 0) {
                     setActiveTabFilename(data.sourceFiles[0].name);
                   }
+                  if (data.hardwareConfigs) {
+                    localStorage.setItem('arduino_sim_hardware_config', JSON.stringify(data.hardwareConfigs));
+                    window.dispatchEvent(new Event('hardwareConfigChanged'));
+                  }
                   alert('Hybrid System プリセットをロードしました');
                 } catch (e) {
                   console.error('Preset Load Error:', e);
