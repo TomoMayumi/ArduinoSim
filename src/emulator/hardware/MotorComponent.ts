@@ -10,6 +10,7 @@ export class MotorComponent implements Component {
     readonly type = 'MOTOR';
     readonly id: string;
     readonly name: string;
+    readonly updateInterval = 1;
     readonly pin: string;
 
     private lastCycles: number = 0;

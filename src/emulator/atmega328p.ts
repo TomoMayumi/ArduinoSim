@@ -69,7 +69,7 @@ export class Atmega328P {
         return addr;
       }
 
-      // ダイナミック点灯や高速なパルス（LCD EN等）を正確にサンプリングするため、毎サイクル状態を更新
+      // 内部で updateInterval に基づき最適化されるため、毎サイクル呼び出して良い
       this.hardware.update();
     }
     this.hardware.update();

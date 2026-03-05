@@ -3,7 +3,11 @@ import type { Component, ComponentState } from './Component';
 
 export class HardwareManager {
     private components: Component[] = [];
+    private highFreqComponents: Component[] = [];
+    private lowFreqComponents: Component[] = [];
     private cpu: CPU;
+    private lastLowFreqUpdate: number = 0;
+    private readonly DEFAULT_LOW_FREQ_INTERVAL = 512;
 
     constructor(cpu: CPU) {
         this.cpu = cpu;
@@ -11,10 +15,17 @@ export class HardwareManager {
 
     public addComponent(component: Component) {
         this.components.push(component);
+        this.refreshGroups();
     }
 
     public removeComponent(id: string) {
         this.components = this.components.filter(c => c.id !== id);
+        this.refreshGroups();
+    }
+
+    private refreshGroups() {
+        this.highFreqComponents = this.components.filter(c => c.updateInterval === 1);
+        this.lowFreqComponents = this.components.filter(c => (c.updateInterval || 0) !== 1);
     }
 
     public getComponent(id: string): Component | undefined {
@@ -26,8 +37,18 @@ export class HardwareManager {
     }
 
     public update() {
-        for (const component of this.components) {
+        // 高頻度コンポーネント (updateInterval === 1) は毎サイクル更新
+        for (const component of this.highFreqComponents) {
             component.update(this.cpu);
+        }
+
+        // 低頻度コンポーネントは一定間隔ごとに更新
+        const cycles = this.cpu.cycles;
+        if (cycles - this.lastLowFreqUpdate >= this.DEFAULT_LOW_FREQ_INTERVAL) {
+            for (const component of this.lowFreqComponents) {
+                component.update(this.cpu);
+            }
+            this.lastLowFreqUpdate = cycles;
         }
     }
 

@@ -10,9 +10,11 @@ export interface Component {
     type: string;
     name: string;
 
+    // 更新間隔 (サイクル数)。未指定の場合はデフォルト (例: 512サイクル)
+    updateInterval?: number;
+
     // シミュレーションステップごとの更新処理
     // cpu: CPUインスタンス
-    // cycles: 現在のサイクル数 (前回呼び出しからの差分ではない点に注意)
     update(cpu: CPU): void;
 
     // Reactコンポーネント用の状態を返す

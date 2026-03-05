@@ -12,6 +12,7 @@ export class Lcd1602Component implements Component {
     readonly type = 'LCD1602';
     readonly id: string;
     readonly name: string;
+    readonly updateInterval = 1;
 
     // Pin configurations (standard 4-bit mode)
     readonly rsPin: string;
