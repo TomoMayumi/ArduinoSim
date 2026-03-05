@@ -16,7 +16,21 @@ export class SourceFileManager {
     }
 
     public getFile(name: string): SourceFile | undefined {
-        return this.files.get(name);
+        // 1. 完全一致で検索
+        if (this.files.has(name)) return this.files.get(name);
+
+        // 2. 正規化（バックスラッシュをスラッシュに）して検索
+        const normalized = name.replace(/\\/g, '/');
+        if (this.files.has(normalized)) return this.files.get(normalized);
+
+        // 3. ベース名だけで検索（ユニークな場合に限る、または最初に見つかったもの）
+        const baseName = normalized.split('/').pop() || normalized;
+        for (const [key, value] of this.files) {
+            const keyBase = key.split('/').pop();
+            if (keyBase === baseName) return value;
+        }
+
+        return undefined;
     }
 
     public getAllFiles(): SourceFile[] {

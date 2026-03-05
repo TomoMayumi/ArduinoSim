@@ -32,11 +32,12 @@ export class SourceMapper {
             const fileLineMatch = line.match(fileLineDirectiveRegex);
             if (fileLineMatch) {
                 const fullPath = fileLineMatch[1];
-                const fileName = fullPath.split(/[/\\]/).pop() || fullPath;
+                // Resolve file through fileManager (which now handles path matching)
+                const file = fileManager.getFile(fullPath);
                 const lineNum = parseInt(fileLineMatch[2], 10);
 
-                if (fileManager.getFile(fileName)) {
-                    currentFile = fileName;
+                if (file) {
+                    currentFile = file.name;
                     currentLineNumber = lineNum;
                 }
                 continue;

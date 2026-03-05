@@ -423,37 +423,52 @@ function App() {
     if (!files || files.length === 0) return;
 
     const newSourceFiles: { name: string; content: string }[] = [];
-    const validExtensions = ['.c', '.h', '.cpp', '.hpp', '.s', '.asm'];
+    const validSourceExtensions = ['.c', '.h', '.cpp', '.hpp', '.s', '.asm'];
+    let detectedHex: string | null = null;
+    let detectedLss: string | null = null;
 
     // デコード用の関数
     const decodeFile = async (file: File): Promise<string> => {
       const buffer = await file.arrayBuffer();
       const uint8Array = new Uint8Array(buffer);
-
       try {
-        // まずは UTF-8 で試行 (fatal: true にして不正なバイトがあれば例外を投げさせる)
         const utf8Decoder = new TextDecoder('utf-8', { fatal: true });
         return utf8Decoder.decode(uint8Array);
       } catch (e) {
-        // UTF-8 で失敗した場合は Shift-JIS (Windows-31j) を試す
         const sjisDecoder = new TextDecoder('windows-31j');
         return sjisDecoder.decode(uint8Array);
       }
     };
 
     for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
-      if (validExtensions.includes(ext)) {
-        const content = await decodeFile(file);
-        newSourceFiles.push({ name: file.name, content });
-      }
+        const file = files[i];
+        const fileName = (file as any).webkitRelativePath || file.name;
+        // プロジェクトルート名（一番上のフォルダ名）を削る
+        const parts = fileName.split('/');
+        const relativeName = parts.length > 1 ? parts.slice(1).join('/') : fileName;
+
+        const ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+
+        if (validSourceExtensions.includes(ext)) {
+            const content = await decodeFile(file);
+            newSourceFiles.push({ name: relativeName, content });
+        } else if (ext === '.hex') {
+            detectedHex = await decodeFile(file);
+        } else if (ext === '.lss') {
+            detectedLss = await decodeFile(file);
+        }
     }
 
-    if (newSourceFiles.length > 0) {
-      const confirmMsg = `${newSourceFiles.length} 個のソースファイルが見つかりました。\n\n「OK」を押すと現在のリストに追加します。\n「キャンセル」を押すと現在のリストをクリアして新しく読み込みます。`;
-      if (window.confirm(confirmMsg)) {
-        // 重複チェック
+    if (newSourceFiles.length > 0 || detectedHex || detectedLss) {
+      let msg = '';
+      if (newSourceFiles.length > 0) msg += `${newSourceFiles.length} 個のソースファイル`;
+      if (detectedHex) msg += (msg ? '、' : '') + 'HEXファイル';
+      if (detectedLss) msg += (msg ? '、' : '') + 'LSSファイル';
+      msg += 'が見つかりました。\n\n「OK」を押すと現在のリストに追加・上書きします。\n「キャンセル」を押すとクリアして新しく読み込みます。';
+
+      const isAppend = window.confirm(msg);
+
+      if (isAppend) {
         setSourceFiles(prev => {
           const merged = [...prev];
           newSourceFiles.forEach(newFile => {
@@ -470,14 +485,18 @@ function App() {
         setSourceFiles(newSourceFiles);
       }
 
+      if (detectedHex) setHexInput(detectedHex);
+      if (detectedLss) setLssInput(detectedLss);
+
       if (newSourceFiles.length > 0 && !activeTabFilename) {
         setActiveTabFilename(newSourceFiles[0].name);
+      } else if (detectedHex && !activeTabFilename) {
+          // ソースがない場合でも何か表示させるためのケア
       }
     } else {
-      alert('有効なソースファイル（.c, .h 等）が見つかりませんでした。');
+      alert('有効なファイル（.c, .h, .hex, .lss 等）が見つかりませんでした。');
     }
 
-    // Reset input
     e.target.value = '';
   };
 
