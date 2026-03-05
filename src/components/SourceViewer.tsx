@@ -52,6 +52,84 @@ export const SourceViewer: React.FC<SourceViewerProps> = memo(({
         selectedFileName ? fileManager.getFile(selectedFileName) : null
         , [fileManager, selectedFileName]);
 
+    // Tree structure helper
+    const fileTree = useMemo(() => {
+        const root: any = { type: 'folder', children: {} };
+        files.forEach(file => {
+            const parts = file.name.split('/');
+            let current = root;
+            parts.forEach((part, index) => {
+                if (index === parts.length - 1) {
+                    current.children[part] = { type: 'file', name: part, fullName: file.name };
+                } else {
+                    if (!current.children[part]) {
+                        current.children[part] = { type: 'folder', name: part, children: {} };
+                    }
+                    current = current.children[part];
+                }
+            });
+        });
+        return root;
+    }, [files]);
+
+    const renderTree = (node: any, depth: number = 0) => {
+        const sortedKeys = Object.keys(node.children).sort((a, b) => {
+            const nodeA = node.children[a];
+            const nodeB = node.children[b];
+            if (nodeA.type !== nodeB.type) {
+                return nodeA.type === 'folder' ? -1 : 1;
+            }
+            return a.localeCompare(b);
+        });
+
+        return sortedKeys.map(key => {
+            const child = node.children[key];
+            if (child.type === 'folder') {
+                return (
+                    <div key={key}>
+                        <div style={{
+                            padding: '2px 8px',
+                            paddingLeft: `${depth * 12 + 8}px`,
+                            fontSize: '0.8rem',
+                            color: '#64748b',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                        }}>
+                            <span style={{ fontSize: '0.7rem' }}>📁</span> {key}
+                        </div>
+                        {renderTree(child, depth + 1)}
+                    </div>
+                );
+            } else {
+                const isSelected = child.fullName === selectedFileName;
+                return (
+                    <div
+                        key={child.fullName}
+                        onClick={() => setSelectedFileName(child.fullName)}
+                        style={{
+                            padding: '2px 8px',
+                            paddingLeft: `${depth * 12 + 8}px`,
+                            cursor: 'pointer',
+                            fontSize: '0.85rem',
+                            borderRadius: '3px',
+                            color: isSelected ? '#fff' : '#cbd5e1',
+                            background: isSelected ? '#3b82f6' : 'transparent',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                        }}
+                    >
+                        <span style={{ fontSize: '0.7rem' }}>📄</span> {key}
+                    </div>
+                );
+            }
+        });
+    };
+
     useEffect(() => {
         if (!isRunning && listRef.current && currentLocation && currentLocation.fileName === selectedFileName) {
             const activeElement = listRef.current.querySelector('.active-source-line');
@@ -68,27 +146,9 @@ export const SourceViewer: React.FC<SourceViewerProps> = memo(({
     return (
         <div className="source-viewer-container" style={{ display: 'flex', height: '100%', gap: '1px', background: '#334155' }}>
             {/* File Explorer */}
-            <div className="file-explorer" style={{ width: '150px', background: '#1e293b', overflowY: 'auto', padding: '0.5rem' }}>
+            <div className="file-explorer" style={{ width: '180px', background: '#1e293b', overflowY: 'auto', padding: '0.5rem' }}>
                 <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.8rem', color: '#94a3b8', textTransform: 'uppercase' }}>Files</h4>
-                {files.map(file => (
-                    <div
-                        key={file.name}
-                        onClick={() => setSelectedFileName(file.name)}
-                        style={{
-                            padding: '4px 8px',
-                            cursor: 'pointer',
-                            fontSize: '0.85rem',
-                            borderRadius: '3px',
-                            color: file.name === selectedFileName ? '#fff' : '#94a3b8',
-                            background: file.name === selectedFileName ? '#3b82f6' : 'transparent',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis'
-                        }}
-                    >
-                        {file.name}
-                    </div>
-                ))}
+                {renderTree(fileTree)}
             </div>
 
             {/* Editor Area */}
