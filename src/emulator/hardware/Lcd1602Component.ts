@@ -27,6 +27,7 @@ export class Lcd1602Component implements Component {
 
     private lastEnState: boolean = false;
     private isWaitingForLowerNibble: boolean = false;
+    private is4BitMode: boolean = false; // Initially in 8-bit mode during power-on
     private upperNibble: number = 0;
 
     constructor(id: string, name: string, rs: string, en: string, d4: string, d5: string, d6: string, d7: string) {
@@ -61,12 +62,25 @@ export class Lcd1602Component implements Component {
 
         const nibble = (d7 << 3) | (d6 << 2) | (d5 << 1) | d4;
 
+        if (!this.is4BitMode) {
+            // In 8-bit mode (initialization phase), the LCD expects 8-bit commands.
+            // However, in 4-bit wiring, only DB4-DB7 are connected.
+            // Each EN pulse is treated as a full 8-bit command (lower 4 bits are 0).
+            const data = (nibble << 4);
+            if (!rs) {
+                // Check for "Function Set" command to switch to 4-bit mode.
+                // 0x20 is "4-bit mode" setting.
+                if ((data & 0xf0) === 0x20) {
+                    this.is4BitMode = true;
+                }
+                this.executeCommand(data);
+            }
+            return;
+        }
+
         if (!this.isWaitingForLowerNibble) {
             // Received upper nibble
             this.upperNibble = nibble;
-            // In 4-bit initialization, some commands are sent as single nibbles.
-            // But for this simple simulation, we will assume it's always sending full bytes (2 nibbles)
-            // after the initial setup. We will simplify and always expect pairs.
             this.isWaitingForLowerNibble = true;
         } else {
             // Received lower nibble
