@@ -69,10 +69,8 @@ export class Atmega328P {
         return addr;
       }
 
-      // ダイナミック点灯などを正確にサンプリングするため、512サイクル(約32us)毎に状態を更新
-      if ((i & 511) === 0) {
-        this.hardware.update();
-      }
+      // ダイナミック点灯や高速なパルス（LCD EN等）を正確にサンプリングするため、毎サイクル状態を更新
+      this.hardware.update();
     }
     this.hardware.update();
     return null;

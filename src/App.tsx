@@ -676,6 +676,28 @@ function App() {
               }} style={{ background: '#7c3aed' }}>
                 Hybrid System ★PRESET
               </button>
+              <button onClick={async () => {
+                try {
+                  const response = await fetch('/samples/lcd_test.json');
+                  const data = await response.json();
+                  setHexInput(data.hex);
+                  setLssInput(data.lss);
+                  setSourceFiles(data.sourceFiles);
+                  if (data.sourceFiles.length > 0) {
+                    setActiveTabFilename(data.sourceFiles[0].name);
+                  }
+                  if (data.hardwareConfigs) {
+                    localStorage.setItem('arduino_sim_hardware_config', JSON.stringify(data.hardwareConfigs));
+                    window.dispatchEvent(new Event('hardwareConfigChanged'));
+                  }
+                  alert('LCD Debug プリセットをロードしました');
+                } catch (e) {
+                  console.error('Preset Load Error:', e);
+                  alert('プリセットのロードに失敗しました');
+                }
+              }} style={{ background: '#ec4899', marginLeft: '0.2rem' }}>
+                LCD Debug ★PRESET
+              </button>
             </div>
             <div style={{ marginTop: '1rem' }}>
               <label style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Intel HEX:</label>
