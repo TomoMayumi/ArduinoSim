@@ -10,40 +10,42 @@ export class MotorComponent implements Component {
     readonly type = 'MOTOR';
     readonly id: string;
     readonly name: string;
-    readonly updateInterval = 1;
     readonly pin: string;
+    readonly updateInterval = 1; // 毎サイクル更新して精度を最大化する
 
-    private lastCycles: number = 0;
-    private highCycles: number = 0;
-    private totalCycles: number = 0;
-    private currentSpeed: number = 0;
+    private currentSpeed = 0;
+    private lastCycles = 0;
+    private highCycles = 0;
+    private totalCycles = 0;
 
-    constructor(id: string, name: string, pin: string) {
+    constructor(
+        id: string,
+        name: string,
+        pin: string
+    ) {
         this.id = id;
         this.name = name;
         this.pin = pin;
     }
 
     update(cpu: CPU): void {
-        const pinState = getPinState(cpu, this.pin);
-        const delta = cpu.cycles - this.lastCycles;
+        const cyclesPassed = cpu.cycles - this.lastCycles;
+        if (cyclesPassed <= 0) return;
 
-        if (delta > 0) {
-            this.totalCycles += delta;
-            if (pinState) {
-                this.highCycles += delta;
-            }
+        if (getPinState(cpu, this.pin)) {
+            this.highCycles += cyclesPassed;
         }
-
+        this.totalCycles += cyclesPassed;
         this.lastCycles = cpu.cycles;
 
-        // Calculate duty cycle periodically
-        // Increased from 10ms (160,000) to 500ms (8,000,000) to support low-frequency PWM (e.g. 100ms/200ms period)
-        const SAMPLE_PERIOD = 8000000;
+        // 計算期間を PWM 周期（100ms = 1,600,000 サイクル）に合わせる
+        // これにより PWM の一周期を正確に捉えられる
+        const SAMPLE_PERIOD = 1600000;
         if (this.totalCycles >= SAMPLE_PERIOD) {
             this.currentSpeed = this.highCycles / this.totalCycles;
-            this.totalCycles = 0;
+            this.totalCycles -= SAMPLE_PERIOD;
             this.highCycles = 0;
+            // totalCycles に残った端数は次のサンプリングに引き継がれる
         }
     }
 
