@@ -10,6 +10,8 @@ import type { SevenSegmentState } from '../emulator/hardware/SevenSegmentCompone
 import type { MotorState } from '../emulator/hardware/MotorComponent';
 import type { Lcd1602State } from '../emulator/hardware/Lcd1602Component';
 import type { AdKeyboardState, AdKeyboardComponent } from '../emulator/hardware/AdKeyboardComponent';
+import { OscilloscopePanel } from './OscilloscopePanel';
+import type { OscilloscopeState, OscilloscopeComponent } from '../emulator/hardware/OscilloscopeComponent';
 import { loadHardwareConfigs, saveHardwareConfigs } from '../emulator/hardware/HardwareConfig';
 import type { HardwareConfig } from '../emulator/hardware/HardwareConfig';
 import { createComponentFromConfig } from '../emulator/hardware/ComponentFactory';
@@ -335,6 +337,18 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
                     </div>
                 </div>
             );
+        } else if (comp.type === 'OSCILLOSCOPE') {
+            const scopeState = state as OscilloscopeState;
+            const scopeComp = comp as OscilloscopeComponent;
+            return (
+                <div key={comp.id} className="hardware-component" style={{ gridColumn: 'span 4', background: '#0f172a' }}>
+                    <OscilloscopePanel 
+                        state={scopeState} 
+                        isRunning={!!isRunning} 
+                        onPinChange={(chIdx, pin) => scopeComp.setChannelPin(chIdx, pin)}
+                    />
+                </div>
+            );
         }
         return null;
     };
@@ -371,6 +385,7 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
                 {renderSingleComponent('sevseg-1')}
                 {renderSingleComponent('lcd-1')}
                 {renderSingleComponent('adkey-1')}
+                {renderSingleComponent('scope-1')}
             </div>
             {editingConfig && (
                 <HardwareConfigDialog

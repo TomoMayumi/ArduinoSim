@@ -1,4 +1,4 @@
-export type ComponentType = 'LED' | 'SWITCH' | 'POTENTIOMETER' | 'SEVEN_SEGMENT' | 'MOTOR' | 'LCD1602' | 'AD_KEYBOARD';
+export type ComponentType = 'LED' | 'SWITCH' | 'POTENTIOMETER' | 'SEVEN_SEGMENT' | 'MOTOR' | 'LCD1602' | 'AD_KEYBOARD' | 'OSCILLOSCOPE';
 
 export interface BaseConfig {
     id: string;
@@ -56,7 +56,12 @@ export interface AdKeyboardConfig extends BaseConfig {
     pin: string;
 }
 
-export type HardwareConfig = LedConfig | SwitchConfig | PotentiometerConfig | SevenSegmentConfig | MotorConfig | Lcd1602Config | AdKeyboardConfig;
+export interface OscilloscopeConfig extends BaseConfig {
+    type: 'OSCILLOSCOPE';
+    pins: string[]; // 複数チャンネル対応
+}
+
+export type HardwareConfig = LedConfig | SwitchConfig | PotentiometerConfig | SevenSegmentConfig | MotorConfig | Lcd1602Config | AdKeyboardConfig | OscilloscopeConfig;
 
 const STORAGE_KEY = 'arduino_sim_hardware_config';
 
@@ -79,6 +84,7 @@ export const DEFAULT_CONFIGS: HardwareConfig[] = [
     { id: 'sevseg-1', type: 'SEVEN_SEGMENT', name: '4-Digit 7-Seg', pinA: 'D4', pinB: 'D5', pinC: 'D6', pinD: 'D7', pinD1: 'D8', pinD2: 'D9', pinD3: 'D10', pinD4: 'D11', pinDP: 'D3' },
     { id: 'lcd-1', type: 'LCD1602', name: 'LCD 1602', rs: 'D12', en: 'D11', d4: 'D5', d5: 'D4', d6: 'D3', d7: 'D2' },
     { id: 'adkey-1', type: 'AD_KEYBOARD', name: 'AD Keyboard', pin: 'A1' },
+    { id: 'scope-1', type: 'OSCILLOSCOPE', name: 'Oscilloscope', pins: ['D9', 'D13'] },
 ];
 
 /**

@@ -7,6 +7,7 @@ import { SevenSegmentComponent } from './SevenSegmentComponent';
 import { MotorComponent } from './MotorComponent';
 import { Lcd1602Component } from './Lcd1602Component';
 import { AdKeyboardComponent } from './AdKeyboardComponent';
+import { OscilloscopeComponent } from './OscilloscopeComponent';
 
 export function createComponentFromConfig(config: HardwareConfig): Component | null {
     switch (config.type) {
@@ -34,6 +35,8 @@ export function createComponentFromConfig(config: HardwareConfig): Component | n
             );
         case 'AD_KEYBOARD':
             return new AdKeyboardComponent(config.id, config.name, config.pin);
+        case 'OSCILLOSCOPE':
+            return new OscilloscopeComponent(config.id, config.name, config.pins);
         default:
             console.warn(`Unknown component type in config: ${(config as any).type}`);
             return null;
