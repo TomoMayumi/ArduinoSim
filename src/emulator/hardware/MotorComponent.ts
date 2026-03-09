@@ -37,8 +37,9 @@ export class MotorComponent implements Component {
 
         this.lastCycles = cpu.cycles;
 
-        // Calculate duty cycle periodically (e.g., every 10ms at 16MHz = 160,000 cycles)
-        const SAMPLE_PERIOD = 160000;
+        // Calculate duty cycle periodically
+        // Increased from 10ms (160,000) to 500ms (8,000,000) to support low-frequency PWM (e.g. 100ms/200ms period)
+        const SAMPLE_PERIOD = 8000000;
         if (this.totalCycles >= SAMPLE_PERIOD) {
             this.currentSpeed = this.highCycles / this.totalCycles;
             this.totalCycles = 0;

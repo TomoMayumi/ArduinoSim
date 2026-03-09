@@ -36,12 +36,20 @@ export const ARDUINO_PINS: { [key: string]: PinConfig } = {
     'A5': { portConfig: portCConfig, pinIndex: 5, portName: 'C' },
 };
 
-export function getPinState(cpu: CPU, pin: string): boolean {
-    const config = ARDUINO_PINS[pin];
+export function getPinState(cpu: CPU, pin: string | number): boolean {
+    let pinId = String(pin);
+    // 数字のみの場合は "D" を付与して正規化
+    if (!pinId.startsWith('D') && !pinId.startsWith('A') && !isNaN(Number(pinId))) {
+        pinId = 'D' + pinId;
+    }
+
+    const config = ARDUINO_PINS[pinId];
     if (!config) return false;
 
-    const portValue = cpu.data[config.portConfig.PORT];
-    return (portValue & (1 << config.pinIndex)) !== 0;
+    // PORTレジスタ(出力設定)ではなく、PINレジスタ(実際のピンの状態)を参照する
+    // これによりハードウェアPWM等による状態変化も取得できる
+    const pinValue = cpu.data[config.portConfig.PIN];
+    return (pinValue & (1 << config.pinIndex)) !== 0;
 }
 
 export function setPinInput(cpu: CPU, pin: string, value: boolean): void {
