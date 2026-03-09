@@ -76,7 +76,7 @@ export class SevenSegmentComponent implements Component {
 
         for (let i = 0; i < 4; i++) {
             let isActive = false;
-            if (digitPins[i] !== 'NC') {
+            if (digitPins[i] && digitPins[i] !== 'NC') {
                 isActive = !getPinState(cpu, digitPins[i]);
             }
             this.digitActive[i] = isActive;

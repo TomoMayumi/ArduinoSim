@@ -212,11 +212,11 @@
       "pinB": "D7",
       "pinC": "D8",
       "pinD": "D9",
-      "pinD1": "",
+      "pinD1": "NC",
       "pinD2": "D13",
       "pinD3": "D12",
       "pinD4": "D11",
-      "pinDP": ""
+      "pinDP": "NC"
     },
     {
       "id": "lcd-1",
