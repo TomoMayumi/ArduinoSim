@@ -55,6 +55,35 @@ export class Atmega328P {
     this.portD = new AVRIOPort(this.cpu, portDConfig);
 
     this.hardware = new HardwareManager(this.cpu);
+
+    // Patch for PWM Inverting Mode with OCR=0 (Fast PWM)
+    // In avr8js, Inverting Mode + OCR=0 results in constant LOW (0% duty).
+    // However, according to ATmega328P datasheet, it should be constant HIGH (100% duty).
+    // We patch updateCompPin to fix this behavior.
+    const patchTimer = (timer: AVRTimer) => {
+      const originalUpdateCompPin = (timer as any).updateCompPin.bind(timer);
+      (timer as any).updateCompPin = (compValue: number, pinName: string, bottom: boolean = false) => {
+        if ((timer as any).timerMode === 3 /* FastPWM */ && compValue === 3 /* Inverting */) {
+          const ocr = pinName === 'A' ? (timer as any).ocrA : pinName === 'B' ? (timer as any).ocrB : (timer as any).ocrC;
+          const nextOcr = pinName === 'A' ? (timer as any).nextOcrA : pinName === 'B' ? (timer as any).nextOcrB : (timer as any).nextOcrC;
+          // When 'bottom' (overflow) occurs, 'nextOcr' will be the value for the next period.
+          const isOcrZero = bottom ? nextOcr === 0 : ocr === 0;
+
+          if (isOcrZero) {
+            // Force HIGH when OCR is 0 in inverting mode to match datasheet behavior (100% duty)
+            if (pinName === 'A') (timer as any).updateCompA(2 /* Set (HIGH) in avr8js */);
+            else if (pinName === 'B') (timer as any).updateCompB(2 /* Set (HIGH) in avr8js */);
+            else (timer as any).updateCompC(2 /* Set (HIGH) in avr8js */);
+            return;
+          }
+        }
+        originalUpdateCompPin(compValue, pinName, bottom);
+      };
+    };
+
+    patchTimer(this.timer0);
+    patchTimer(this.timer1);
+    patchTimer(this.timer2);
   }
 
   public step(breakpoints: Set<number> = new Set()): number | null {
