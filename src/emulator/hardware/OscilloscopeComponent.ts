@@ -24,8 +24,8 @@ export class OscilloscopeComponent implements Component {
     readonly updateInterval = 1; // 毎サイクル監視
 
     private channels: { pin: string; samples: PinSample[]; lastValue: boolean | null }[] = [];
-    private maxSamples = 2000; // チャンネルあたりの最大サンプル数（エッジの変化点のみ記録）
-    private bufferSizeCycles = 1600000; // 100ms分 (16MHz想定)
+    private maxSamples = 10000; // チャンネルあたりの最大サンプル数
+    private bufferSizeCycles = 32000000; // 2秒分 (16MHz想定) に増強
 
     constructor(id: string, name: string, pins: string[]) {
         this.id = id;
@@ -39,6 +39,7 @@ export class OscilloscopeComponent implements Component {
 
     update(cpu: CPU): void {
         const currentCycle = cpu.cycles;
+        this.lastUpdateCycle = currentCycle;
 
         for (const channel of this.channels) {
             const value = getPinState(cpu, channel.pin);
@@ -54,7 +55,7 @@ export class OscilloscopeComponent implements Component {
                     channel.samples.shift();
                 }
 
-                // 数制限 (念のため)
+                // 数制限
                 if (channel.samples.length > this.maxSamples) {
                     channel.samples.shift();
                 }
@@ -63,14 +64,17 @@ export class OscilloscopeComponent implements Component {
     }
 
     getState(): OscilloscopeState {
+        // updateの中で保持していた最新サイクルを使用する
         return {
             channels: this.channels.map(ch => ({
                 pin: ch.pin,
-                samples: [...ch.samples] // コピーを返す
+                samples: [...ch.samples]
             })),
-            currentCycle: 0 // HardwareManagerでセットされる可能性もあるが、ここでは0かダミー
+            currentCycle: this.lastUpdateCycle
         };
     }
+
+    private lastUpdateCycle = 0;
 
     // ピンの変更（UIから呼び出し可能にするための準備）
     setChannelPin(index: number, pin: string) {

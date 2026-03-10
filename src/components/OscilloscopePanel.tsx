@@ -58,38 +58,64 @@ export const OscilloscopePanel: React.FC<OscilloscopePanelProps> = ({ state, isR
 
         const visibleCycles = TOTAL_CYCLES / timeScale;
         
+        // --- トリガ位置の計算 (全チャンネル共通) ---
+        let startCycle = state.currentCycle - visibleCycles;
+        
+        if (triggerMode !== 'none' && state.channels.length > 0) {
+            // CH1 (index 0) を基準にトリガを探す
+            const masterChannel = state.channels[0];
+            const samples = masterChannel.samples;
+            
+            if (samples.length > 1) {
+                // 表示範囲の少し外（右）まで含めてトリガを探す
+                const triggerSearchEnd = state.currentCycle;
+                const triggerSearchStart = state.currentCycle - visibleCycles * 3; // 余裕を持って探す
+
+                let foundTrigger = false;
+                for (let i = samples.length - 1; i > 0; i--) {
+                    const s1 = samples[i-1];
+                    const s2 = samples[i];
+                    if (s2.cycle < triggerSearchStart) break;
+                    if (s2.cycle > triggerSearchEnd) continue;
+
+                    const isRising = !s1.value && s2.value;
+                    const isFalling = s1.value && !s2.value;
+
+                    if ((triggerMode === 'rising' && isRising) || (triggerMode === 'falling' && isFalling)) {
+                        // トリガ位置を画面の左端10%付近にする
+                        startCycle = s2.cycle - (visibleCycles * 0.1);
+                        foundTrigger = true;
+                        break;
+                    }
+                }
+
+                // トリガが見つからない場合、"Auto" に戻るとちらつくので、
+                // 前回の位置を維持するか、あるいは「見つからなかった」ことを明示する。
+                // ここではとりあえず lastStartCycle を使って安定させるための簡易的な対策
+                // (ステートを持たせると複雑になるので、まずは masterChannel の最後のサンプルを基準にした位置に固定する)
+                if (!foundTrigger) {
+                    // 何も見つからない場合は、最後の「変化」を基準にする
+                    const lastEdge = samples[samples.length - 1].cycle;
+                    startCycle = lastEdge - (visibleCycles * 0.9);
+                }
+            }
+        }
+
         // 描画ロジック
         state.channels.forEach((channel, channelIdx) => {
             const samples = channel.samples;
+            
+            ctx.strokeStyle = channelIdx === 0 ? '#00ff00' : '#ffff00'; // 緑と黄
+            ctx.lineWidth = 2;
+
             if (samples.length === 0) {
                 // データがない場合でもピン名だけ表示
-                ctx.fillStyle = channelIdx === 0 ? '#00ff00' : '#ffff00';
+                ctx.fillStyle = ctx.strokeStyle;
                 ctx.font = '10px monospace';
                 const y = (channelIdx + 1) * (CANVAS_HEIGHT / (state.channels.length + 1));
                 ctx.fillText(`CH${channelIdx + 1}: ${channel.pin} (No Data)`, 10, y - 5);
                 return;
             };
-
-            ctx.strokeStyle = channelIdx === 0 ? '#00ff00' : '#ffff00'; // 緑と黄
-            ctx.lineWidth = 2;
-
-            // トリガ位置の決定
-            let startCycle = samples[samples.length - 1].cycle - (visibleCycles * 0.9);
-            if (triggerMode !== 'none') {
-                // 直近のデータからエッジを探す
-                for (let i = samples.length - 1; i > 0; i--) {
-                    const s1 = samples[i-1];
-                    const s2 = samples[i];
-                    const isRising = !s1.value && s2.value;
-                    const isFalling = s1.value && !s2.value;
-
-                    if ((triggerMode === 'rising' && isRising) || (triggerMode === 'falling' && isFalling)) {
-                        // トリガ位置を画面の左端付近（10%位置とか）にする
-                        startCycle = s2.cycle - (visibleCycles * 0.1);
-                        break;
-                    }
-                }
-            }
 
             const getX = (cycle: number) => ((cycle - startCycle) / visibleCycles) * CANVAS_WIDTH;
             const getY = (val: boolean) => {
@@ -98,34 +124,29 @@ export const OscilloscopePanel: React.FC<OscilloscopePanelProps> = ({ state, isR
                 return val ? base - height : base;
             };
 
-            ctx.beginPath();
-            let first = true;
+            // 描画範囲外（左）の最後の状態を特定
+            let currentIdx = 0;
+            while(currentIdx < samples.length && getX(samples[currentIdx].cycle) < 0) {
+                currentIdx++;
+            }
             
-            // 描画範囲内のサンプルを処理
-            for (let i = 0; i < samples.length; i++) {
+            ctx.beginPath();
+            let lastValue = currentIdx > 0 ? samples[currentIdx - 1].value : samples[0].value;
+            ctx.moveTo(0, getY(lastValue));
+
+            for (let i = currentIdx; i < samples.length; i++) {
                 const s = samples[i];
                 const x = getX(s.cycle);
                 
-                if (x > CANVAS_WIDTH + 100) break; // 画面外（右）
-                if (x < -100) continue; // 画面外（左）
+                if (x > CANVAS_WIDTH) break;
 
-                if (first) {
-                    ctx.moveTo(x, getY(s.value));
-                    first = false;
-                } else {
-                    const prevS = samples[i-1];
-                    ctx.lineTo(x, getY(prevS.value)); // 水平
-                    ctx.lineTo(x, getY(s.value));     // 垂直
-                }
+                ctx.lineTo(x, getY(lastValue)); // 前の状態を維持して水平移動
+                ctx.lineTo(x, getY(s.value));     // 垂直移動
+                lastValue = s.value;
             }
-            // 最後の状態を画面右端まで伸ばす
-            if (samples.length > 0) {
-              const lastS = samples[samples.length - 1];
-              const lastX = getX(lastS.cycle);
-              if (lastX < CANVAS_WIDTH) {
-                ctx.lineTo(CANVAS_WIDTH, getY(lastS.value));
-              }
-            }
+
+            // 右端まで描画
+            ctx.lineTo(CANVAS_WIDTH, getY(lastValue));
             ctx.stroke();
 
             // ピン名表示
