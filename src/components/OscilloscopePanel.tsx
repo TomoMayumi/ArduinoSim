@@ -67,14 +67,16 @@ export const OscilloscopePanel: React.FC<OscilloscopePanelProps> = ({ state, isR
             const samples = masterChannel.samples;
             
             if (samples.length > 1) {
-                // 表示範囲の少し外（右）まで含めてトリガを探す
-                const triggerSearchEnd = state.currentCycle;
-                const triggerSearchStart = state.currentCycle - visibleCycles * 3; // 余裕を持って探す
+                // トリガ位置（10%）から右端（100%）までをデータで埋めるために、
+                // 「現在」から少なくとも 90%visibleCycles 遡った位置にあるエッジを探す
+                const triggerSearchEnd = state.currentCycle - (visibleCycles * 0.9);
+                const triggerSearchStart = state.currentCycle - visibleCycles * 5; // 十分遡る
 
                 let foundTrigger = false;
                 for (let i = samples.length - 1; i > 0; i--) {
                     const s1 = samples[i-1];
                     const s2 = samples[i];
+                    
                     if (s2.cycle < triggerSearchStart) break;
                     if (s2.cycle > triggerSearchEnd) continue;
 
@@ -89,14 +91,22 @@ export const OscilloscopePanel: React.FC<OscilloscopePanelProps> = ({ state, isR
                     }
                 }
 
-                // トリガが見つからない場合、"Auto" に戻るとちらつくので、
-                // 前回の位置を維持するか、あるいは「見つからなかった」ことを明示する。
-                // ここではとりあえず lastStartCycle を使って安定させるための簡易的な対策
-                // (ステートを持たせると複雑になるので、まずは masterChannel の最後のサンプルを基準にした位置に固定する)
+                // トリガが範囲内に見つからない場合、最近のエッジで妥協する（ただし右側は空白になる）
                 if (!foundTrigger) {
-                    // 何も見つからない場合は、最後の「変化」を基準にする
-                    const lastEdge = samples[samples.length - 1].cycle;
-                    startCycle = lastEdge - (visibleCycles * 0.9);
+                    for (let i = samples.length - 1; i > 0; i--) {
+                        const s1 = samples[i-1];
+                        const s2 = samples[i];
+                        if (s2.cycle < state.currentCycle - visibleCycles) break; // ウィンドウ内には入れたい
+
+                        const isRising = !s1.value && s2.value;
+                        const isFalling = s1.value && !s2.value;
+
+                        if ((triggerMode === 'rising' && isRising) || (triggerMode === 'falling' && isFalling)) {
+                            startCycle = s2.cycle - (visibleCycles * 0.1);
+                            foundTrigger = true;
+                            break;
+                        }
+                    }
                 }
             }
         }
