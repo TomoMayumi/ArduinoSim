@@ -39,7 +39,7 @@ const SEGMENT_PATTERNS: { [key: number]: number[] } = {
 
 export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunning }) => {
     const [states, setStates] = useState<{ [id: string]: ComponentState }>({});
-    const [editingConfig, setEditingConfig] = useState<HardwareConfig | null>(null);
+    const [editingConfigs, setEditingConfigs] = useState<HardwareConfig[] | null>(null);
 
     useEffect(() => {
         if (!emulator) return;
@@ -100,35 +100,43 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
         }
     }
 
-    const openConfigFor = (id: string) => {
+    const openConfigsFor = (ids: string[]) => {
         const configs = loadHardwareConfigs();
-        const config = configs.find(c => c.id === id);
-        if (config) {
-            setEditingConfig(config);
+        const selectedConfigs = ids.map(id => configs.find(c => c.id === id)).filter(c => c) as HardwareConfig[];
+        if (selectedConfigs.length > 0) {
+            setEditingConfigs(selectedConfigs);
         }
     }
 
-    const handleSaveConfig = (newConfig: HardwareConfig) => {
+    const openConfigFor = (id: string) => {
+        openConfigsFor([id]);
+    }
+
+    const handleSaveConfigs = (newConfigs: HardwareConfig[]) => {
         if (!emulator) return;
 
         // localStorageに保存
         const configs = loadHardwareConfigs();
-        const idx = configs.findIndex(c => c.id === newConfig.id);
-        if (idx !== -1) {
-            configs[idx] = newConfig;
-        } else {
-            configs.push(newConfig);
+        for (const newConfig of newConfigs) {
+            const idx = configs.findIndex(c => c.id === newConfig.id);
+            if (idx !== -1) {
+                configs[idx] = newConfig;
+            } else {
+                configs.push(newConfig);
+            }
         }
         saveHardwareConfigs(configs);
 
         // メモリ上のコンポーネントを再生成
-        emulator.hardware.removeComponent(newConfig.id);
-        const comp = createComponentFromConfig(newConfig);
-        if (comp) {
-            emulator.hardware.addComponent(comp);
+        for (const newConfig of newConfigs) {
+            emulator.hardware.removeComponent(newConfig.id);
+            const comp = createComponentFromConfig(newConfig);
+            if (comp) {
+                emulator.hardware.addComponent(comp);
+            }
         }
 
-        setEditingConfig(null);
+        setEditingConfigs(null);
     }
 
     if (!emulator) return <div>エミュレータ未接続</div>;
@@ -148,7 +156,6 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
         const ledComp = comp as LedComponent;
         return (
             <div key={comp.id} className="hw-group-item" style={{ position: 'relative' }}>
-                <button className="settings-btn" onClick={() => openConfigFor(comp.id)}>⚙️</button>
                 <div
                     className={`hw-led ${ledState.isOn ? 'on' : ''}`}
                     style={{
@@ -176,7 +183,6 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
         const swComp = comp as SwitchComponent;
         return (
             <div key={comp.id} className="hw-group-item" style={{ position: 'relative' }}>
-                <button className="settings-btn" onClick={() => openConfigFor(comp.id)}>⚙️</button>
                 <button
                     className={`hw-btn ${swState.isPressed ? 'pressed' : ''}`}
                     onMouseDown={() => swState.mode === 'momentary' && handleSwitchAction(comp.id, 'down')}
@@ -358,7 +364,8 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
             <h3>Breadboard (Hardware Components)</h3>
             <div className="components-grid">
                 {/* スイッチ 4つをひとつの枠にまとめて横並び表示（押す操作が必要なので先に配置） */}
-                <div className="hardware-component hw-group" style={{ gridColumn: 'span 2' }}>
+                <div className="hardware-component hw-group" style={{ gridColumn: 'span 2', position: 'relative' }}>
+                    <button className="settings-btn" onClick={() => openConfigsFor(['sw-1', 'sw-2', 'sw-3', 'sw-4'])}>⚙️</button>
                     <span className="label">Switches</span>
                     <div className="hw-group-row">
                         {renderSwitchItem('sw-1')}
@@ -369,7 +376,8 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
                 </div>
 
                 {/* LED 4つをひとつの枠にまとめて横並び表示（表示のみなので後に配置） */}
-                <div className="hardware-component hw-group" style={{ gridColumn: 'span 2' }}>
+                <div className="hardware-component hw-group" style={{ gridColumn: 'span 2', position: 'relative' }}>
+                    <button className="settings-btn" onClick={() => openConfigsFor(['led-1', 'led-2', 'led-3', 'led-4'])}>⚙️</button>
                     <span className="label">LEDs</span>
                     <div className="hw-group-row">
                         {renderLedItem('led-1')}
@@ -387,11 +395,11 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
                 {renderSingleComponent('adkey-1')}
                 {renderSingleComponent('scope-1')}
             </div>
-            {editingConfig && (
+            {editingConfigs && (
                 <HardwareConfigDialog
-                    config={editingConfig}
-                    onSave={handleSaveConfig}
-                    onClose={() => setEditingConfig(null)}
+                    configs={editingConfigs}
+                    onSave={handleSaveConfigs}
+                    onClose={() => setEditingConfigs(null)}
                 />
             )}
         </div>
