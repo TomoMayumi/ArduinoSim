@@ -27,7 +27,7 @@ body {
 
 .main-layout {
   display: grid;
-  grid-template-columns: minmax(400px, 450px) minmax(300px, 1fr) 340px;
+  grid-template-columns: minmax(400px, 450px) minmax(300px, 1fr) 380px;
   gap: 1rem;
   flex: 1;
   overflow-y: auto;
@@ -56,6 +56,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .disassembly-sidebar {
@@ -152,6 +154,7 @@ button.connected {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  overflow: hidden;
 }
 
 .hex-upload .buttons {
@@ -159,6 +162,7 @@ button.connected {
   flex-wrap: wrap;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
+  max-width: 100%;
 }
 
 .hex-upload button {
@@ -166,6 +170,9 @@ button.connected {
   padding: 0.25rem 0.5rem;
   white-space: normal;
   text-align: left;
+  max-width: 100%;
+  box-sizing: border-box;
+  word-break: break-word;
 }
 
 textarea {
@@ -186,8 +193,8 @@ textarea {
 
 .components-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 0.75rem;
 }
 
 .hardware-component {
@@ -245,6 +252,7 @@ textarea {
 
 .hw-group {
   align-items: stretch;
+  overflow: hidden;
 }
 
 .hw-group-row {
@@ -262,9 +270,11 @@ textarea {
   align-items: center;
   gap: 0.5rem;
   flex: 1;
+  min-width: 0;
   padding: 0.25rem;
   background: rgba(255, 255, 255, 0.03);
   border-radius: 0.25rem;
+  overflow: hidden;
 }
 
 .hw-group-item .hw-btn {
