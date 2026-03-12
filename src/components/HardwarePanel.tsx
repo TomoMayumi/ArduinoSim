@@ -357,18 +357,7 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
         <div className="hardware-panel">
             <h3>Breadboard (Hardware Components)</h3>
             <div className="components-grid">
-                {/* LED 4つをひとつの枠にまとめて横並び表示 */}
-                <div className="hardware-component hw-group" style={{ gridColumn: 'span 2' }}>
-                    <span className="label">LEDs</span>
-                    <div className="hw-group-row">
-                        {renderLedItem('led-1')}
-                        {renderLedItem('led-2')}
-                        {renderLedItem('led-3')}
-                        {renderLedItem('led-4')}
-                    </div>
-                </div>
-
-                {/* スイッチ 4つをひとつの枠にまとめて横並び表示 */}
+                {/* スイッチ 4つをひとつの枠にまとめて横並び表示（押す操作が必要なので先に配置） */}
                 <div className="hardware-component hw-group" style={{ gridColumn: 'span 2' }}>
                     <span className="label">Switches</span>
                     <div className="hw-group-row">
@@ -376,6 +365,17 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
                         {renderSwitchItem('sw-2')}
                         {renderSwitchItem('sw-3')}
                         {renderSwitchItem('sw-4')}
+                    </div>
+                </div>
+
+                {/* LED 4つをひとつの枠にまとめて横並び表示（表示のみなので後に配置） */}
+                <div className="hardware-component hw-group" style={{ gridColumn: 'span 2' }}>
+                    <span className="label">LEDs</span>
+                    <div className="hw-group-row">
+                        {renderLedItem('led-1')}
+                        {renderLedItem('led-2')}
+                        {renderLedItem('led-3')}
+                        {renderLedItem('led-4')}
                     </div>
                 </div>
 
