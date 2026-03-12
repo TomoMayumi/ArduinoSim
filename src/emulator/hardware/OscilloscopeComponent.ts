@@ -42,6 +42,14 @@ export class OscilloscopeComponent implements Component {
         this.lastUpdateCycle = currentCycle;
 
         for (const channel of this.channels) {
+            if (channel.pin === 'None') {
+                if (channel.samples.length > 0) {
+                    channel.samples = [];
+                    channel.lastValue = null;
+                }
+                continue;
+            }
+
             const value = getPinState(cpu, channel.pin);
             
             // 初回または値が変化した場合のみ記録

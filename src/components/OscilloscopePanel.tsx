@@ -9,29 +9,48 @@ interface OscilloscopePanelProps {
 
 export const OscilloscopePanel: React.FC<OscilloscopePanelProps> = ({ state, isRunning, onPinChange }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const [timeScale, setTimeScale] = useState(1); // 1 = 1600000 cycles total width
-    const [triggerMode, setTriggerMode] = useState<'none' | 'rising' | 'falling' | 'single'>('rising');
+    const [timeScale, setTimeScale] = useState(1); // Reference: 1 = 100ms total
+    const [triggerMode, setTriggerMode] = useState<'none' | 'auto' | 'single'>('auto');
+    const [triggerEdge, setTriggerEdge] = useState<'rising' | 'falling' | 'both'>('rising');
+    const [triggerChannel, setTriggerChannel] = useState(0); // 0-indexed
     const [isArmed, setIsArmed] = useState(false);
     const [frozenState, setFrozenState] = useState<{ state: OscilloscopeState, startCycle: number } | null>(null);
 
     // 表示用の設定
-    const CANVAS_WIDTH = 600;
-    const CANVAS_HEIGHT = 200;
-    const TOTAL_CYCLES = 1600000; // 100ms at 16MHz
+    const CANVAS_WIDTH = 640;
+    const CANVAS_HEIGHT = 320;
+    const TOTAL_CYCLES_REF = 1600000; // 100ms at 16MHz
 
     const ALL_PINS = [
+        'None',
         'D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7',
         'D8', 'D9', 'D10', 'D11', 'D12', 'D13',
         'A0', 'A1', 'A2', 'A3', 'A4', 'A5'
     ];
 
-    // Singleモードでトリガ設定が変更された時やisRunningがtrueになった時にリセット
+    const TIME_OPTIONS = [
+        { label: '200ms', value: 0.5 },
+        { label: '100ms', value: 1 },
+        { label: '50ms', value: 2 },
+        { label: '20ms', value: 5 },
+        { label: '10ms', value: 10 },
+        { label: '5ms', value: 20 },
+        { label: '2ms', value: 50 },
+        { label: '1ms', value: 100 },
+        { label: '500μs', value: 200 },
+        { label: '200μs', value: 500 },
+        { label: '100μs', value: 1000 },
+        { label: '50μs', value: 2000 },
+        { label: '20μs', value: 5000 },
+        { label: '10μs', value: 10000 },
+    ];
+
     useEffect(() => {
         if (triggerMode === 'single') {
             setIsArmed(true);
             setFrozenState(null);
         }
-    }, [triggerMode]);
+    }, [triggerMode, triggerChannel, triggerEdge]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -39,35 +58,33 @@ export const OscilloscopePanel: React.FC<OscilloscopePanelProps> = ({ state, isR
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        // シングルトリガの判定と更新停止
         let currentState = state;
         let currentStartCycle: number | null = null;
+        const visibleCycles = TOTAL_CYCLES_REF / timeScale;
 
-        const visibleCycles = TOTAL_CYCLES / timeScale;
+        const checkTrigger = (s1: { value: boolean }, s2: { value: boolean }) => {
+            if (triggerEdge === 'rising') return !s1.value && s2.value;
+            if (triggerEdge === 'falling') return s1.value && !s2.value;
+            return s1.value !== s2.value; // both
+        };
 
         if (triggerMode === 'single') {
             if (frozenState) {
                 currentState = frozenState.state;
                 currentStartCycle = frozenState.startCycle;
-            } else if (isArmed && state.channels.length > 0) {
-                // トリガ探索
-                const masterChannel = state.channels[0];
-                const samples = masterChannel.samples;
+            } else if (isArmed && state.channels[triggerChannel]) {
+                const triggerSource = state.channels[triggerChannel];
+                const samples = triggerSource.samples;
                 if (samples.length > 1) {
-                    const triggerSearchEnd = state.currentCycle - (visibleCycles * 0.9);
-                    const triggerSearchStart = state.currentCycle - visibleCycles * 5;
-
+                    const searchEnd = state.currentCycle - (visibleCycles * 0.9);
+                    const searchStart = state.currentCycle - visibleCycles * 8;
                     for (let i = samples.length - 1; i > 0; i--) {
                         const s1 = samples[i-1];
                         const s2 = samples[i];
-                        if (s2.cycle < triggerSearchStart) break;
-                        if (s2.cycle > triggerSearchEnd) continue;
-
-                        // SingleモードではRising/Fallingどちらでも反応するようにするか、あるいは既存の設定を流用
-                        // ユーザーの「シングルトリガ」は一般的に「何かの変化があったら止める」なので、立ち上がりで判定
-                        if (!s1.value && s2.value) {
-                            const foundStartCycle = s2.cycle - (visibleCycles * 0.1);
-                            setFrozenState({ state, startCycle: foundStartCycle });
+                        if (s2.cycle < searchStart) break;
+                        if (s2.cycle > searchEnd) continue;
+                        if (checkTrigger(s1, s2)) {
+                            setFrozenState({ state, startCycle: s2.cycle - (visibleCycles * 0.1) });
                             setIsArmed(false);
                             break;
                         }
@@ -76,48 +93,36 @@ export const OscilloscopePanel: React.FC<OscilloscopePanelProps> = ({ state, isR
             }
         }
 
-        // 描画用のデータ確定
         const renderState = currentState;
         let startCycle = currentStartCycle ?? (renderState.currentCycle - visibleCycles);
         
-        // 通常トリガ（Rising/Falling）の計算
-        if (triggerMode !== 'none' && triggerMode !== 'single' && renderState.channels.length > 0) {
-            const masterChannel = renderState.channels[0];
-            const samples = masterChannel.samples;
-            
+        if (triggerMode === 'auto' && renderState.channels[triggerChannel]) {
+            const triggerSource = renderState.channels[triggerChannel];
+            const samples = triggerSource.samples;
             if (samples.length > 1) {
-                const triggerSearchEnd = renderState.currentCycle - (visibleCycles * 0.9);
-                const triggerSearchStart = renderState.currentCycle - visibleCycles * 5;
-
-                let foundTrigger = false;
+                const searchEnd = renderState.currentCycle - (visibleCycles * 0.9);
+                const searchStart = renderState.currentCycle - visibleCycles * 8;
+                let found = false;
                 for (let i = samples.length - 1; i > 0; i--) {
                     const s1 = samples[i-1];
                     const s2 = samples[i];
-                    if (s2.cycle < triggerSearchStart) break;
-                    if (s2.cycle > triggerSearchEnd) continue;
-
-                    const isRising = !s1.value && s2.value;
-                    const isFalling = s1.value && !s2.value;
-
-                    if ((triggerMode === 'rising' && isRising) || (triggerMode === 'falling' && isFalling)) {
+                    if (s2.cycle < searchStart) break;
+                    if (s2.cycle > searchEnd) continue;
+                    if (checkTrigger(s1, s2)) {
                         startCycle = s2.cycle - (visibleCycles * 0.1);
-                        foundTrigger = true;
+                        found = true;
                         break;
                     }
                 }
-
-                if (!foundTrigger) {
+                if (!found) {
+                    // Fallback to latest activity if no stable trigger in window
                     for (let i = samples.length - 1; i > 0; i--) {
                         const s1 = samples[i-1];
                         const s2 = samples[i];
                         if (s2.cycle < renderState.currentCycle - visibleCycles) break;
-
-                        const isRising = !s1.value && s2.value;
-                        const isFalling = s1.value && !s2.value;
-
-                        if ((triggerMode === 'rising' && isRising) || (triggerMode === 'falling' && isFalling)) {
+                        if (checkTrigger(s1, s2)) {
                             startCycle = s2.cycle - (visibleCycles * 0.1);
-                            foundTrigger = true;
+                            found = true;
                             break;
                         }
                     }
@@ -125,7 +130,7 @@ export const OscilloscopePanel: React.FC<OscilloscopePanelProps> = ({ state, isR
             }
         }
 
-        // --- 描画開始 ---
+        // Render
         ctx.fillStyle = '#0f172a';
         ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
@@ -133,41 +138,37 @@ export const OscilloscopePanel: React.FC<OscilloscopePanelProps> = ({ state, isR
         ctx.lineWidth = 1;
         for (let i = 0; i <= 10; i++) {
             const x = (CANVAS_WIDTH / 10) * i;
-            ctx.beginPath();
-            ctx.moveTo(x, 0); ctx.lineTo(x, CANVAS_HEIGHT);
-            ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, CANVAS_HEIGHT); ctx.stroke();
         }
-        for (let i = 0; i <= 4; i++) {
-            const y = (CANVAS_HEIGHT / 4) * i;
-            ctx.beginPath();
-            ctx.moveTo(0, y); ctx.lineTo(CANVAS_WIDTH, y);
-            ctx.stroke();
+        for (let i = 0; i <= 8; i++) {
+            const y = (CANVAS_HEIGHT / 8) * i;
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(CANVAS_WIDTH, y); ctx.stroke();
         }
 
-        renderState.channels.forEach((channel, channelIdx) => {
+        const channelColors = ['#00ff00', '#ffff00', '#00ffff', '#ff00ff', '#ffffff', '#ff8000', '#80ff00', '#0080ff'];
+
+        renderState.channels.forEach((channel, idx) => {
+            if (channel.pin === 'None') return;
             const samples = channel.samples;
-            ctx.strokeStyle = channelIdx === 0 ? '#00ff00' : '#ffff00';
+            ctx.strokeStyle = channelColors[idx % channelColors.length];
             ctx.lineWidth = 2;
-
-            if (samples.length === 0) {
-                ctx.fillStyle = ctx.strokeStyle;
-                ctx.font = '10px monospace';
-                const y = (channelIdx + 1) * (CANVAS_HEIGHT / (renderState.channels.length + 1));
-                ctx.fillText(`CH${channelIdx + 1}: ${channel.pin} (No Data)`, 10, y - 5);
-                return;
-            };
 
             const getX = (cycle: number) => ((cycle - startCycle) / visibleCycles) * CANVAS_WIDTH;
             const getY = (val: boolean) => {
-                const base = (channelIdx + 1) * (CANVAS_HEIGHT / (renderState.channels.length + 1));
-                const height = CANVAS_HEIGHT / 5;
-                return val ? base - height : base;
+                const channelHeight = CANVAS_HEIGHT / 8;
+                const base = (idx + 1) * channelHeight;
+                const amplitude = channelHeight * 0.7;
+                return val ? base - amplitude : base - channelHeight * 0.1;
             };
 
-            let currentIdx = 0;
-            while(currentIdx < samples.length && getX(samples[currentIdx].cycle) < 0) {
-                currentIdx++;
+            if (samples.length === 0) {
+                ctx.fillStyle = ctx.strokeStyle; ctx.font = '10px monospace';
+                ctx.fillText(`CH${idx+1}:${channel.pin}`, 5, (idx + 1) * (CANVAS_HEIGHT/8) - 5);
+                return;
             }
+
+            let currentIdx = 0;
+            while(currentIdx < samples.length && getX(samples[currentIdx].cycle) < 0) currentIdx++;
             
             ctx.beginPath();
             let lastValue = currentIdx > 0 ? samples[currentIdx - 1].value : samples[0].value;
@@ -184,26 +185,49 @@ export const OscilloscopePanel: React.FC<OscilloscopePanelProps> = ({ state, isR
             ctx.lineTo(CANVAS_WIDTH, getY(lastValue));
             ctx.stroke();
 
-            ctx.fillStyle = ctx.strokeStyle;
-            ctx.font = 'bold 12px monospace';
-            ctx.fillText(`CH${channelIdx + 1}: ${channel.pin}`, 10, getY(true) - 10);
+            ctx.fillStyle = '#0f172a'; ctx.globalAlpha = 0.7;
+            ctx.fillRect(2, (idx) * (CANVAS_HEIGHT/8) + 2, 50, 14);
+            ctx.globalAlpha = 1.0;
+            ctx.fillStyle = ctx.strokeStyle; ctx.font = 'bold 10px sans-serif';
+            ctx.fillText(`CH${idx+1}:${channel.pin}`, 5, (idx) * (CANVAS_HEIGHT/8) + 12);
         });
 
-    }, [state, timeScale, triggerMode, isArmed, frozenState]);
+        // Trigger Marker
+        if (triggerMode !== 'none') {
+            ctx.strokeStyle = '#ef4444'; ctx.setLineDash([5, 5]); ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(CANVAS_WIDTH * 0.1, 0); ctx.lineTo(CANVAS_WIDTH * 0.1, CANVAS_HEIGHT); ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+    }, [state, timeScale, triggerMode, triggerEdge, triggerChannel, isArmed, frozenState]);
 
     return (
-        <div className="oscilloscope-panel" style={{ background: '#0f172a', padding: '1rem', borderRadius: '4px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-                <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#38bdf8' }}>Oscilloscope</h3>
-                
-                <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
+        <div className="oscilloscope-panel" style={{ background: '#1e293b', padding: '1rem', borderRadius: '8px', color: '#f8fafc', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h3 style={{ margin: 0, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{ fontSize: '1.2rem' }}>O</span>SCILLOSCOPE
+                        <span style={{ fontSize: '0.7rem', background: '#38bdf8', color: '#0f172a', padding: '1px 4px', borderRadius: '3px' }}>8CH</span>
+                    </h3>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                        <label style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Time/Div</label>
+                        <select 
+                            value={timeScale} onChange={e => setTimeScale(Number(e.target.value))}
+                            style={{ background: '#0f172a', color: '#fff', border: '1px solid #475569', borderRadius: '4px', padding: '2px 4px' }}
+                        >
+                            {TIME_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                        </select>
+                    </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '0.5rem', background: '#0f172a', padding: '0.5rem', borderRadius: '6px' }}>
                     {state.channels.map((ch, idx) => (
-                        <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#1e293b', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>
-                            <span style={{ fontSize: '0.8rem', color: idx === 0 ? '#00ff00' : '#ffff00', fontWeight: 'bold' }}>CH{idx+1}</span>
+                        <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem' }}>
+                            <span style={{ color: ['#00ff00', '#ffff00', '#00ffff', '#ff00ff', '#ffffff', '#ff8000', '#80ff00', '#0080ff'][idx % 8], fontWeight: 'bold' }}>CH{idx+1}</span>
                             <select 
                                 value={ch.pin} 
                                 onChange={e => onPinChange(idx, e.target.value)}
-                                style={{ background: '#0f172a', color: '#fff', border: '1px solid #475569', fontSize: '0.75rem', padding: '1px 4px' }}
+                                style={{ background: '#1e293b', color: '#fff', border: 'none', fontSize: '0.7rem', width: '100%' }}
                             >
                                 {ALL_PINS.map(p => <option key={p} value={p}>{p}</option>)}
                             </select>
@@ -211,59 +235,54 @@ export const OscilloscopePanel: React.FC<OscilloscopePanelProps> = ({ state, isR
                     ))}
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.8rem', fontSize: '0.85rem', alignItems: 'center' }}>
-                    <label style={{ color: '#94a3b8' }}>
-                        Time: 
-                        <select value={timeScale} onChange={e => setTimeScale(Number(e.target.value))} style={{ background: '#1e293b', color: '#fff', border: '1px solid #475569', marginLeft: '0.4rem' }}>
-                            <option value={0.1}>x0.1</option>
-                            <option value={0.5}>x0.5</option>
-                            <option value={1}>x1 (100ms)</option>
-                            <option value={2}>x2 (50ms)</option>
-                            <option value={5}>x5 (20ms)</option>
-                            <option value={10}>x10 (10ms)</option>
-                            <option value={50}>x50 (2ms)</option>
-                        </select>
-                    </label>
-                    <label style={{ color: '#94a3b8' }}>
-                        Trig: 
-                        <select value={triggerMode} onChange={e => setTriggerMode(e.target.value as any)} style={{ background: '#1e293b', color: '#fff', border: '1px solid #475569', marginLeft: '0.4rem' }}>
-                            <option value="none">Auto</option>
-                            <option value="rising">Rising</option>
-                            <option value="falling">Falling</option>
+                <div style={{ display: 'flex', gap: '1rem', background: '#0f172a', padding: '0.5rem', borderRadius: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Mode:</span>
+                        <select value={triggerMode} onChange={e => setTriggerMode(e.target.value as any)} style={{ background: '#1e293b', color: '#fff', border: '1px solid #475569', fontSize: '0.8rem' }}>
+                            <option value="none">Off</option>
+                            <option value="auto">Auto</option>
                             <option value="single">Single</option>
                         </select>
-                    </label>
+                    </div>
+                    {triggerMode !== 'none' && (
+                        <>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Source:</span>
+                                <select value={triggerChannel} onChange={e => setTriggerChannel(Number(e.target.value))} style={{ background: '#1e293b', color: '#fff', border: '1px solid #475569', fontSize: '0.8rem' }}>
+                                    {state.channels.map((_, i) => <option key={i} value={i}>CH{i+1}</option>)}
+                                </select>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Edge:</span>
+                                <select value={triggerEdge} onChange={e => setTriggerEdge(e.target.value as any)} style={{ background: '#1e293b', color: '#fff', border: '1px solid #475569', fontSize: '0.8rem' }}>
+                                    <option value="rising">Rising</option>
+                                    <option value="falling">Falling</option>
+                                    <option value="both">Both</option>
+                                </select>
+                            </div>
+                        </>
+                    )}
                     {triggerMode === 'single' && (
                         <button 
                             onClick={() => { setIsArmed(true); setFrozenState(null); }}
-                            style={{ 
-                                background: isArmed ? '#ef4444' : '#10b981', 
-                                color: '#fff', border: 'none', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', cursor: 'pointer',
-                                boxShadow: isArmed ? '0 0 10px rgba(239, 68, 68, 0.5)' : 'none'
-                             }}
+                            style={{ background: isArmed ? '#ef4444' : '#10b981', color: '#fff', border: 'none', padding: '4px 12px', borderRadius: '4px', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 'bold' }}
                         >
-                            {isArmed ? 'ARMED...' : 'RESET/ARM'}
+                            {isArmed ? 'ARMED' : 'ARM'}
                         </button>
                     )}
                 </div>
-            </div>
-            
-            <div style={{ position: 'relative' }}>
-                <canvas 
-                    ref={canvasRef} 
-                    width={CANVAS_WIDTH} 
-                    height={CANVAS_HEIGHT} 
-                    style={{ width: '100%', height: 'auto', border: '1px solid #334155', display: 'block' }}
-                />
-            </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem' }}>
-                <span style={{ fontSize: '0.7rem', color: '#64748b' }}>
-                    {triggerMode === 'single' ? (isArmed ? '● WAITING FOR TRIGGER' : '|| CAPTURED') : (isRunning ? '● LIVE' : '|| STOPPED')}
-                </span>
-                <span style={{ fontSize: '0.7rem', color: '#64748b' }}>
-                    Horizontal: {(10 / timeScale).toFixed(1)}ms/div
-                </span>
+                <div style={{ position: 'relative', background: '#000', borderRadius: '4px', overflow: 'hidden' }}>
+                    <canvas ref={canvasRef} width={CANVAS_WIDTH} height={CANVAS_HEIGHT} style={{ width: '100%', height: 'auto', display: 'block' }} />
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#64748b' }}>
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        <span style={{ color: isRunning ? '#10b981' : '#64748b' }}>{isRunning ? '● RUNNING' : '|| STOPPED'}</span>
+                        {triggerMode === 'single' && <span>{isArmed ? 'WAITING TRIGGER' : 'CAPTURED'}</span>}
+                    </div>
+                    <span>Resolution: 62.5ns/cycle</span>
+                </div>
             </div>
         </div>
     );
