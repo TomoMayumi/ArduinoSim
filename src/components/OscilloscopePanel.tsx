@@ -10,6 +10,7 @@ interface OscilloscopePanelProps {
 export const OscilloscopePanel: React.FC<OscilloscopePanelProps> = ({ state, isRunning, onPinChange }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [timeScale, setTimeScale] = useState(1); // Reference: 1 = 100ms total
+    const [displayChannelCount, setDisplayChannelCount] = useState(4); // デフォルト4CH表示
     const [triggerMode, setTriggerMode] = useState<'none' | 'auto' | 'single'>('auto');
     const [triggerEdge, setTriggerEdge] = useState<'rising' | 'falling' | 'both'>('rising');
     const [triggerChannel, setTriggerChannel] = useState(0); // 0-indexed
@@ -45,12 +46,20 @@ export const OscilloscopePanel: React.FC<OscilloscopePanelProps> = ({ state, isR
         { label: '10μs', value: 10000 },
     ];
 
+    const channelColors = ['#00ff00', '#ffff00', '#00ffff', '#ff00ff', '#ffffff', '#ff8000', '#80ff00', '#0080ff'];
+
     useEffect(() => {
         if (triggerMode === 'single') {
             setIsArmed(true);
             setFrozenState(null);
         }
     }, [triggerMode, triggerChannel, triggerEdge]);
+
+    useEffect(() => {
+        if (triggerChannel >= displayChannelCount) {
+            setTriggerChannel(0);
+        }
+    }, [displayChannelCount, triggerChannel]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -140,14 +149,14 @@ export const OscilloscopePanel: React.FC<OscilloscopePanelProps> = ({ state, isR
             const x = (CANVAS_WIDTH / 10) * i;
             ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, CANVAS_HEIGHT); ctx.stroke();
         }
-        for (let i = 0; i <= 8; i++) {
-            const y = (CANVAS_HEIGHT / 8) * i;
+        for (let i = 0; i <= displayChannelCount; i++) {
+            const y = (CANVAS_HEIGHT / displayChannelCount) * i;
             ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(CANVAS_WIDTH, y); ctx.stroke();
         }
 
-        const channelColors = ['#00ff00', '#ffff00', '#00ffff', '#ff00ff', '#ffffff', '#ff8000', '#80ff00', '#0080ff'];
 
-        renderState.channels.forEach((channel, idx) => {
+
+        renderState.channels.slice(0, displayChannelCount).forEach((channel, idx) => {
             if (channel.pin === 'None') return;
             const samples = channel.samples;
             ctx.strokeStyle = channelColors[idx % channelColors.length];
@@ -155,17 +164,13 @@ export const OscilloscopePanel: React.FC<OscilloscopePanelProps> = ({ state, isR
 
             const getX = (cycle: number) => ((cycle - startCycle) / visibleCycles) * CANVAS_WIDTH;
             const getY = (val: boolean) => {
-                const channelHeight = CANVAS_HEIGHT / 8;
+                const channelHeight = CANVAS_HEIGHT / displayChannelCount;
                 const base = (idx + 1) * channelHeight;
                 const amplitude = channelHeight * 0.7;
                 return val ? base - amplitude : base - channelHeight * 0.1;
             };
 
-            if (samples.length === 0) {
-                ctx.fillStyle = ctx.strokeStyle; ctx.font = '10px monospace';
-                ctx.fillText(`CH${idx+1}:${channel.pin}`, 5, (idx + 1) * (CANVAS_HEIGHT/8) - 5);
-                return;
-            }
+            if (samples.length === 0) return;
 
             let currentIdx = 0;
             while(currentIdx < samples.length && getX(samples[currentIdx].cycle) < 0) currentIdx++;
@@ -184,12 +189,6 @@ export const OscilloscopePanel: React.FC<OscilloscopePanelProps> = ({ state, isR
             }
             ctx.lineTo(CANVAS_WIDTH, getY(lastValue));
             ctx.stroke();
-
-            ctx.fillStyle = '#0f172a'; ctx.globalAlpha = 0.7;
-            ctx.fillRect(2, (idx) * (CANVAS_HEIGHT/8) + 2, 50, 14);
-            ctx.globalAlpha = 1.0;
-            ctx.fillStyle = ctx.strokeStyle; ctx.font = 'bold 10px sans-serif';
-            ctx.fillText(`CH${idx+1}:${channel.pin}`, 5, (idx) * (CANVAS_HEIGHT/8) + 12);
         });
 
         // Trigger Marker
@@ -199,81 +198,105 @@ export const OscilloscopePanel: React.FC<OscilloscopePanelProps> = ({ state, isR
             ctx.setLineDash([]);
         }
 
-    }, [state, timeScale, triggerMode, triggerEdge, triggerChannel, isArmed, frozenState]);
+    }, [state, timeScale, triggerMode, triggerEdge, triggerChannel, isArmed, frozenState, displayChannelCount]);
 
     return (
         <div className="oscilloscope-panel" style={{ background: '#1e293b', padding: '1rem', borderRadius: '8px', color: '#f8fafc', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h3 style={{ margin: 0, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+                    <h3 style={{ margin: 0, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap' }}>
                         <span style={{ fontSize: '1.2rem' }}>O</span>SCILLOSCOPE
                         <span style={{ fontSize: '0.7rem', background: '#38bdf8', color: '#0f172a', padding: '1px 4px', borderRadius: '3px' }}>8CH</span>
                     </h3>
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                        <label style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Time/Div</label>
-                        <select 
-                            value={timeScale} onChange={e => setTimeScale(Number(e.target.value))}
-                            style={{ background: '#0f172a', color: '#fff', border: '1px solid #475569', borderRadius: '4px', padding: '2px 4px' }}
-                        >
-                            {TIME_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-                        </select>
-                    </div>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '0.5rem', background: '#0f172a', padding: '0.5rem', borderRadius: '6px' }}>
-                    {state.channels.map((ch, idx) => (
-                        <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem' }}>
-                            <span style={{ color: ['#00ff00', '#ffff00', '#00ffff', '#ff00ff', '#ffffff', '#ff8000', '#80ff00', '#0080ff'][idx % 8], fontWeight: 'bold' }}>CH{idx+1}</span>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap', background: '#0f172a', padding: '0.5rem', borderRadius: '6px' }}>
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                            <label style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Channels</label>
                             <select 
-                                value={ch.pin} 
-                                onChange={e => onPinChange(idx, e.target.value)}
-                                style={{ background: '#1e293b', color: '#fff', border: 'none', fontSize: '0.7rem', width: '100%' }}
+                                value={displayChannelCount} onChange={e => setDisplayChannelCount(Number(e.target.value))}
+                                style={{ background: '#1e293b', color: '#fff', border: '1px solid #475569', borderRadius: '4px', padding: '2px', fontSize: '0.8rem' }}
                             >
-                                {ALL_PINS.map(p => <option key={p} value={p}>{p}</option>)}
+                                <option value={1}>1 CH</option>
+                                <option value={2}>2 CH</option>
+                                <option value={4}>4 CH</option>
+                                <option value={8}>8 CH</option>
                             </select>
                         </div>
-                    ))}
-                </div>
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                            <label style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Time/Div</label>
+                            <select 
+                                value={timeScale} onChange={e => setTimeScale(Number(e.target.value))}
+                                style={{ background: '#1e293b', color: '#fff', border: '1px solid #475569', borderRadius: '4px', padding: '2px', fontSize: '0.8rem' }}
+                            >
+                                {TIME_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                            </select>
+                        </div>
 
-                <div style={{ display: 'flex', gap: '1rem', background: '#0f172a', padding: '0.5rem', borderRadius: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Mode:</span>
-                        <select value={triggerMode} onChange={e => setTriggerMode(e.target.value as any)} style={{ background: '#1e293b', color: '#fff', border: '1px solid #475569', fontSize: '0.8rem' }}>
-                            <option value="none">Off</option>
-                            <option value="auto">Auto</option>
-                            <option value="single">Single</option>
-                        </select>
+                        <div style={{ width: '1px', height: '20px', background: '#1e293b', margin: '0 0.5rem' }}></div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Mode:</span>
+                            <select value={triggerMode} onChange={e => setTriggerMode(e.target.value as any)} style={{ background: '#1e293b', color: '#fff', border: '1px solid #475569', fontSize: '0.8rem', padding: '2px', borderRadius: '4px' }}>
+                                <option value="none">Off</option>
+                                <option value="auto">Auto</option>
+                                <option value="single">Single</option>
+                            </select>
+                        </div>
+                        {triggerMode !== 'none' && (
+                            <>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Src:</span>
+                                    <select value={triggerChannel} onChange={e => setTriggerChannel(Number(e.target.value))} style={{ background: '#1e293b', color: '#fff', border: '1px solid #475569', fontSize: '0.8rem', padding: '2px', borderRadius: '4px' }}>
+                                        {state.channels.slice(0, displayChannelCount).map((_, i) => <option key={i} value={i}>CH{i+1}</option>)}
+                                    </select>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Edge:</span>
+                                    <select value={triggerEdge} onChange={e => setTriggerEdge(e.target.value as any)} style={{ background: '#1e293b', color: '#fff', border: '1px solid #475569', fontSize: '0.8rem', padding: '2px', borderRadius: '4px' }}>
+                                        <option value="rising">Rising</option>
+                                        <option value="falling">Falling</option>
+                                        <option value="both">Both</option>
+                                    </select>
+                                </div>
+                            </>
+                        )}
+                        {triggerMode === 'single' && (
+                            <button 
+                                onClick={() => { setIsArmed(true); setFrozenState(null); }}
+                                style={{ background: isArmed ? '#ef4444' : '#10b981', color: '#fff', border: 'none', padding: '4px 12px', borderRadius: '4px', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 'bold' }}
+                            >
+                                {isArmed ? 'ARMED' : 'ARM'}
+                            </button>
+                        )}
                     </div>
-                    {triggerMode !== 'none' && (
-                        <>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Source:</span>
-                                <select value={triggerChannel} onChange={e => setTriggerChannel(Number(e.target.value))} style={{ background: '#1e293b', color: '#fff', border: '1px solid #475569', fontSize: '0.8rem' }}>
-                                    {state.channels.map((_, i) => <option key={i} value={i}>CH{i+1}</option>)}
-                                </select>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Edge:</span>
-                                <select value={triggerEdge} onChange={e => setTriggerEdge(e.target.value as any)} style={{ background: '#1e293b', color: '#fff', border: '1px solid #475569', fontSize: '0.8rem' }}>
-                                    <option value="rising">Rising</option>
-                                    <option value="falling">Falling</option>
-                                    <option value="both">Both</option>
-                                </select>
-                            </div>
-                        </>
-                    )}
-                    {triggerMode === 'single' && (
-                        <button 
-                            onClick={() => { setIsArmed(true); setFrozenState(null); }}
-                            style={{ background: isArmed ? '#ef4444' : '#10b981', color: '#fff', border: 'none', padding: '4px 12px', borderRadius: '4px', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 'bold' }}
-                        >
-                            {isArmed ? 'ARMED' : 'ARM'}
-                        </button>
-                    )}
                 </div>
 
-                <div style={{ position: 'relative', background: '#000', borderRadius: '4px', overflow: 'hidden' }}>
-                    <canvas ref={canvasRef} width={CANVAS_WIDTH} height={CANVAS_HEIGHT} style={{ width: '100%', height: 'auto', display: 'block' }} />
+                <div style={{ display: 'flex', gap: '0', alignItems: 'stretch', background: '#000', borderRadius: '6px', overflow: 'hidden', border: '1px solid #1e293b' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', width: '60px', background: '#0f172a', flexShrink: 0 }}>
+                        {state.channels.slice(0, displayChannelCount).map((ch, idx) => (
+                            <div key={idx} style={{ 
+                                flex: 1, 
+                                display: 'flex', 
+                                flexDirection: 'column', 
+                                justifyContent: 'center', 
+                                alignItems: 'center',
+                                padding: '0 0.25rem',
+                                borderBottom: idx < displayChannelCount - 1 ? '1px solid #1e293b' : 'none'
+                             }}>
+                                <span style={{ color: channelColors[idx % 8], fontWeight: 'bold', fontSize: '0.75rem', marginBottom: '2px' }}>CH{idx+1}</span>
+                                <select 
+                                    value={ch.pin} 
+                                    onChange={e => onPinChange(idx, e.target.value)}
+                                    style={{ background: '#1e293b', color: '#fff', border: 'none', fontSize: '0.7rem', width: '100%', padding: '2px 0', textAlign: 'center' }}
+                                >
+                                    {ALL_PINS.map(p => <option key={p} value={p}>{p}</option>)}
+                                </select>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div style={{ flex: 1, position: 'relative', display: 'flex', minWidth: 0 }}>
+                        <canvas ref={canvasRef} width={CANVAS_WIDTH} height={CANVAS_HEIGHT} style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'fill' }} />
+                    </div>
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#64748b' }}>
