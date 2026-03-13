@@ -25,12 +25,31 @@ body {
   gap: 0;
 }
 
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
 .main-layout {
   display: grid;
-  grid-template-columns: minmax(400px, 450px) minmax(300px, 1fr) 380px;
+  grid-template-columns: minmax(400px, 450px) 250px minmax(300px, 1fr) 300px;
   gap: 1rem;
   flex: 1;
-  overflow-y: auto;
+  overflow-y: hidden;
   overflow-x: hidden;
   padding-top: 1rem;
 }
@@ -46,24 +65,16 @@ body {
   z-index: 10;
 }
 
-.main-content {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
+.main-content,
+.register-sidebar,
+.disassembly-sidebar,
 .sidebar {
   display: flex;
   flex-direction: column;
   gap: 1rem;
   min-width: 0;
-  overflow: hidden;
-}
-
-.disassembly-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  overflow-y: auto;
+  padding-bottom: 2rem; /* Scrolling past the end padding */
 }
 
 

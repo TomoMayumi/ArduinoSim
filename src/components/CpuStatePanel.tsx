@@ -115,9 +115,9 @@ export const CpuStatePanel: React.FC<CpuStatePanelProps> = memo(({ emulator, isR
                             {group.registers.map(reg => {
                                 const val = cpu.data[reg.addr];
                                 return (
-                                    <div key={reg.name} style={{ display: 'grid', gridTemplateColumns: '70px 40px 40px 40px 80px', gap: '1rem', fontFamily: 'monospace', color: '#94a3b8' }}>
-                                        <span style={{ color: '#e2e8f0', fontWeight: 'bold' }}>{reg.name}</span>
-                                        <span style={{ color: '#64748b' }}>0x{reg.addr.toString(16).toUpperCase().padStart(2, '0')}</span>
+                                <div key={reg.name} style={{ display: 'grid', gridTemplateColumns: '45px 35px 35px 25px 60px', gap: '0.25rem', fontFamily: 'monospace', color: '#94a3b8', fontSize: '0.75rem', alignItems: 'center' }}>
+                                    <span style={{ color: '#e2e8f0', fontWeight: 'bold' }}>{reg.name}</span>
+                                    <span style={{ color: '#64748b' }}>0x{reg.addr.toString(16).toUpperCase().padStart(2, '0')}</span>
                                         <span title="Hexadecimal">0x{val.toString(16).toUpperCase().padStart(2, '0')}</span>
                                         <span title="Decimal">{val.toString(10).padStart(3, ' ')}</span>
                                         <span title="Binary">0b{val.toString(2).padStart(8, '0')}</span>

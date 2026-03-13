@@ -517,39 +517,45 @@ function App() {
 
       <div className="main-layout">
         <main className="main-content">
-          <div className="card">
-            <h2>Arduino Board (Emulated)</h2>
-            <div style={{ display: 'flex', gap: '2rem', alignItems: 'center', padding: '1rem' }}>
-              <Pin13Led portB={emulator?.portB} />
-              <div className="board-info">
-                <p>MCU: ATmega328P</p>
-                <p>Clock: 16MHz</p>
-                <p>Status: {isRunning ? 'Running' : 'Stopped'}</p>
-                <p style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: '#94a3b8' }}>
-                  PC: 0x{debugInfo.pc.toString(16).padStart(4, '0')} |
-                  Cycles: {debugInfo.cycles.toLocaleString()}
-                </p>
+          <div className="card" style={{ padding: '0.5rem 1.5rem' }}>
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <h3 style={{ margin: 0, fontSize: '1rem' }}>Arduino (ATmega328P)</h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}>
+                  <Pin13Led portB={emulator?.portB} />
+                  <span>D13</span>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', fontSize: '0.8rem', color: '#cbd5e1' }}>
+                <span>Clock: 16MHz</span>
+                <span>Status: {isRunning ? 'Running' : 'Stopped'}</span>
+                <span style={{ fontFamily: 'monospace', color: '#94a3b8' }}>
+                  PC: 0x{debugInfo.pc.toString(16).padStart(4, '0')} | Cycles: {debugInfo.cycles.toLocaleString()}
+                </span>
               </div>
             </div>
           </div>
 
           <div className="card">
+            <HardwarePanel emulator={emulator} isRunning={isRunning} />
+          </div>
+
+          <div className="card" style={{ padding: '0.5rem 1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
             <SerialConsole
               uart={emulator?.uart}
               onReset={reset}
               noResetMode={noResetMode}
             />
           </div>
-
-          <div className="card">
-            <HardwarePanel emulator={emulator} isRunning={isRunning} />
-          </div>
         </main>
 
-        <aside className="disassembly-sidebar">
-          <div className="card" style={{ display: 'flex', flexDirection: 'column', boxSizing: 'border-box', overflowY: 'auto' }}>
+        <aside className="register-sidebar">
+          <div className="card" style={{ display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
             <CpuStatePanel emulator={emulator} isRunning={isRunning} />
           </div>
+        </aside>
+
+        <aside className="disassembly-sidebar">
           <div className="card" style={{ display: 'flex', flexDirection: 'column', boxSizing: 'border-box', flex: 1, minHeight: 0 }}>
             <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.5rem', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', gap: '1rem' }}>
