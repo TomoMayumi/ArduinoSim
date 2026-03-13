@@ -503,7 +503,7 @@ function App() {
   return (
     <div className="app-container">
       <header className="header">
-        <h1>Arduino/Atmega328P Simulator</h1>
+        <h1 style={{ margin: '0' }}>Arduino/Atmega328P Simulator</h1>
         <div className="controls">
           <button onClick={isRunning ? stop : start}>
             {isRunning ? '一時停止' : '実行'}
