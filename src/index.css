@@ -74,7 +74,6 @@ body {
   gap: 0.5rem;
   min-width: 0;
   overflow-y: auto;
-  padding-bottom: 2rem; /* Scrolling past the end padding */
 }
 
 
@@ -165,7 +164,7 @@ button.connected {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 .hex-upload .buttons {
