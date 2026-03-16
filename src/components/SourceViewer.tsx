@@ -147,7 +147,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = memo(({
         <div className="source-viewer-container" style={{ display: 'flex', height: '100%', gap: '1px', background: '#334155' }}>
             {/* File Explorer */}
             <div className="file-explorer" style={{ width: '180px', background: '#1e293b', overflowY: 'auto', padding: '0.5rem' }}>
-                <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.8rem', color: '#94a3b8', textTransform: 'uppercase' }}>Files</h4>
+                <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.8rem', color: '#94a3b8', textTransform: 'uppercase' }}>ファイル</h4>
                 {renderTree(fileTree)}
             </div>
 

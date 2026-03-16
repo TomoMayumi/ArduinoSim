@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { parseHex } from './emulator/intelhex';
 import { useEmulator } from './emulator/useEmulator';
 import { Pin13Led } from './components/Pin13Led';
@@ -9,7 +9,13 @@ import { SourceViewer } from './components/SourceViewer';
 import { CpuStatePanel } from './components/CpuStatePanel';
 import './index.css';
 
-// サンプルデータの定数は public/samples/ 配下の JSON ファイルに移行しました
+// サンプル一覧の型定義
+interface SampleInfo {
+  filename: string;
+  name: string;
+  category: string;
+  description: string;
+}
 
 function App() {
   const [hexInput, setHexInput] = useState('');
@@ -21,8 +27,22 @@ function App() {
   const [debugInfo, setDebugInfo] = useState({ pc: 0, cycles: 0 });
   const [viewMode, setViewMode] = useState<'disassembly' | 'source'>('source');
   const [showAsmInSource, setShowAsmInSource] = useState(false);
-
   const [activeTabFilename, setActiveTabFilename] = useState<string | null>(null);
+
+  // サンプル一覧
+  const [sampleList, setSampleList] = useState<SampleInfo[]>([]);
+  const [selectedSample, setSelectedSample] = useState('blink.json');
+
+  // 折りたたみ
+  const [showHexLss, setShowHexLss] = useState(false);
+
+  // トースト通知
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  const showToast = useCallback((message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  }, []);
 
   useEffect(() => {
     try {
@@ -36,12 +56,24 @@ function App() {
     }
   }, [hexInput]);
 
+  // サンプル一覧を読み込む
+  useEffect(() => {
+    fetch('/samples/sample_index.json')
+      .then(res => res.json())
+      .then(data => {
+        setSampleList(data.samples || []);
+      })
+      .catch(e => console.error('サンプル一覧の読み込みに失敗:', e));
+  }, []);
+
   useEffect(() => {
     // 初回ロード時に Blink を読み込む
     loadSample('blink.json');
   }, []);
 
-  const loadSample = async (filename: string, isPreset = false) => {
+  const loadSample = async (filename: string) => {
+    const sampleInfo = sampleList.find(s => s.filename === filename);
+
     try {
       const response = await fetch(`/samples/${filename}`);
       const data = await response.json();
@@ -58,19 +90,23 @@ function App() {
       if (data.hardwareConfigs) {
         localStorage.setItem('arduino_sim_hardware_config', JSON.stringify(data.hardwareConfigs));
         window.dispatchEvent(new Event('hardwareConfigChanged'));
-      } else if (isPreset) {
-         // プリセットかつ設定がない場合は初期化しないでおくか、初期化するかの判断になるが
-         // 互換性のため一旦そのままにする
       }
 
-      if (isPreset) {
-        alert(`${filename.replace('.json', '')} プリセットをロードしました`);
-      }
+      setSelectedSample(filename);
+      const displayName = sampleInfo?.name || filename.replace('.json', '');
+      showToast(`${displayName} をロードしました`);
     } catch (e) {
       console.error('Sample Load Error:', e);
-      alert('サンプルのロードに失敗しました');
+      showToast('サンプルのロードに失敗しました', 'error');
     }
   };
+
+  // サンプルをカテゴリ別にグループ化
+  const samplesByCategory = sampleList.reduce<Record<string, SampleInfo[]>>((acc, sample) => {
+    if (!acc[sample.category]) acc[sample.category] = [];
+    acc[sample.category].push(sample);
+    return acc;
+  }, {});
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -88,7 +124,7 @@ function App() {
     const name = prompt('ファイル名を入力してください (例: main.c):');
     if (name) {
       if (sourceFiles.find(f => f.name === name)) {
-        alert('そのファイル名は既に存在します');
+        showToast('そのファイル名は既に存在します', 'error');
         return;
       }
       setSourceFiles([...sourceFiles, { name, content: '' }]);
@@ -181,11 +217,11 @@ function App() {
 
       if (newSourceFiles.length > 0 && !activeTabFilename) {
         setActiveTabFilename(newSourceFiles[0].name);
-      } else if (detectedHex && !activeTabFilename) {
-          // ソースがない場合でも何か表示させるためのケア
       }
+
+      showToast(`${msg.split('が見つかりました')[0]}を読み込みました`);
     } else {
-      alert('有効なファイル（.c, .h, .hex, .lss 等）が見つかりませんでした。');
+      showToast('有効なファイル（.c, .h, .hex, .lss 等）が見つかりませんでした。', 'error');
     }
 
     e.target.value = '';
@@ -193,16 +229,23 @@ function App() {
 
   return (
     <div className="app-container">
+      {/* トースト通知 */}
+      {toast && (
+        <div className={`toast-notification ${toast.type}`}>
+          {toast.message}
+        </div>
+      )}
+
       <header className="header">
         <h1 style={{ margin: '0' }}>Arduino/Atmega328P Simulator</h1>
         <div className="controls">
           <button onClick={isRunning ? stop : start}>
-            {isRunning ? '一時停止' : '実行'}
+            {isRunning ? '⏸ 一時停止' : '▶ 実行'}
           </button>
           {!isRunning && (
-            <button onClick={step} style={{ marginLeft: '0.5rem' }}>ステップ</button>
+            <button onClick={step} style={{ marginLeft: '0.5rem' }}>⏭ ステップ</button>
           )}
-          <button onClick={reset} style={{ marginLeft: '0.5rem' }}>リセット</button>
+          <button onClick={reset} style={{ marginLeft: '0.5rem' }}>🔄 リセット</button>
         </div>
       </header>
 
@@ -218,10 +261,10 @@ function App() {
                 </div>
               </div>
               <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', fontSize: '0.8rem', color: '#cbd5e1' }}>
-                <span>Clock: 16MHz</span>
-                <span>Status: {isRunning ? 'Running' : 'Stopped'}</span>
+                <span>クロック: 16MHz</span>
+                <span>状態: {isRunning ? '実行中' : '停止中'}</span>
                 <span style={{ fontFamily: 'monospace', color: '#94a3b8' }}>
-                  PC: 0x{debugInfo.pc.toString(16).padStart(4, '0')} | Cycles: {debugInfo.cycles.toLocaleString()}
+                  PC: 0x{debugInfo.pc.toString(16).padStart(4, '0')} | サイクル: {debugInfo.cycles.toLocaleString()}
                 </span>
               </div>
             </div>
@@ -251,15 +294,15 @@ function App() {
             <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.5rem', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', gap: '1rem' }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
-                  <input type="radio" value="source" checked={viewMode === 'source'} onChange={(e) => setViewMode(e.target.value as any)} /> Source
+                  <input type="radio" value="source" checked={viewMode === 'source'} onChange={(e) => setViewMode(e.target.value as any)} /> ソース
                 </label>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
-                  <input type="radio" value="disassembly" checked={viewMode === 'disassembly'} onChange={(e) => setViewMode(e.target.value as any)} /> Disassembly
+                  <input type="radio" value="disassembly" checked={viewMode === 'disassembly'} onChange={(e) => setViewMode(e.target.value as any)} /> 逆アセンブリ
                 </label>
               </div>
               {viewMode === 'source' && (
                 <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer', fontSize: '0.8rem', color: '#94a3b8' }}>
-                  <input type="checkbox" checked={showAsmInSource} onChange={(e) => setShowAsmInSource(e.target.checked)} /> Show ASM
+                  <input type="checkbox" checked={showAsmInSource} onChange={(e) => setShowAsmInSource(e.target.checked)} /> ASM表示
                 </label>
               )}
             </div>
@@ -311,65 +354,68 @@ function App() {
           </div>
 
           <div className="card hex-upload">
-            <h3>HEX & LSS プログラム</h3>
-            <div className="buttons">
-              <button onClick={() => loadSample('blink.json')}>
-                Blink (Lチカ)
-              </button>
-              <button onClick={() => loadSample('serial_echo.json')}>
-                Serial Echo (エコーバック)
-              </button>
-              <button onClick={() => loadSample('blink2.json')}>
-                Blink2 (Lチカ)
-              </button>
-              <button onClick={() => loadSample('push_switch.json')}>
-                Push Switch (プッシュスイッチ)
-              </button>
-              <button onClick={() => loadSample('pot_blink.json')}>
-                Potentiometer (可変抵抗)
-              </button>
-              <button onClick={() => loadSample('seven_segment.json')}>
-                7-Segment (7セグ)
-              </button>
-              <button onClick={() => loadSample('seven_segment_countup.json')}>
-                7-Segment Countup (7セグカウントアップ)
-              </button>
-              <button onClick={() => loadSample('motor_pwm.json')}>
-                DC Motor PWM (モーター)
-              </button>
-              <button onClick={() => loadSample('lcd_hello.json')}>
-                LCD 1602 Hello (液晶)
-              </button>
-              <button onClick={() => loadSample('analog_a0_to_7seg.json')}>
-                Analog A0 to 7-Segment (アナログA0から7セグ)
-              </button>
-              <button onClick={() => loadSample('c_sample.json')} style={{ background: '#059669' }}>
-                C Sample (Lチカ) ★NEW
-              </button>
-              <button onClick={() => loadSample('hybrid_system.json', true)} style={{ background: '#7c3aed' }}>
-                Hybrid System ★PRESET
-              </button>
-              <button onClick={() => loadSample('lcd_test.json', true)} style={{ background: '#ec4899', marginLeft: '0.2rem' }}>
-                LCD Debug ★PRESET
-              </button>
+            <h3>サンプルプログラム</h3>
+            
+            {/* サンプル選択ドロップダウン */}
+            <div style={{ marginBottom: '0.75rem' }}>
+              <select
+                className="sample-select"
+                value={selectedSample}
+                onChange={(e) => {
+                  const filename = e.target.value;
+                  if (filename) {
+                    loadSample(filename);
+                  }
+                }}
+              >
+                {Object.entries(samplesByCategory).map(([category, samples]) => (
+                  <optgroup label={`── ${category} ──`} key={category}>
+                    {samples.map(sample => (
+                      <option key={sample.filename} value={sample.filename}>
+                        {sample.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+              {/* 選択中のサンプルの説明 */}
+              {sampleList.find(s => s.filename === selectedSample) && (
+                <div className="sample-description">
+                  📝 {sampleList.find(s => s.filename === selectedSample)?.description}
+                </div>
+              )}
             </div>
-            <div style={{ marginTop: '1rem' }}>
-              <label style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Intel HEX:</label>
-              <textarea
-                rows={3}
-                value={hexInput}
-                onChange={(e) => setHexInput(e.target.value)}
-                placeholder="Intel HEX"
-              />
-            </div>
-            <div style={{ marginTop: '0.5rem' }}>
-              <label style={{ fontSize: '0.8rem', color: '#94a3b8' }}>LSSファイル:</label>
-              <textarea
-                rows={3}
-                value={lssInput}
-                onChange={(e) => setLssInput(e.target.value)}
-                placeholder="LSSファイル"
-              />
+
+            {/* HEX/LSSの折りたたみセクション */}
+            <div className="collapsible-section">
+              <button
+                className="collapsible-toggle"
+                onClick={() => setShowHexLss(!showHexLss)}
+              >
+                <span>{showHexLss ? '▼' : '▶'} HEX / LSS データ（上級者向け）</span>
+              </button>
+              {showHexLss && (
+                <div className="collapsible-content">
+                  <div style={{ marginTop: '0.5rem' }}>
+                    <label style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Intel HEX:</label>
+                    <textarea
+                      rows={3}
+                      value={hexInput}
+                      onChange={(e) => setHexInput(e.target.value)}
+                      placeholder="Intel HEX"
+                    />
+                  </div>
+                  <div style={{ marginTop: '0.5rem' }}>
+                    <label style={{ fontSize: '0.8rem', color: '#94a3b8' }}>LSSファイル:</label>
+                    <textarea
+                      rows={3}
+                      value={lssInput}
+                      onChange={(e) => setLssInput(e.target.value)}
+                      placeholder="LSSファイル"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             <div style={{ marginTop: '1rem' }}>
@@ -407,8 +453,9 @@ function App() {
                       cursor: 'pointer'
                     }}
                     onClick={() => setActiveTabFilename(file.name)}
+                    title={file.name}
                   >
-                    <span style={{ maxWidth: '80px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{file.name}</span>
+                    <span style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{file.name}</span>
                     <button
                       onClick={(e) => { e.stopPropagation(); removeSourceFile(file.name); }}
                       style={{ background: 'transparent', border: 'none', color: '#fff', marginLeft: '4px', padding: '0 2px', cursor: 'pointer' }}

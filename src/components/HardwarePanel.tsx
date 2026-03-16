@@ -361,7 +361,7 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
 
     return (
         <div className="hardware-panel">
-            <h3>Breadboard (Hardware Components)</h3>
+            <h3>ブレッドボード</h3>
             <div className="components-grid">
                 {/* スイッチ 4つをひとつの枠にまとめて横並び表示（押す操作が必要なので先に配置） */}
                 <div className="hardware-component hw-group" style={{ gridColumn: 'span 2', position: 'relative' }}>

@@ -1,0 +1,82 @@
+{
+  "samples": [
+    {
+      "filename": "blink.json",
+      "name": "Blink (Lチカ)",
+      "category": "基本",
+      "description": "LEDを点滅させるアセンブリプログラム"
+    },
+    {
+      "filename": "blink2.json",
+      "name": "Blink2 (Lチカ)",
+      "category": "基本",
+      "description": "LEDを点滅させるアセンブリプログラム（別バージョン）"
+    },
+    {
+      "filename": "c_sample.json",
+      "name": "C Sample (Lチカ)",
+      "category": "基本",
+      "description": "C言語によるLED点滅プログラム（ソースコード付き）"
+    },
+    {
+      "filename": "serial_echo.json",
+      "name": "Serial Echo (エコーバック)",
+      "category": "通信",
+      "description": "シリアル通信で受信したデータをそのまま返すプログラム"
+    },
+    {
+      "filename": "push_switch.json",
+      "name": "Push Switch (プッシュスイッチ)",
+      "category": "入力",
+      "description": "プッシュスイッチの入力を読み取るプログラム"
+    },
+    {
+      "filename": "pot_blink.json",
+      "name": "Potentiometer (可変抵抗)",
+      "category": "入力",
+      "description": "可変抵抗の値に応じてLEDの点滅速度を変えるプログラム"
+    },
+    {
+      "filename": "seven_segment.json",
+      "name": "7-Segment (7セグ)",
+      "category": "出力",
+      "description": "7セグメントLEDに数字を表示するプログラム"
+    },
+    {
+      "filename": "seven_segment_countup.json",
+      "name": "7-Segment Countup (カウントアップ)",
+      "category": "出力",
+      "description": "7セグメントLEDでカウントアップ表示するプログラム"
+    },
+    {
+      "filename": "motor_pwm.json",
+      "name": "DC Motor PWM (モーター)",
+      "category": "出力",
+      "description": "PWMでDCモーターの回転速度を制御するプログラム"
+    },
+    {
+      "filename": "lcd_hello.json",
+      "name": "LCD 1602 Hello (液晶)",
+      "category": "出力",
+      "description": "LCD 1602に文字列を表示するプログラム"
+    },
+    {
+      "filename": "analog_a0_to_7seg.json",
+      "name": "Analog A0→7セグ",
+      "category": "応用",
+      "description": "アナログ入力A0の値を7セグメントLEDに表示するプログラム"
+    },
+    {
+      "filename": "hybrid_system.json",
+      "name": "Hybrid System (総合)",
+      "category": "応用",
+      "description": "ハイブリッドシステムの総合サンプル（全コンポーネント使用）"
+    },
+    {
+      "filename": "lcd_test.json",
+      "name": "LCD Debug (デバッグ)",
+      "category": "応用",
+      "description": "LCD初期化シーケンスのデバッグ用サンプル"
+    }
+  ]
+}

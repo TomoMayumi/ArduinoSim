@@ -77,21 +77,21 @@ export const CpuStatePanel: React.FC<CpuStatePanelProps> = memo(({ emulator, isR
     return (
         <div className="cpu-state-panel" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', fontSize: '0.8rem' }}>
             <div>
-                <h4 style={{ margin: '0 0 0.5rem 0', color: '#cbd5e1' }}>SREG (0x5F)</h4>
+                <h4 style={{ margin: '0 0 0.5rem 0', color: '#cbd5e1' }}>ステータスレジスタ SREG (0x5F)</h4>
                 <div style={{ fontFamily: 'monospace', background: '#0f172a', padding: '0.5rem', borderRadius: '4px' }}>
                     {sregRender}
                 </div>
             </div>
 
             <div>
-                <h4 style={{ margin: '0 0 0.5rem 0', color: '#cbd5e1' }}>General Purpose Registers</h4>
+                <h4 style={{ margin: '0 0 0.5rem 0', color: '#cbd5e1' }}>汎用レジスタ</h4>
                 <div style={{ background: '#0f172a', padding: '0.5rem', borderRadius: '4px' }}>
                     {regBlocks}
                 </div>
             </div>
 
             <div>
-                <h4 style={{ margin: '0 0 0.5rem 0', color: '#cbd5e1' }}>Peripheral Groups</h4>
+                <h4 style={{ margin: '0 0 0.5rem 0', color: '#cbd5e1' }}>ペリフェラルグループ</h4>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem', background: '#0f172a', padding: '0.5rem', borderRadius: '4px' }}>
                     {PERIPHERAL_GROUPS.map(group => (
                         <label key={group.id} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem', color: '#cbd5e1', cursor: 'pointer' }}>
@@ -107,7 +107,7 @@ export const CpuStatePanel: React.FC<CpuStatePanelProps> = memo(({ emulator, isR
             </div>
 
             <div>
-                <h4 style={{ margin: '0 0 0.5rem 0', color: '#cbd5e1' }}>I/O Registers</h4>
+                <h4 style={{ margin: '0 0 0.5rem 0', color: '#cbd5e1' }}>I/Oレジスタ</h4>
                 {PERIPHERAL_GROUPS.filter(g => selectedGroups.includes(g.id)).map(group => (
                     <div key={group.id} style={{ marginBottom: '1rem' }}>
                         <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#94a3b8', marginBottom: '0.25rem' }}>{group.label}</div>

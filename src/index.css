@@ -416,6 +416,130 @@ textarea {
   box-shadow: 0 0 5px #f00;
 }
 
+/* サンプル選択ドロップダウン */
+.sample-select {
+  width: 100%;
+  background: #0f172a;
+  color: #e2e8f0;
+  border: 1px solid #475569;
+  border-radius: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M3 4.5L6 8l3-3.5H3z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+}
+
+.sample-select:hover,
+.sample-select:focus {
+  border-color: var(--accent-color);
+}
+
+.sample-select optgroup {
+  color: #94a3b8;
+  font-style: normal;
+  font-weight: bold;
+  background: #1e293b;
+}
+
+.sample-select option {
+  color: #e2e8f0;
+  background: #0f172a;
+  padding: 4px;
+}
+
+/* サンプル説明文 */
+.sample-description {
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(56, 189, 248, 0.08);
+  border-left: 3px solid var(--accent-color);
+  border-radius: 0 0.25rem 0.25rem 0;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+/* 折りたたみセクション */
+.collapsible-section {
+  border: 1px solid #334155;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.collapsible-toggle {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.03);
+  border: none;
+  color: #94a3b8;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  transition: background 0.2s;
+}
+
+.collapsible-toggle:hover {
+  background: rgba(255, 255, 255, 0.06);
+  transform: none;
+}
+
+.collapsible-content {
+  padding: 0 0.75rem 0.75rem;
+}
+
+/* トースト通知 */
+.toast-notification {
+  position: fixed;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  animation: toast-slide-in 0.3s ease-out, toast-fade-out 0.3s ease-in 2.7s forwards;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.toast-notification.success {
+  background: linear-gradient(135deg, #059669, #10b981);
+  color: white;
+}
+
+.toast-notification.error {
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  color: white;
+}
+
+@keyframes toast-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes toast-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 @keyframes spin {
   from {
     transform: rotate(0deg);
