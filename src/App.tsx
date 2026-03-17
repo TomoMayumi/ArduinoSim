@@ -101,6 +101,30 @@ function App() {
     }
   };
 
+  // 現在の状態をサンプルJSONとしてエクスポート
+  const exportCurrentState = () => {
+    const hwConfig = localStorage.getItem('arduino_sim_hardware_config');
+    const data: Record<string, unknown> = {
+      hex: hexInput,
+      lss: lssInput,
+      sourceFiles: sourceFiles,
+    };
+    if (hwConfig) {
+      data.hardwareConfigs = JSON.parse(hwConfig);
+    }
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${selectedSample || 'export'}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('現在の状態をエクスポートしました');
+  };
+
   // サンプルをカテゴリ別にグループ化
   const samplesByCategory = sampleList.reduce<Record<string, SampleInfo[]>>((acc, sample) => {
     if (!acc[sample.category]) acc[sample.category] = [];
@@ -358,26 +382,36 @@ function App() {
             
             {/* サンプル選択ドロップダウン */}
             <div style={{ marginBottom: '0.75rem' }}>
-              <select
-                className="sample-select"
-                value={selectedSample}
-                onChange={(e) => {
-                  const filename = e.target.value;
-                  if (filename) {
-                    loadSample(filename);
-                  }
-                }}
-              >
-                {Object.entries(samplesByCategory).map(([category, samples]) => (
-                  <optgroup label={`── ${category} ──`} key={category}>
-                    {samples.map(sample => (
-                      <option key={sample.filename} value={sample.filename}>
-                        {sample.name}
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <select
+                  className="sample-select"
+                  value={selectedSample}
+                  onChange={(e) => {
+                    const filename = e.target.value;
+                    if (filename) {
+                      loadSample(filename);
+                    }
+                  }}
+                  style={{ flex: 1 }}
+                >
+                  {Object.entries(samplesByCategory).map(([category, samples]) => (
+                    <optgroup label={`── ${category} ──`} key={category}>
+                      {samples.map(sample => (
+                        <option key={sample.filename} value={sample.filename}>
+                          {sample.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+                <button
+                  onClick={exportCurrentState}
+                  title="現在の状態をJSONファイルとしてエクスポート"
+                  style={{ background: '#6366f1', fontSize: '0.75rem', padding: '0.5rem 0.6rem', whiteSpace: 'nowrap', flexShrink: 0 }}
+                >
+                  📤
+                </button>
+              </div>
               {/* 選択中のサンプルの説明 */}
               {sampleList.find(s => s.filename === selectedSample) && (
                 <div className="sample-description">
