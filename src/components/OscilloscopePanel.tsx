@@ -5,14 +5,16 @@ interface OscilloscopePanelProps {
     state: OscilloscopeState;
     isRunning: boolean;
     onPinChange: (channelIndex: number, pin: string) => void;
+    onModeChange: (channelIndex: number, mode: 'digital' | 'analog') => void;
 }
 
-export const OscilloscopePanel: React.FC<OscilloscopePanelProps> = ({ state, isRunning, onPinChange }) => {
+export const OscilloscopePanel: React.FC<OscilloscopePanelProps> = ({ state, isRunning, onPinChange, onModeChange }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [timeScale, setTimeScale] = useState(1); // Reference: 1 = 100ms total
     const [displayChannelCount, setDisplayChannelCount] = useState(4); // デフォルト4CH表示
     const [triggerMode, setTriggerMode] = useState<'none' | 'auto' | 'single'>('auto');
     const [triggerEdge, setTriggerEdge] = useState<'rising' | 'falling' | 'both'>('rising');
+    const [triggerLevel, setTriggerLevel] = useState<number>(2.5);
     const [triggerChannel, setTriggerChannel] = useState(0); // 0-indexed
     const [isArmed, setIsArmed] = useState(false);
     const [frozenState, setFrozenState] = useState<{ state: OscilloscopeState, startCycle: number } | null>(null);
@@ -71,10 +73,10 @@ export const OscilloscopePanel: React.FC<OscilloscopePanelProps> = ({ state, isR
         let currentStartCycle: number | null = null;
         const visibleCycles = TOTAL_CYCLES_REF / timeScale;
 
-        const checkTrigger = (s1: { value: boolean }, s2: { value: boolean }) => {
-            if (triggerEdge === 'rising') return !s1.value && s2.value;
-            if (triggerEdge === 'falling') return s1.value && !s2.value;
-            return s1.value !== s2.value; // both
+        const checkTrigger = (s1: { value: number }, s2: { value: number }) => {
+            if (triggerEdge === 'rising') return s1.value < triggerLevel && s2.value >= triggerLevel;
+            if (triggerEdge === 'falling') return s1.value > triggerLevel && s2.value <= triggerLevel;
+            return (s1.value < triggerLevel && s2.value >= triggerLevel) || (s1.value > triggerLevel && s2.value <= triggerLevel); // both
         };
 
         if (triggerMode === 'single') {
@@ -163,11 +165,12 @@ export const OscilloscopePanel: React.FC<OscilloscopePanelProps> = ({ state, isR
             ctx.lineWidth = 2;
 
             const getX = (cycle: number) => ((cycle - startCycle) / visibleCycles) * CANVAS_WIDTH;
-            const getY = (val: boolean) => {
+            const getY = (val: number) => {
                 const channelHeight = CANVAS_HEIGHT / displayChannelCount;
                 const base = (idx + 1) * channelHeight;
-                const amplitude = channelHeight * 0.7;
-                return val ? base - amplitude : base - channelHeight * 0.1;
+                const margin = channelHeight * 0.1;
+                const drawHeight = channelHeight * 0.8;
+                return base - margin - (val / 5.0) * drawHeight;
             };
 
             if (samples.length === 0) return;
@@ -198,7 +201,7 @@ export const OscilloscopePanel: React.FC<OscilloscopePanelProps> = ({ state, isR
             ctx.setLineDash([]);
         }
 
-    }, [state, timeScale, triggerMode, triggerEdge, triggerChannel, isArmed, frozenState, displayChannelCount]);
+    }, [state, timeScale, triggerMode, triggerEdge, triggerChannel, triggerLevel, isArmed, frozenState, displayChannelCount]);
 
     return (
         <div className="oscilloscope-panel" style={{ background: '#1e293b', padding: '1rem', borderRadius: '8px', color: '#f8fafc', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}>
@@ -257,6 +260,14 @@ export const OscilloscopePanel: React.FC<OscilloscopePanelProps> = ({ state, isR
                                         <option value="both">Both</option>
                                     </select>
                                 </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Level ({triggerLevel.toFixed(1)}V):</span>
+                                    <input 
+                                        type="range" min="0" max="5" step="0.1" 
+                                        value={triggerLevel} onChange={e => setTriggerLevel(parseFloat(e.target.value))}
+                                        style={{ width: '60px' }}
+                                    />
+                                </div>
                             </>
                         )}
                         {triggerMode === 'single' && (
@@ -283,6 +294,16 @@ export const OscilloscopePanel: React.FC<OscilloscopePanelProps> = ({ state, isR
                                 borderBottom: idx < displayChannelCount - 1 ? '1px solid #1e293b' : 'none'
                              }}>
                                 <span style={{ color: channelColors[idx % 8], fontWeight: 'bold', fontSize: '0.75rem', marginBottom: '2px' }}>CH{idx+1}</span>
+                                <div style={{ display: 'flex', width: '100%', gap: '2px', marginBottom: '2px' }}>
+                                    <button 
+                                        onClick={() => onModeChange(idx, 'digital')}
+                                        style={{ flex: 1, background: (ch as any).mode !== 'analog' ? '#3b82f6' : '#1e293b', color: '#fff', border: 'none', fontSize: '0.6rem', padding: '2px', cursor: 'pointer', borderRadius: '2px' }}
+                                    >D</button>
+                                    <button 
+                                        onClick={() => onModeChange(idx, 'analog')}
+                                        style={{ flex: 1, background: (ch as any).mode === 'analog' ? '#10b981' : '#1e293b', color: '#fff', border: 'none', fontSize: '0.6rem', padding: '2px', cursor: 'pointer', borderRadius: '2px' }}
+                                    >A</button>
+                                </div>
                                 <select 
                                     value={ch.pin} 
                                     onChange={e => onPinChange(idx, e.target.value)}

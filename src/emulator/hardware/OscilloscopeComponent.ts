@@ -4,11 +4,12 @@ import { getPinState } from '../PinMappings';
 
 export interface PinSample {
     cycle: number;
-    value: boolean;
+    value: number;
 }
 
 export interface OscilloscopeChannelState {
     pin: string;
+    mode: 'digital' | 'analog';
     samples: PinSample[];
 }
 
@@ -23,7 +24,7 @@ export class OscilloscopeComponent implements Component {
     readonly name: string;
     readonly updateInterval = 1; // 毎サイクル監視
 
-    private channels: { pin: string; samples: PinSample[]; lastValue: boolean | null }[] = [];
+    private channels: { pin: string; mode: 'digital' | 'analog'; isAnalogPin: boolean; adcChannel: number; samples: PinSample[]; lastValue: number | null }[] = [];
     private maxSamples = 10000; // チャンネルあたりの最大サンプル数
     private bufferSizeCycles = 32000000; // 2秒分 (16MHz想定) に増強
 
@@ -32,6 +33,9 @@ export class OscilloscopeComponent implements Component {
         this.name = name;
         this.channels = pins.map(pin => ({
             pin,
+            mode: 'digital',
+            isAnalogPin: pin.startsWith('A'),
+            adcChannel: pin.startsWith('A') ? parseInt(pin.substring(1)) : -1,
             samples: [],
             lastValue: null
         }));
@@ -50,9 +54,18 @@ export class OscilloscopeComponent implements Component {
                 continue;
             }
 
-            const value = getPinState(cpu, channel.pin);
+            let value = 0.0;
+            if (channel.mode === 'analog' && channel.isAnalogPin) {
+                const adc = (cpu as any).adc;
+                if (adc) {
+                    value = adc.channelValues[channel.adcChannel] || 0.0;
+                }
+            } else {
+                value = getPinState(cpu, channel.pin) ? 5.0 : 0.0;
+            }
             
             // 初回または値が変化した場合のみ記録
+            // 比較は strict に行って浮動小数点のわずかな変動でも記録する
             if (channel.lastValue === null || value !== channel.lastValue) {
                 channel.samples.push({ cycle: currentCycle, value });
                 channel.lastValue = value;
@@ -76,6 +89,7 @@ export class OscilloscopeComponent implements Component {
         return {
             channels: this.channels.map(ch => ({
                 pin: ch.pin,
+                mode: ch.mode,
                 samples: [...ch.samples]
             })),
             currentCycle: this.lastUpdateCycle
@@ -88,6 +102,16 @@ export class OscilloscopeComponent implements Component {
     setChannelPin(index: number, pin: string) {
         if (this.channels[index]) {
             this.channels[index].pin = pin;
+            this.channels[index].isAnalogPin = pin.startsWith('A');
+            this.channels[index].adcChannel = pin.startsWith('A') ? parseInt(pin.substring(1)) : -1;
+            this.channels[index].samples = [];
+            this.channels[index].lastValue = null;
+        }
+    }
+
+    setChannelMode(index: number, mode: 'digital' | 'analog') {
+        if (this.channels[index]) {
+            this.channels[index].mode = mode;
             this.channels[index].samples = [];
             this.channels[index].lastValue = null;
         }

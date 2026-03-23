@@ -352,6 +352,7 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
                         state={scopeState} 
                         isRunning={!!isRunning} 
                         onPinChange={(chIdx, pin) => scopeComp.setChannelPin(chIdx, pin)}
+                        onModeChange={(chIdx, mode) => scopeComp.setChannelMode(chIdx, mode)}
                     />
                 </div>
             );

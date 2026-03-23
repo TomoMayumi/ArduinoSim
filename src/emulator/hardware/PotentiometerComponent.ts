@@ -50,8 +50,9 @@ export class PotentiometerComponent implements Component {
         // (this.cpu as any).adc = this.adc; // Let's add this link in Atmega328P constructor!
 
         const adc = (cpu as any).adc;
-        if (adc && ARDUINO_PINS[this.pin]) {
-            const channel = ARDUINO_PINS[this.pin].pinIndex;
+        if (adc && this.pin.startsWith('A') && ARDUINO_PINS[this.pin]) {
+            // Analog pin indices in avr8js match the integer part of the pin name (e.g. A0 -> 0)
+            const channel = parseInt(this.pin.substring(1));
             // ADC channelValues are expected to be voltages (0-5)
             adc.channelValues[channel] = this.value;
         }
