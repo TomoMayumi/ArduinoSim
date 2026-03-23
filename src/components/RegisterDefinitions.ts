@@ -2,6 +2,7 @@ export interface BitFieldDef {
     name: string;
     bits: number[];   // ビット位置の配列 (例: [7,6] = bit7:6)
     description?: string;
+    readonly?: boolean;
 }
 
 export interface RegisterDef {
@@ -12,6 +13,7 @@ export interface RegisterDef {
     special?: 'pc' | 'sp' | 'x' | 'y' | 'z';
     /** ビット幅 (デフォルト: 8) */
     bitWidth?: number;
+    readonly?: boolean;
 }
 
 export interface RegisterGroup {
@@ -32,10 +34,12 @@ export function extractBitFieldValue(regValue: number, bits: number[]): number {
 }
 
 // --- PORT ビットフィールド生成ヘルパー ---
-const portBits = (prefix: string, count: number): BitFieldDef[] => {
+const portBits = (prefix: string, count: number, isReadonly: boolean = false): BitFieldDef[] => {
     const fields: BitFieldDef[] = [];
     for (let i = count - 1; i >= 0; i--) {
-        fields.push({ name: `${prefix}${i}`, bits: [i] });
+        const def: BitFieldDef = { name: `${prefix}${i}`, bits: [i] };
+        if (isReadonly) def.readonly = true;
+        fields.push(def);
     }
     return fields;
 };
@@ -85,21 +89,21 @@ export const PERIPHERAL_GROUPS: RegisterGroup[] = [
         id: 'portb', label: 'PORT B', registers: [
             { name: 'PORTB', addr: 0x25, bitFields: portBits('PORTB', 8) },
             { name: 'DDRB',  addr: 0x24, bitFields: portBits('DDB', 8) },
-            { name: 'PINB',  addr: 0x23, bitFields: portBits('PINB', 8) }
+            { name: 'PINB',  addr: 0x23, bitFields: portBits('PINB', 8, true), readonly: true }
         ]
     },
     {
         id: 'portc', label: 'PORT C', registers: [
             { name: 'PORTC', addr: 0x28, bitFields: portBits('PORTC', 7) },
             { name: 'DDRC',  addr: 0x27, bitFields: portBits('DDC', 7) },
-            { name: 'PINC',  addr: 0x26, bitFields: portBits('PINC', 7) }
+            { name: 'PINC',  addr: 0x26, bitFields: portBits('PINC', 7, true), readonly: true }
         ]
     },
     {
         id: 'portd', label: 'PORT D', registers: [
             { name: 'PORTD', addr: 0x2B, bitFields: portBits('PORTD', 8) },
             { name: 'DDRD',  addr: 0x2A, bitFields: portBits('DDD', 8) },
-            { name: 'PIND',  addr: 0x29, bitFields: portBits('PIND', 8) }
+            { name: 'PIND',  addr: 0x29, bitFields: portBits('PIND', 8, true), readonly: true }
         ]
     },
 
@@ -132,10 +136,10 @@ export const PERIPHERAL_GROUPS: RegisterGroup[] = [
                 ]
             },
             {
-                name: 'TIFR0', addr: 0x35, bitFields: [
-                    { name: 'OCF0B', bits: [2], description: 'Output Compare B Match Flag' },
-                    { name: 'OCF0A', bits: [1], description: 'Output Compare A Match Flag' },
-                    { name: 'TOV0',  bits: [0], description: 'Overflow Flag' },
+                name: 'TIFR0', addr: 0x35, readonly: true, bitFields: [
+                    { name: 'OCF0B', bits: [2], description: 'Output Compare B Match Flag', readonly: true },
+                    { name: 'OCF0A', bits: [1], description: 'Output Compare A Match Flag', readonly: true },
+                    { name: 'TOV0',  bits: [0], description: 'Overflow Flag', readonly: true },
                 ]
             }
         ]
@@ -182,11 +186,11 @@ export const PERIPHERAL_GROUPS: RegisterGroup[] = [
                 ]
             },
             {
-                name: 'TIFR1', addr: 0x36, bitFields: [
-                    { name: 'ICF1',  bits: [5], description: 'Input Capture Flag' },
-                    { name: 'OCF1B', bits: [2], description: 'Output Compare B Match Flag' },
-                    { name: 'OCF1A', bits: [1], description: 'Output Compare A Match Flag' },
-                    { name: 'TOV1',  bits: [0], description: 'Overflow Flag' },
+                name: 'TIFR1', addr: 0x36, readonly: true, bitFields: [
+                    { name: 'ICF1',  bits: [5], description: 'Input Capture Flag', readonly: true },
+                    { name: 'OCF1B', bits: [2], description: 'Output Compare B Match Flag', readonly: true },
+                    { name: 'OCF1A', bits: [1], description: 'Output Compare A Match Flag', readonly: true },
+                    { name: 'TOV1',  bits: [0], description: 'Overflow Flag', readonly: true },
                 ]
             }
         ]
@@ -221,10 +225,10 @@ export const PERIPHERAL_GROUPS: RegisterGroup[] = [
                 ]
             },
             {
-                name: 'TIFR2', addr: 0x37, bitFields: [
-                    { name: 'OCF2B', bits: [2], description: 'Output Compare B Match Flag' },
-                    { name: 'OCF2A', bits: [1], description: 'Output Compare A Match Flag' },
-                    { name: 'TOV2',  bits: [0], description: 'Overflow Flag' },
+                name: 'TIFR2', addr: 0x37, readonly: true, bitFields: [
+                    { name: 'OCF2B', bits: [2], description: 'Output Compare B Match Flag', readonly: true },
+                    { name: 'OCF2A', bits: [1], description: 'Output Compare A Match Flag', readonly: true },
+                    { name: 'TOV2',  bits: [0], description: 'Overflow Flag', readonly: true },
                 ]
             },
             {
@@ -247,12 +251,12 @@ export const PERIPHERAL_GROUPS: RegisterGroup[] = [
             { name: 'UDR0', addr: 0xC6 },
             {
                 name: 'UCSR0A', addr: 0xC0, bitFields: [
-                    { name: 'RXC0',  bits: [7], description: 'USART Receive Complete' },
+                    { name: 'RXC0',  bits: [7], description: 'USART Receive Complete', readonly: true },
                     { name: 'TXC0',  bits: [6], description: 'USART Transmit Complete' },
-                    { name: 'UDRE0', bits: [5], description: 'USART Data Register Empty' },
-                    { name: 'FE0',   bits: [4], description: 'Frame Error' },
-                    { name: 'DOR0',  bits: [3], description: 'Data OverRun' },
-                    { name: 'UPE0',  bits: [2], description: 'USART Parity Error' },
+                    { name: 'UDRE0', bits: [5], description: 'USART Data Register Empty', readonly: true },
+                    { name: 'FE0',   bits: [4], description: 'Frame Error', readonly: true },
+                    { name: 'DOR0',  bits: [3], description: 'Data OverRun', readonly: true },
+                    { name: 'UPE0',  bits: [2], description: 'USART Parity Error', readonly: true },
                     { name: 'U2X0',  bits: [1], description: 'Double USART Transmission Speed' },
                     { name: 'MPCM0', bits: [0], description: 'Multi-processor Communication Mode' },
                 ]
@@ -309,8 +313,8 @@ export const PERIPHERAL_GROUPS: RegisterGroup[] = [
                     { name: 'ADTS', bits: [2, 1, 0], description: 'ADC Auto Trigger Source' },
                 ]
             },
-            { name: 'ADCH',  addr: 0x79 },
-            { name: 'ADCL',  addr: 0x78 },
+            { name: 'ADCH',  addr: 0x79, readonly: true },
+            { name: 'ADCL',  addr: 0x78, readonly: true },
             {
                 name: 'DIDR0', addr: 0x7E, bitFields: [
                     { name: 'ADC5D', bits: [5], description: 'ADC5 Digital Input Disable' },

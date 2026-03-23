@@ -61,6 +61,18 @@ export const CpuStatePanel: React.FC<CpuStatePanelProps> = memo(({ emulator, isR
 
     const [expandedRegs, setExpandedRegs] = useState<Set<string>>(new Set());
 
+    interface EditingState {
+        regName: string;
+        bitFieldName?: string;
+        tempValue: string;
+        bitWidth: number;
+        addr?: number;
+        special?: string;
+        baseValue: number; // for bitfield mod
+        bits?: number[];   // for bitfield mod
+    }
+    const [editingReg, setEditingReg] = useState<EditingState | null>(null);
+
     const toggleGroup = (groupId: string) => {
         setSelectedGroups(prev => prev.includes(groupId) ? prev.filter(id => id !== groupId) : [...prev, groupId]);
     };
@@ -102,6 +114,103 @@ export const CpuStatePanel: React.FC<CpuStatePanelProps> = memo(({ emulator, isR
         return '0x' + reg.addr.toString(16).toUpperCase().padStart(2, '0');
     };
 
+    const handleDoubleClick = (
+        regName: string,
+        val: number,
+        bitWidth: number,
+        addr: number,
+        special?: string,
+        readonly?: boolean,
+        bitFieldName?: string,
+        bits?: number[]
+    ) => {
+        if (readonly) return;
+        
+        let initialStr = '';
+        if (displayFormat === 'hex') {
+            const hexDigits = Math.ceil(bitWidth / 4);
+            initialStr = '0x' + val.toString(16).toUpperCase().padStart(hexDigits, '0');
+        } else if (displayFormat === 'bin') {
+            initialStr = '0b' + val.toString(2).padStart(bitWidth, '0');
+        } else {
+            initialStr = val.toString(10);
+        }
+
+        setEditingReg({
+            regName,
+            bitFieldName,
+            tempValue: initialStr,
+            bitWidth,
+            addr,
+            special,
+            baseValue: bitFieldName ? getRegValue({ addr, special }) : val,
+            bits
+        });
+    };
+
+    const commitEdit = () => {
+        if (!editingReg) return;
+        const { tempValue, special, addr, baseValue, bits, bitWidth } = editingReg;
+        
+        // parse value
+        let numVal = 0;
+        const trimmed = tempValue.trim().toLowerCase();
+        if (trimmed.startsWith('0x')) {
+            numVal = parseInt(trimmed.substring(2), 16);
+        } else if (trimmed.startsWith('0b')) {
+            numVal = parseInt(trimmed.substring(2), 2);
+        } else {
+            numVal = parseInt(trimmed, 10);
+        }
+
+        if (isNaN(numVal)) {
+            setEditingReg(null);
+            return;
+        }
+
+        const maxVal = (1 << bitWidth) - 1;
+        numVal = numVal & maxVal;
+
+        let finalWriteVal = numVal;
+        if (bits && bits.length > 0) {
+            // Modify only the specified bits
+            let mask = 0;
+            for (const b of bits) mask |= (1 << b);
+            
+            // shift numVal to the correct position
+            const shift = bits[bits.length - 1]; // e.g. bits=[7,6] -> shift=6
+            finalWriteVal = (baseValue & ~mask) | ((numVal << shift) & mask);
+        }
+
+        if (special === 'pc') {
+            cpu.pc = finalWriteVal;
+        } else if (special === 'sp') {
+            cpu.writeData(0x5D, finalWriteVal & 0xFF);
+            cpu.writeData(0x5E, (finalWriteVal >> 8) & 0xFF);
+        } else if (special === 'x') {
+            cpu.writeData(26, finalWriteVal & 0xFF);
+            cpu.writeData(27, (finalWriteVal >> 8) & 0xFF);
+        } else if (special === 'y') {
+            cpu.writeData(28, finalWriteVal & 0xFF);
+            cpu.writeData(29, (finalWriteVal >> 8) & 0xFF);
+        } else if (special === 'z') {
+            cpu.writeData(30, finalWriteVal & 0xFF);
+            cpu.writeData(31, (finalWriteVal >> 8) & 0xFF);
+        } else if (addr !== undefined) {
+            cpu.writeData(addr, finalWriteVal);
+        }
+
+        setEditingReg(null);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            commitEdit();
+        } else if (e.key === 'Escape') {
+            setEditingReg(null);
+        }
+    };
+
     return (
         <div className="cpu-state-panel" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.8rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -141,7 +250,25 @@ export const CpuStatePanel: React.FC<CpuStatePanelProps> = memo(({ emulator, isR
                                                         <span className="sfr-reg-name">{reg.name}</span>
                                                     )}
                                                     <span className="sfr-reg-addr">{addrLabel}</span>
-                                                    <span className="sfr-reg-val" onClick={cycleFormat} title="クリックで表示形式を切り替え">{formatValue(val, displayFormat, bitWidth)}</span>
+                                                    <span
+                                                        className={`sfr-reg-val ${reg.readonly ? 'readonly' : ''}`}
+                                                        onDoubleClick={() => handleDoubleClick(reg.name, val, bitWidth, reg.addr, reg.special, reg.readonly)}
+                                                        title={reg.readonly ? "読み取り専用" : "ダブルクリックで編集"}
+                                                    >
+                                                        {editingReg?.regName === reg.name && !editingReg.bitFieldName ? (
+                                                            <input
+                                                                autoFocus
+                                                                className="sfr-reg-input"
+                                                                type="text"
+                                                                value={editingReg.tempValue}
+                                                                onChange={(e) => setEditingReg({ ...editingReg, tempValue: e.target.value })}
+                                                                onKeyDown={handleKeyDown}
+                                                                onBlur={commitEdit}
+                                                            />
+                                                        ) : (
+                                                            formatValue(val, displayFormat, bitWidth)
+                                                        )}
+                                                    </span>
                                                 </div>
                                                 {isRegExpanded && hasBitFields && (
                                                     <div className="sfr-bitfield-list">
@@ -152,7 +279,25 @@ export const CpuStatePanel: React.FC<CpuStatePanelProps> = memo(({ emulator, isR
                                                                 <div key={bf.name} className="sfr-bitfield-row" title={bf.description || ''}>
                                                                     <span className="sfr-bf-name">{bf.name}</span>
                                                                     <span className="sfr-bf-bits">{bitLabel}</span>
-                                                                    <span className="sfr-bf-val" onClick={cycleFormat}>{formatValue(bfVal, displayFormat, bf.bits.length)}</span>
+                                                                    <span
+                                                                        className={`sfr-bf-val ${bf.readonly ? 'readonly' : ''}`}
+                                                                        onDoubleClick={() => handleDoubleClick(reg.name, bfVal, bf.bits.length, reg.addr, reg.special, bf.readonly, bf.name, bf.bits)}
+                                                                        title={bf.readonly ? "読み取り専用" : "ダブルクリックで編集"}
+                                                                    >
+                                                                        {editingReg?.regName === reg.name && editingReg.bitFieldName === bf.name ? (
+                                                                            <input
+                                                                                autoFocus
+                                                                                className="sfr-reg-input"
+                                                                                type="text"
+                                                                                value={editingReg.tempValue}
+                                                                                onChange={(e) => setEditingReg({ ...editingReg, tempValue: e.target.value })}
+                                                                                onKeyDown={handleKeyDown}
+                                                                                onBlur={commitEdit}
+                                                                            />
+                                                                        ) : (
+                                                                            formatValue(bfVal, displayFormat, bf.bits.length)
+                                                                        )}
+                                                                    </span>
                                                                 </div>
                                                             );
                                                         })}

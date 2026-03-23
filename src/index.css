@@ -650,8 +650,25 @@ textarea {
   transition: color 0.15s;
 }
 
-.sfr-reg-val:hover {
+.sfr-reg-val:not(.readonly):hover {
   color: #7dd3fc;
+}
+
+.sfr-reg-val.readonly, .sfr-bf-val.readonly {
+  cursor: default;
+  color: #94a3b8;
+}
+
+.sfr-reg-input {
+  width: 100%;
+  background: rgba(15, 23, 42, 0.8);
+  color: #fbbf24;
+  border: 1px solid #38bdf8;
+  border-radius: 2px;
+  font-family: inherit;
+  font-size: inherit;
+  padding: 0 2px;
+  outline: none;
 }
 
 .sfr-format-toggle {
@@ -716,7 +733,7 @@ textarea {
   cursor: pointer;
 }
 
-.sfr-bf-val:hover {
+.sfr-bf-val:not(.readonly):hover {
   color: #7dd3fc;
 }
 
