@@ -640,6 +640,10 @@ textarea {
   color: #475569;
 }
 
+.sfr-val-prefix {
+  color: #334155;
+}
+
 .sfr-reg-val {
   color: #38bdf8;
   cursor: pointer;

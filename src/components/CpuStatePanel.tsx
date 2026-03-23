@@ -10,14 +10,14 @@ interface CpuStatePanelProps {
 type DisplayFormat = 'hex' | 'dec' | 'bin';
 const FORMAT_CYCLE: DisplayFormat[] = ['hex', 'dec', 'bin'];
 
-const formatValue = (val: number, fmt: DisplayFormat, bitWidth: number = 8): string => {
+const formatValue = (val: number, fmt: DisplayFormat, bitWidth: number = 8): React.ReactNode => {
     switch (fmt) {
         case 'hex': {
             const hexDigits = Math.ceil(bitWidth / 4);
-            return '0x' + val.toString(16).toUpperCase().padStart(hexDigits, '0');
+            return <><span className="sfr-val-prefix">0x</span>{val.toString(16).toUpperCase().padStart(hexDigits, '0')}</>;
         }
         case 'dec': return val.toString(10);
-        case 'bin': return '0b' + val.toString(2).padStart(bitWidth, '0');
+        case 'bin': return <><span className="sfr-val-prefix">0b</span>{val.toString(2).padStart(bitWidth, '0')}</>;
     }
 };
 
