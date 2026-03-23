@@ -7,6 +7,25 @@ interface CpuStatePanelProps {
     isRunning: boolean;
 }
 
+type DisplayFormat = 'hex' | 'dec' | 'bin';
+const FORMAT_CYCLE: DisplayFormat[] = ['hex', 'dec', 'bin'];
+
+const formatValue = (val: number, fmt: DisplayFormat): string => {
+    switch (fmt) {
+        case 'hex': return '0x' + val.toString(16).toUpperCase().padStart(2, '0');
+        case 'dec': return val.toString(10);
+        case 'bin': return '0b' + val.toString(2).padStart(8, '0');
+    }
+};
+
+const formatLabel = (fmt: DisplayFormat): string => {
+    switch (fmt) {
+        case 'hex': return 'HEX';
+        case 'dec': return 'DEC';
+        case 'bin': return 'BIN';
+    }
+};
+
 export const CpuStatePanel: React.FC<CpuStatePanelProps> = memo(({ emulator, isRunning }) => {
     const [selectedGroups, setSelectedGroups] = useState<string[]>(() => {
         try {
@@ -17,9 +36,22 @@ export const CpuStatePanel: React.FC<CpuStatePanelProps> = memo(({ emulator, isR
         }
     });
 
+    const [displayFormat, setDisplayFormat] = useState<DisplayFormat>(() => {
+        const saved = localStorage.getItem('arduinoSim_regDisplayFormat');
+        return (saved === 'hex' || saved === 'dec' || saved === 'bin') ? saved : 'hex';
+    });
+
     useEffect(() => {
         localStorage.setItem('arduinoSim_selectedRegGroups', JSON.stringify(selectedGroups));
     }, [selectedGroups]);
+
+    useEffect(() => {
+        localStorage.setItem('arduinoSim_regDisplayFormat', displayFormat);
+    }, [displayFormat]);
+
+    const cycleFormat = () => {
+        setDisplayFormat(prev => FORMAT_CYCLE[(FORMAT_CYCLE.indexOf(prev) + 1) % FORMAT_CYCLE.length]);
+    };
 
     const toggleGroup = (groupId: string) => {
         setSelectedGroups(prev => prev.includes(groupId) ? prev.filter(id => id !== groupId) : [...prev, groupId]);
@@ -91,7 +123,10 @@ export const CpuStatePanel: React.FC<CpuStatePanelProps> = memo(({ emulator, isR
             </div>
 
             <div>
-                <h4 style={{ margin: '0 0 0.5rem 0', color: '#cbd5e1' }}>ペリフェラル レジスタ</h4>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '0 0 0.5rem 0' }}>
+                    <h4 style={{ margin: 0, color: '#cbd5e1' }}>ペリフェラル レジスタ</h4>
+                    <span className="sfr-format-toggle" onClick={cycleFormat} title="クリックで表示形式を切り替え">{formatLabel(displayFormat)}</span>
+                </div>
                 <div className="sfr-tree">
                     {PERIPHERAL_GROUPS.map(group => {
                         const isExpanded = selectedGroups.includes(group.id);
@@ -113,9 +148,7 @@ export const CpuStatePanel: React.FC<CpuStatePanelProps> = memo(({ emulator, isR
                                                 <div key={reg.name} className="sfr-tree-reg-row">
                                                     <span className="sfr-reg-name">{reg.name}</span>
                                                     <span className="sfr-reg-addr">0x{reg.addr.toString(16).toUpperCase().padStart(2, '0')}</span>
-                                                    <span className="sfr-reg-hex" title="Hexadecimal">0x{val.toString(16).toUpperCase().padStart(2, '0')}</span>
-                                                    <span className="sfr-reg-dec" title="Decimal">{val.toString(10).padStart(3, ' ')}</span>
-                                                    <span className="sfr-reg-bin" title="Binary">0b{val.toString(2).padStart(8, '0')}</span>
+                                                    <span className="sfr-reg-val" onClick={cycleFormat} title="クリックで表示形式を切り替え">{formatValue(val, displayFormat)}</span>
                                                 </div>
                                             );
                                         })}

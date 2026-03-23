@@ -616,7 +616,7 @@ textarea {
 
 .sfr-tree-reg-row {
   display: grid;
-  grid-template-columns: 50px 32px 32px 22px 62px;
+  grid-template-columns: 50px 32px 1fr;
   gap: 0.25rem;
   font-family: 'Fira Code', monospace;
   font-size: 0.7rem;
@@ -640,14 +640,29 @@ textarea {
   color: #475569;
 }
 
-.sfr-reg-hex {
+.sfr-reg-val {
   color: #38bdf8;
+  cursor: pointer;
+  transition: color 0.15s;
 }
 
-.sfr-reg-dec {
-  color: #94a3b8;
+.sfr-reg-val:hover {
+  color: #7dd3fc;
 }
 
-.sfr-reg-bin {
-  color: #64748b;
+.sfr-format-toggle {
+  font-size: 0.65rem;
+  font-family: 'Fira Code', monospace;
+  font-weight: 600;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.1);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+}
+
+.sfr-format-toggle:hover {
+  background: rgba(56, 189, 248, 0.2);
 }
