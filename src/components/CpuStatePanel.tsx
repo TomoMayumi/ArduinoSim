@@ -91,42 +91,40 @@ export const CpuStatePanel: React.FC<CpuStatePanelProps> = memo(({ emulator, isR
             </div>
 
             <div>
-                <h4 style={{ margin: '0 0 0.5rem 0', color: '#cbd5e1' }}>ペリフェラルグループ</h4>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem', background: '#0f172a', padding: '0.5rem', borderRadius: '4px' }}>
-                    {PERIPHERAL_GROUPS.map(group => (
-                        <label key={group.id} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem', color: '#cbd5e1', cursor: 'pointer' }}>
-                            <input 
-                                type="checkbox" 
-                                checked={selectedGroups.includes(group.id)}
-                                onChange={() => toggleGroup(group.id)}
-                            />
-                            {group.label}
-                        </label>
-                    ))}
-                </div>
-            </div>
-
-            <div>
-                <h4 style={{ margin: '0 0 0.5rem 0', color: '#cbd5e1' }}>I/Oレジスタ</h4>
-                {PERIPHERAL_GROUPS.filter(g => selectedGroups.includes(g.id)).map(group => (
-                    <div key={group.id} style={{ marginBottom: '1rem' }}>
-                        <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#94a3b8', marginBottom: '0.25rem' }}>{group.label}</div>
-                        <div style={{ background: '#0f172a', padding: '0.5rem', borderRadius: '4px', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                            {group.registers.map(reg => {
-                                const val = cpu.data[reg.addr];
-                                return (
-                                <div key={reg.name} style={{ display: 'grid', gridTemplateColumns: '45px 35px 35px 25px 60px', gap: '0.25rem', fontFamily: 'monospace', color: '#94a3b8', fontSize: '0.75rem', alignItems: 'center' }}>
-                                    <span style={{ color: '#e2e8f0', fontWeight: 'bold' }}>{reg.name}</span>
-                                    <span style={{ color: '#64748b' }}>0x{reg.addr.toString(16).toUpperCase().padStart(2, '0')}</span>
-                                        <span title="Hexadecimal">0x{val.toString(16).toUpperCase().padStart(2, '0')}</span>
-                                        <span title="Decimal">{val.toString(10).padStart(3, ' ')}</span>
-                                        <span title="Binary">0b{val.toString(2).padStart(8, '0')}</span>
+                <h4 style={{ margin: '0 0 0.5rem 0', color: '#cbd5e1' }}>ペリフェラル レジスタ</h4>
+                <div className="sfr-tree">
+                    {PERIPHERAL_GROUPS.map(group => {
+                        const isExpanded = selectedGroups.includes(group.id);
+                        return (
+                            <div key={group.id} className="sfr-tree-group">
+                                <div
+                                    className={`sfr-tree-header ${isExpanded ? 'expanded' : ''}`}
+                                    onClick={() => toggleGroup(group.id)}
+                                >
+                                    <span className="sfr-tree-arrow">{isExpanded ? '▼' : '▶'}</span>
+                                    <span className="sfr-tree-label">{group.label}</span>
+                                    <span className="sfr-tree-count">{group.registers.length}</span>
+                                </div>
+                                {isExpanded && (
+                                    <div className="sfr-tree-registers">
+                                        {group.registers.map(reg => {
+                                            const val = cpu.data[reg.addr];
+                                            return (
+                                                <div key={reg.name} className="sfr-tree-reg-row">
+                                                    <span className="sfr-reg-name">{reg.name}</span>
+                                                    <span className="sfr-reg-addr">0x{reg.addr.toString(16).toUpperCase().padStart(2, '0')}</span>
+                                                    <span className="sfr-reg-hex" title="Hexadecimal">0x{val.toString(16).toUpperCase().padStart(2, '0')}</span>
+                                                    <span className="sfr-reg-dec" title="Decimal">{val.toString(10).padStart(3, ' ')}</span>
+                                                    <span className="sfr-reg-bin" title="Binary">0b{val.toString(2).padStart(8, '0')}</span>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                ))}
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
         </div>
     );

@@ -549,3 +549,105 @@ textarea {
     transform: rotate(360deg);
   }
 }
+
+/* SFR ツリー表示 */
+.sfr-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: #0f172a;
+  padding: 0.25rem;
+  border-radius: 4px;
+}
+
+.sfr-tree-group {
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.sfr-tree-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.5rem;
+  cursor: pointer;
+  user-select: none;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+
+.sfr-tree-header:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.sfr-tree-header.expanded {
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.sfr-tree-arrow {
+  font-size: 0.6rem;
+  color: #64748b;
+  width: 0.8rem;
+  flex-shrink: 0;
+}
+
+.sfr-tree-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  flex: 1;
+}
+
+.sfr-tree-count {
+  font-size: 0.65rem;
+  color: #475569;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0 0.35rem;
+  border-radius: 8px;
+  line-height: 1.4;
+}
+
+.sfr-tree-registers {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 0.15rem 0 0.25rem 1.2rem;
+}
+
+.sfr-tree-reg-row {
+  display: grid;
+  grid-template-columns: 50px 32px 32px 22px 62px;
+  gap: 0.25rem;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.7rem;
+  color: #94a3b8;
+  align-items: center;
+  padding: 1px 0.25rem;
+  border-radius: 2px;
+  transition: background 0.1s;
+}
+
+.sfr-tree-reg-row:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.sfr-reg-name {
+  color: #e2e8f0;
+  font-weight: bold;
+}
+
+.sfr-reg-addr {
+  color: #475569;
+}
+
+.sfr-reg-hex {
+  color: #38bdf8;
+}
+
+.sfr-reg-dec {
+  color: #94a3b8;
+}
+
+.sfr-reg-bin {
+  color: #64748b;
+}
