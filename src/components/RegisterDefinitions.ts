@@ -8,6 +8,10 @@ export interface RegisterDef {
     name: string;
     addr: number;
     bitFields?: BitFieldDef[];
+    /** データ空間外の特殊レジスタ */
+    special?: 'pc' | 'sp' | 'x' | 'y' | 'z';
+    /** ビット幅 (デフォルト: 8) */
+    bitWidth?: number;
 }
 
 export interface RegisterGroup {
@@ -35,6 +39,45 @@ const portBits = (prefix: string, count: number): BitFieldDef[] => {
     }
     return fields;
 };
+
+// --- 汎用レジスタ R0-R31 生成ヘルパー ---
+const gprRegisters = (): RegisterDef[] => {
+    const regs: RegisterDef[] = [];
+    for (let i = 0; i < 32; i++) {
+        regs.push({ name: `R${i}`, addr: i });
+    }
+    return regs;
+};
+
+// ========== CPU レジスタグループ ==========
+export const CPU_GROUPS: RegisterGroup[] = [
+    {
+        id: 'cpu', label: 'CPU Core', registers: [
+            { name: 'PC', addr: -1, special: 'pc', bitWidth: 16 },
+            { name: 'SP', addr: -1, special: 'sp', bitWidth: 16 },
+            {
+                name: 'SREG', addr: 0x5F, bitFields: [
+                    { name: 'I', bits: [7], description: 'Global Interrupt Enable' },
+                    { name: 'T', bits: [6], description: 'Bit Copy Storage' },
+                    { name: 'H', bits: [5], description: 'Half Carry Flag' },
+                    { name: 'S', bits: [4], description: 'Sign Bit' },
+                    { name: 'V', bits: [3], description: 'Two\'s Complement Overflow Flag' },
+                    { name: 'N', bits: [2], description: 'Negative Flag' },
+                    { name: 'Z', bits: [1], description: 'Zero Flag' },
+                    { name: 'C', bits: [0], description: 'Carry Flag' },
+                ]
+            },
+        ]
+    },
+    {
+        id: 'gpr', label: '汎用レジスタ (R0-R31)', registers: [
+            ...gprRegisters(),
+            { name: 'X (R27:R26)', addr: -1, special: 'x', bitWidth: 16 },
+            { name: 'Y (R29:R28)', addr: -1, special: 'y', bitWidth: 16 },
+            { name: 'Z (R31:R30)', addr: -1, special: 'z', bitWidth: 16 },
+        ]
+    },
+];
 
 export const PERIPHERAL_GROUPS: RegisterGroup[] = [
     // ========== PORT B/C/D ==========
