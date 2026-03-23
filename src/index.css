@@ -574,7 +574,7 @@ textarea {
   top: 1rem;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 9999;
+  z-index: 10000;
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
   font-size: 0.85rem;
