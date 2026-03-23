@@ -1,6 +1,6 @@
 import React, { memo, useState, useEffect } from 'react';
 import { Atmega328P } from '../emulator/atmega328p';
-import { PERIPHERAL_GROUPS } from './RegisterDefinitions';
+import { PERIPHERAL_GROUPS, extractBitFieldValue } from './RegisterDefinitions';
 
 interface CpuStatePanelProps {
     emulator: Atmega328P | null;
@@ -10,11 +10,14 @@ interface CpuStatePanelProps {
 type DisplayFormat = 'hex' | 'dec' | 'bin';
 const FORMAT_CYCLE: DisplayFormat[] = ['hex', 'dec', 'bin'];
 
-const formatValue = (val: number, fmt: DisplayFormat): string => {
+const formatValue = (val: number, fmt: DisplayFormat, bitWidth: number = 8): string => {
     switch (fmt) {
-        case 'hex': return '0x' + val.toString(16).toUpperCase().padStart(2, '0');
+        case 'hex': {
+            const hexDigits = Math.ceil(bitWidth / 4);
+            return '0x' + val.toString(16).toUpperCase().padStart(hexDigits, '0');
+        }
         case 'dec': return val.toString(10);
-        case 'bin': return '0b' + val.toString(2).padStart(8, '0');
+        case 'bin': return '0b' + val.toString(2).padStart(bitWidth, '0');
     }
 };
 
@@ -53,8 +56,19 @@ export const CpuStatePanel: React.FC<CpuStatePanelProps> = memo(({ emulator, isR
         setDisplayFormat(prev => FORMAT_CYCLE[(FORMAT_CYCLE.indexOf(prev) + 1) % FORMAT_CYCLE.length]);
     };
 
+    const [expandedRegs, setExpandedRegs] = useState<Set<string>>(new Set());
+
     const toggleGroup = (groupId: string) => {
         setSelectedGroups(prev => prev.includes(groupId) ? prev.filter(id => id !== groupId) : [...prev, groupId]);
+    };
+
+    const toggleReg = (regName: string) => {
+        setExpandedRegs(prev => {
+            const next = new Set(prev);
+            if (next.has(regName)) next.delete(regName);
+            else next.add(regName);
+            return next;
+        });
     };
 
     if (!emulator || isRunning) {
@@ -144,11 +158,37 @@ export const CpuStatePanel: React.FC<CpuStatePanelProps> = memo(({ emulator, isR
                                     <div className="sfr-tree-registers">
                                         {group.registers.map(reg => {
                                             const val = cpu.data[reg.addr];
+                                            const hasBitFields = reg.bitFields && reg.bitFields.length > 0;
+                                            const isRegExpanded = expandedRegs.has(reg.name);
                                             return (
-                                                <div key={reg.name} className="sfr-tree-reg-row">
-                                                    <span className="sfr-reg-name">{reg.name}</span>
-                                                    <span className="sfr-reg-addr">0x{reg.addr.toString(16).toUpperCase().padStart(2, '0')}</span>
-                                                    <span className="sfr-reg-val" onClick={cycleFormat} title="クリックで表示形式を切り替え">{formatValue(val, displayFormat)}</span>
+                                                <div key={reg.name}>
+                                                    <div className={`sfr-tree-reg-row ${hasBitFields ? 'expandable' : ''}`}>
+                                                        {hasBitFields ? (
+                                                            <span className="sfr-reg-name" onClick={() => toggleReg(reg.name)} style={{ cursor: 'pointer' }}>
+                                                                <span className="sfr-tree-arrow" style={{ marginRight: '2px' }}>{isRegExpanded ? '▼' : '▶'}</span>
+                                                                {reg.name}
+                                                            </span>
+                                                        ) : (
+                                                            <span className="sfr-reg-name">{reg.name}</span>
+                                                        )}
+                                                        <span className="sfr-reg-addr">0x{reg.addr.toString(16).toUpperCase().padStart(2, '0')}</span>
+                                                        <span className="sfr-reg-val" onClick={cycleFormat} title="クリックで表示形式を切り替え">{formatValue(val, displayFormat)}</span>
+                                                    </div>
+                                                    {isRegExpanded && hasBitFields && (
+                                                        <div className="sfr-bitfield-list">
+                                                            {reg.bitFields!.map(bf => {
+                                                                const bfVal = extractBitFieldValue(val, bf.bits);
+                                                                const bitLabel = bf.bits.length === 1 ? `[${bf.bits[0]}]` : `[${bf.bits[0]}:${bf.bits[bf.bits.length - 1]}]`;
+                                                                return (
+                                                                    <div key={bf.name} className="sfr-bitfield-row" title={bf.description || ''}>
+                                                                        <span className="sfr-bf-name">{bf.name}</span>
+                                                                        <span className="sfr-bf-bits">{bitLabel}</span>
+                                                                        <span className="sfr-bf-val" onClick={cycleFormat}>{formatValue(bfVal, displayFormat, bf.bits.length)}</span>
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             );
                                         })}

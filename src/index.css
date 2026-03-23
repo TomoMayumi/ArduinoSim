@@ -665,4 +665,54 @@ textarea {
 
 .sfr-format-toggle:hover {
   background: rgba(56, 189, 248, 0.2);
-}
+}
+
+/* ビットフィールド付きレジスタのスタイル */
+.sfr-tree-reg-row.expandable .sfr-reg-name:hover {
+  color: #7dd3fc;
+}
+
+.sfr-bitfield-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 0.1rem 0 0.2rem 1.4rem;
+  border-left: 1px solid #334155;
+  margin-left: 0.5rem;
+}
+
+.sfr-bitfield-row {
+  display: grid;
+  grid-template-columns: 1fr 30px auto;
+  gap: 0.25rem;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  color: #64748b;
+  align-items: center;
+  padding: 0 0.25rem;
+  border-radius: 2px;
+  transition: background 0.1s;
+}
+
+.sfr-bitfield-row:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.sfr-bf-name {
+  color: #94a3b8;
+}
+
+.sfr-bf-bits {
+  color: #475569;
+  text-align: right;
+}
+
+.sfr-bf-val {
+  color: #38bdf8;
+  cursor: pointer;
+}
+
+.sfr-bf-val:hover {
+  color: #7dd3fc;
+}
+
