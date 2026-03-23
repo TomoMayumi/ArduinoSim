@@ -36,6 +36,10 @@ function App() {
   // 折りたたみ
   const [showHexLss, setShowHexLss] = useState(false);
 
+  // モーダル
+  const [showSettings, setShowSettings] = useState(false);
+  const [showSamples, setShowSamples] = useState(false);
+
   // トースト通知
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
@@ -260,40 +264,37 @@ function App() {
         </div>
       )}
 
-      <header className="header">
-        <h1 style={{ margin: '0' }}>Arduino/Atmega328P Simulator</h1>
-        <div className="controls">
-          <button onClick={isRunning ? stop : start}>
-            {isRunning ? '⏸ 一時停止' : '▶ 実行'}
+      <header className="header" style={{ padding: '0.5rem 1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+          <h1 style={{ margin: '0', fontSize: '1.2rem' }}>Arduino Simulator</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.8rem', background: '#1e293b', padding: '0.2rem 0.75rem', borderRadius: '0.5rem', border: '1px solid #334155' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <Pin13Led portB={emulator?.portB} /> <span>D13</span>
+            </div>
+            <div style={{ color: '#cbd5e1', borderLeft: '1px solid #334155', paddingLeft: '0.75rem' }}>
+              16MHz | {isRunning ? '実行中' : '停止中'}
+            </div>
+            <div style={{ fontFamily: 'monospace', color: '#94a3b8', borderLeft: '1px solid #334155', paddingLeft: '0.75rem' }}>
+              PC: 0x{debugInfo.pc.toString(16).padStart(4, '0')} | Cyc: {debugInfo.cycles.toLocaleString()}
+            </div>
+          </div>
+        </div>
+        <div className="controls" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <button onClick={isRunning ? stop : start} title={isRunning ? '一時停止' : '実行'} style={{ padding: '0.4rem 0.75rem' }}>
+            {isRunning ? '⏸' : '▶'}
           </button>
           {!isRunning && (
-            <button onClick={step} style={{ marginLeft: '0.5rem' }}>⏭ ステップ</button>
+            <button onClick={step} title="ステップ" style={{ padding: '0.4rem 0.75rem', marginLeft: '0' }}>⏭</button>
           )}
-          <button onClick={reset} style={{ marginLeft: '0.5rem' }}>🔄 リセット</button>
+          <button onClick={reset} title="リセット" style={{ padding: '0.4rem 0.75rem', marginLeft: '0' }}>🔄</button>
+          <div style={{ width: '1px', height: '20px', background: '#334155', margin: '0 0.25rem' }}></div>
+          <button className="header-icon-btn" onClick={() => setShowSamples(true)}>📁 プログラム読込</button>
+          <button className="header-icon-btn" onClick={() => setShowSettings(true)}>⚙️ 設定</button>
         </div>
       </header>
 
       <div className="main-layout">
         <main className="main-content">
-          <div className="card" style={{ padding: '0.5rem 1.5rem' }}>
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                <h3 style={{ margin: 0, fontSize: '1rem' }}>Arduino (ATmega328P)</h3>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}>
-                  <Pin13Led portB={emulator?.portB} />
-                  <span>D13</span>
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', fontSize: '0.8rem', color: '#cbd5e1' }}>
-                <span>クロック: 16MHz</span>
-                <span>状態: {isRunning ? '実行中' : '停止中'}</span>
-                <span style={{ fontFamily: 'monospace', color: '#94a3b8' }}>
-                  PC: 0x{debugInfo.pc.toString(16).padStart(4, '0')} | サイクル: {debugInfo.cycles.toLocaleString()}
-                </span>
-              </div>
-            </div>
-          </div>
-
           <div className="card">
             <HardwarePanel emulator={emulator} isRunning={isRunning} />
           </div>
@@ -353,166 +354,154 @@ function App() {
           </div>
         </aside>
 
-        <aside className="sidebar">
-          <div className="card">
-            <h3>設定</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={noResetMode}
-                  onChange={(e) => setNoResetMode(e.target.checked)}
-                />
-                RESET EN 切断モード (リセットなし)
-              </label>
-              <button
-                onClick={() => {
-                  localStorage.removeItem('arduino_sim_hardware_config');
-                  window.location.reload();
-                }}
-                style={{ background: '#475569', fontSize: '0.8rem', padding: '0.5rem' }}
-              >
-                ハードウェア設定を初期化
-              </button>
-            </div>
-          </div>
+      </div>
 
-          <div className="card hex-upload">
-            <h3>サンプルプログラム</h3>
-            
-            {/* サンプル選択ドロップダウン */}
-            <div style={{ marginBottom: '0.75rem' }}>
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                <select
-                  className="sample-select"
-                  value={selectedSample}
-                  onChange={(e) => {
-                    const filename = e.target.value;
-                    if (filename) {
-                      loadSample(filename);
-                    }
-                  }}
-                  style={{ flex: 1 }}
-                >
-                  {Object.entries(samplesByCategory).map(([category, samples]) => (
-                    <optgroup label={`── ${category} ──`} key={category}>
-                      {samples.map(sample => (
-                        <option key={sample.filename} value={sample.filename}>
-                          {sample.name}
-                        </option>
-                      ))}
-                    </optgroup>
-                  ))}
-                </select>
+      {showSettings && (
+        <div className="modal-overlay" onClick={() => setShowSettings(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>⚙️ 設定</h2>
+              <button className="modal-close-btn" onClick={() => setShowSettings(false)}>&times;</button>
+            </div>
+            <div className="modal-body">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={noResetMode}
+                    onChange={(e) => setNoResetMode(e.target.checked)}
+                  />
+                  RESET EN 切断モード (リセットなし)
+                </label>
                 <button
-                  onClick={exportCurrentState}
-                  title="現在の状態をJSONファイルとしてエクスポート"
-                  style={{ background: '#6366f1', fontSize: '0.75rem', padding: '0.5rem 0.6rem', whiteSpace: 'nowrap', flexShrink: 0 }}
+                  onClick={() => {
+                    localStorage.removeItem('arduino_sim_hardware_config');
+                    window.location.reload();
+                  }}
+                  style={{ background: '#475569', fontSize: '0.8rem', padding: '0.5rem' }}
                 >
-                  📤
+                  ハードウェア設定を初期化
                 </button>
               </div>
-              {/* 選択中のサンプルの説明 */}
-              {sampleList.find(s => s.filename === selectedSample) && (
-                <div className="sample-description">
-                  📝 {sampleList.find(s => s.filename === selectedSample)?.description}
-                </div>
-              )}
-            </div>
-
-            {/* HEX/LSSの折りたたみセクション */}
-            <div className="collapsible-section">
-              <button
-                className="collapsible-toggle"
-                onClick={() => setShowHexLss(!showHexLss)}
-              >
-                <span>{showHexLss ? '▼' : '▶'} HEX / LSS データ（上級者向け）</span>
-              </button>
-              {showHexLss && (
-                <div className="collapsible-content">
-                  <div style={{ marginTop: '0.5rem' }}>
-                    <label style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Intel HEX:</label>
-                    <textarea
-                      rows={3}
-                      value={hexInput}
-                      onChange={(e) => setHexInput(e.target.value)}
-                      placeholder="Intel HEX"
-                    />
-                  </div>
-                  <div style={{ marginTop: '0.5rem' }}>
-                    <label style={{ fontSize: '0.8rem', color: '#94a3b8' }}>LSSファイル:</label>
-                    <textarea
-                      rows={3}
-                      value={lssInput}
-                      onChange={(e) => setLssInput(e.target.value)}
-                      placeholder="LSSファイル"
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div style={{ marginTop: '1rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                <label style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Cソースコード群:</label>
-                <div style={{ display: 'flex', gap: '4px' }}>
-                  <button onClick={addSourceFile} style={{ fontSize: '0.7rem', padding: '2px 8px', background: '#3b82f6' }}>追加</button>
-                  <button
-                    onClick={() => document.getElementById('folder-upload')?.click()}
-                    style={{ fontSize: '0.7rem', padding: '2px 8px', background: '#10b981' }}
-                  >
-                    フォルダを追加
-                  </button>
-                  <input
-                    id="folder-upload"
-                    type="file"
-                    onChange={handleFolderUpload}
-                    style={{ display: 'none' }}
-                    {...({ webkitdirectory: "", directory: "" } as any)}
-                  />
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
-                {sourceFiles.map(file => (
-                  <div
-                    key={file.name}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      background: activeTabFilename === file.name ? '#3b82f6' : '#334155',
-                      fontSize: '0.75rem',
-                      padding: '2px 6px',
-                      borderRadius: '3px',
-                      cursor: 'pointer'
-                    }}
-                    onClick={() => setActiveTabFilename(file.name)}
-                    title={file.name}
-                  >
-                    <span style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{file.name}</span>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); removeSourceFile(file.name); }}
-                      style={{ background: 'transparent', border: 'none', color: '#fff', marginLeft: '4px', padding: '0 2px', cursor: 'pointer' }}
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              {activeTabFilename && (
-                <textarea
-                  rows={10}
-                  value={sourceFiles.find(f => f.name === activeTabFilename)?.content || ''}
-                  onChange={(e) => updateSourceFileContent(e.target.value)}
-                  placeholder={`${activeTabFilename} の内容を入力...`}
-                  style={{ fontSize: '0.8rem', fontFamily: 'monospace' }}
-                />
-              )}
             </div>
           </div>
-        </aside>
-      </div>
+        </div>
+      )}
+
+      {showSamples && (
+        <div className="modal-overlay" onClick={() => setShowSamples(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '800px', height: '90vh' }}>
+            <div className="modal-header">
+              <h2>📁 プログラムの読み込み (ファイル・サンプル)</h2>
+              <button className="modal-close-btn" onClick={() => setShowSamples(false)}>&times;</button>
+            </div>
+            <div className="modal-body" style={{ flex: 1 }}>
+              <div className="hex-upload">
+                <div style={{ marginBottom: '0.75rem' }}>
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.8rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>組み込みサンプル:</span>
+                    <select
+                      className="sample-select"
+                      value={selectedSample}
+                      onChange={(e) => {
+                        const filename = e.target.value;
+                        if (filename) {
+                          loadSample(filename);
+                        }
+                      }}
+                      style={{ flex: 1 }}
+                    >
+                      {Object.entries(samplesByCategory).map(([category, samples]) => (
+                        <optgroup label={`── ${category} ──`} key={category}>
+                          {samples.map(sample => (
+                            <option key={sample.filename} value={sample.filename}>
+                              {sample.name}
+                            </option>
+                          ))}
+                        </optgroup>
+                      ))}
+                    </select>
+                    <button
+                      onClick={exportCurrentState}
+                      title="現在の状態をJSONファイルとしてエクスポート"
+                      style={{ background: '#6366f1', fontSize: '0.75rem', padding: '0.5rem 0.6rem', whiteSpace: 'nowrap', flexShrink: 0 }}
+                    >
+                      📤
+                    </button>
+                  </div>
+                  {sampleList.find(s => s.filename === selectedSample) && (
+                    <div className="sample-description">
+                      📝 {sampleList.find(s => s.filename === selectedSample)?.description}
+                    </div>
+                  )}
+                </div>
+
+                <div className="collapsible-section">
+                  <button className="collapsible-toggle" onClick={() => setShowHexLss(!showHexLss)}>
+                    <span>{showHexLss ? '▼' : '▶'} HEX / LSS データ（上級者向け）</span>
+                  </button>
+                  {showHexLss && (
+                    <div className="collapsible-content">
+                      <div style={{ marginTop: '0.5rem' }}>
+                        <label style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Intel HEX:</label>
+                        <textarea
+                          rows={3}
+                          value={hexInput}
+                          onChange={(e) => setHexInput(e.target.value)}
+                          placeholder="Intel HEX"
+                        />
+                      </div>
+                      <div style={{ marginTop: '0.5rem' }}>
+                        <label style={{ fontSize: '0.8rem', color: '#94a3b8' }}>LSSファイル:</label>
+                        <textarea
+                          rows={3}
+                          value={lssInput}
+                          onChange={(e) => setLssInput(e.target.value)}
+                          placeholder="LSSファイル"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', flex: 1, minHeight: '300px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <label style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Cソースコード群:</label>
+                    <div style={{ display: 'flex', gap: '4px' }}>
+                      <button onClick={addSourceFile} style={{ fontSize: '0.7rem', padding: '2px 8px', background: '#3b82f6' }}>追加</button>
+                      <button onClick={() => document.getElementById('folder-upload')?.click()} style={{ fontSize: '0.7rem', padding: '2px 8px', background: '#10b981' }}>フォルダを追加</button>
+                      <input id="folder-upload" type="file" onChange={handleFolderUpload} style={{ display: 'none' }} {...({ webkitdirectory: "", directory: "" } as any)} />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+                    {sourceFiles.map(file => (
+                      <div
+                        key={file.name}
+                        style={{ display: 'flex', alignItems: 'center', background: activeTabFilename === file.name ? '#3b82f6' : '#334155', fontSize: '0.75rem', padding: '2px 6px', borderRadius: '3px', cursor: 'pointer' }}
+                        onClick={() => setActiveTabFilename(file.name)}
+                        title={file.name}
+                      >
+                        <span style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{file.name}</span>
+                        <button onClick={(e) => { e.stopPropagation(); removeSourceFile(file.name); }} style={{ background: 'transparent', border: 'none', color: '#fff', marginLeft: '4px', padding: '0 2px', cursor: 'pointer' }}>×</button>
+                      </div>
+                    ))}
+                  </div>
+
+                  {activeTabFilename && (
+                    <textarea
+                      style={{ flex: 1, fontSize: '0.8rem', fontFamily: 'monospace', minHeight: '200px', resize: 'vertical' }}
+                      value={sourceFiles.find(f => f.name === activeTabFilename)?.content || ''}
+                      onChange={(e) => updateSourceFileContent(e.target.value)}
+                      placeholder={`${activeTabFilename} の内容を入力...`}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

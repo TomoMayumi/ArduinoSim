@@ -46,7 +46,7 @@ body {
 
 .main-layout {
   display: grid;
-  grid-template-columns: minmax(400px, 450px) 250px minmax(300px, 1fr) 300px;
+  grid-template-columns: minmax(450px, 1.5fr) minmax(300px, 0.5fr) minmax(300px, 1.7fr);
   gap: 0.5rem;
   flex: 1;
   overflow-y: hidden;
@@ -97,9 +97,83 @@ button {
   transition: all 0.2s;
 }
 
+button.header-icon-btn {
+  background: #334155;
+  color: #f8fafc;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+button.header-icon-btn:hover {
+  background: #475569;
+}
+
 button:hover {
   opacity: 0.9;
   transform: translateY(-1px);
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: var(--card-bg);
+  border: 1px solid #334155;
+  border-radius: 0.75rem;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #334155;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.modal-close-btn {
+  background: transparent;
+  color: #94a3b8;
+  padding: 0.25rem;
+  font-size: 1.5rem;
+  line-height: 1;
+  margin: -0.5rem;
+}
+
+.modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  transform: none;
+}
+
+.modal-body {
+  padding: 1.25rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 button.connected {
@@ -736,4 +810,4 @@ textarea {
 .sfr-bf-val:not(.readonly):hover {
   color: #7dd3fc;
 }
-
+
