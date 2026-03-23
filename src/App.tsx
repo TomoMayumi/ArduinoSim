@@ -296,10 +296,20 @@ function App() {
           <button onClick={isRunning ? stop : start} title={isRunning ? '一時停止' : '実行'} style={{ padding: '0.4rem 0.75rem' }}>
             {isRunning ? '⏸' : '▶'}
           </button>
-          {!isRunning && (
-            <button onClick={step} title="ステップ" style={{ padding: '0.4rem 0.75rem', marginLeft: '0' }}>⏭</button>
-          )}
-          <button onClick={reset} title="リセット" style={{ padding: '0.4rem 0.75rem', marginLeft: '0' }}>🔄</button>
+          <button
+            onClick={step}
+            title="ステップ"
+            disabled={isRunning}
+            style={{
+              padding: '0.4rem 0.75rem',
+              opacity: isRunning ? 0.4 : 1,
+              cursor: isRunning ? 'not-allowed' : 'pointer',
+              pointerEvents: isRunning ? 'none' : 'auto'
+            }}
+          >
+            ⏭
+          </button>
+          <button onClick={reset} title="リセット" style={{ padding: '0.4rem 0.75rem' }}>🔄</button>
           <div style={{ width: '1px', height: '20px', background: '#334155', margin: '0 0.25rem' }}></div>
           <button className="header-icon-btn" onClick={() => setShowSamples(true)}>📁 プログラム読込</button>
           <button className="header-icon-btn" onClick={() => setShowSettings(true)}>⚙️ 設定</button>
