@@ -811,3 +811,239 @@ textarea {
   color: #7dd3fc;
 }
 
+/* ウォッチパネル */
+.watch-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+}
+
+.watch-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: #0f172a;
+  border-radius: 4px;
+  padding: 0.25rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.watch-row {
+  display: grid;
+  grid-template-columns: 1fr auto 20px;
+  gap: 0.25rem;
+  padding: 0.2rem 0.35rem;
+  border-radius: 2px;
+  align-items: center;
+  transition: background 0.1s;
+}
+
+.watch-row:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.watch-expr-text {
+  color: #e2e8f0;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.75rem;
+  cursor: text;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.watch-val-text {
+  color: #38bdf8;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: color 0.15s;
+  white-space: nowrap;
+}
+
+.watch-val-text:hover {
+  color: #7dd3fc;
+}
+
+.watch-error {
+  color: #f87171;
+  font-size: 0.65rem;
+  font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 120px;
+}
+
+.watch-no-value {
+  color: #475569;
+}
+
+.watch-edit-input {
+  width: 100%;
+  background: rgba(15, 23, 42, 0.8);
+  color: #fbbf24;
+  border: 1px solid #38bdf8;
+  border-radius: 2px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.75rem;
+  padding: 0 2px;
+  outline: none;
+}
+
+.watch-remove-btn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 0.85rem;
+  padding: 0;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.15s;
+  width: auto;
+  min-width: 0;
+}
+
+.watch-remove-btn:hover {
+  color: #ef4444;
+  background: transparent;
+  transform: none;
+}
+
+.watch-add-row {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.watch-add-input {
+  flex: 1;
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: #cbd5e1;
+  padding: 0.3rem 0.5rem;
+  border-radius: 4px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.75rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.watch-add-input:focus {
+  border-color: #38bdf8;
+}
+
+.watch-add-btn {
+  background: #334155;
+  color: #94a3b8;
+  border: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.15s;
+}
+
+.watch-add-btn:hover:not(:disabled) {
+  background: #3b82f6;
+  color: white;
+}
+
+.watch-add-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* ブレークポイントマーカー */
+.bp-marker {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #ef4444;
+  border: 1px solid #fca5a1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.bp-marker.conditional {
+  background-color: #f59e0b;
+  border-color: #fcd34d;
+}
+
+.bp-condition-icon {
+  font-size: 0.5rem;
+  font-weight: bold;
+  color: #000;
+  line-height: 1;
+}
+
+/* 条件編集ポップオーバー */
+.bp-condition-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+}
+
+.bp-condition-popover {
+  position: fixed;
+  background: #1e293b;
+  border: 1px solid #475569;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+  min-width: 300px;
+  z-index: 10000;
+}
+
+.bp-condition-input {
+  width: 100%;
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+  padding: 0.4rem 0.5rem;
+  border-radius: 4px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.8rem;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.bp-condition-input:focus {
+  border-color: #38bdf8;
+}
+
+.bp-condition-btn {
+  background: #334155;
+  color: #94a3b8;
+  border: none;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.bp-condition-btn:hover {
+  background: #475569;
+  transform: none;
+}
+
+.bp-condition-btn.primary {
+  background: #3b82f6;
+  color: white;
+}
+
+.bp-condition-btn.primary:hover {
+  background: #2563eb;
+}

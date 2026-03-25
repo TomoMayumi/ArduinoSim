@@ -1,25 +1,28 @@
 import React, { useEffect, useRef, useMemo, memo, useState } from 'react';
 import { SourceMapper } from '../emulator/SourceMapper';
 import type { SourceFileManager } from '../emulator/SourceFileManager';
+import type { BreakpointInfo } from '../emulator/DebugTypes';
 
 interface SourceViewerProps {
     sourceMapper: SourceMapper;
     fileManager: SourceFileManager;
     pc: number; // word address
     isRunning: boolean;
-    breakpoints: Set<number>;
+    breakpoints: Map<number, BreakpointInfo>;
     onToggleBreakpoint: (address: number) => void;
     onToggleLineBreakpoint: (addresses: number[]) => void;
+    onUpdateCondition?: (address: number, condition: string) => void;
     showAssembly?: boolean;
 }
 
 export const SourceViewer: React.FC<SourceViewerProps> = memo(({
     sourceMapper, fileManager, pc, isRunning, breakpoints,
-    onToggleBreakpoint, onToggleLineBreakpoint, showAssembly = false
+    onToggleBreakpoint, onToggleLineBreakpoint, onUpdateCondition, showAssembly = false
 }) => {
     const listRef = useRef<HTMLDivElement>(null);
     const prevPcRef = useRef<number>(pc);
     const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
+    const [conditionEdit, setConditionEdit] = useState<{ address: number; x: number; y: number; value: string } | null>(null);
 
     const activeByteAddress = isRunning ? -1 : pc * 2;
     const currentLocation = useMemo(() => {
@@ -173,8 +176,11 @@ export const SourceViewer: React.FC<SourceViewerProps> = memo(({
                         const isActive = currentLocation?.fileName === selectedFileName && currentLocation?.lineNumber === lineNumber;
                         const lineAddresses = sourceMapper.getAddressesForLocation(selectedFileName!, lineNumber);
                         const hasBreakpoint = lineAddresses.some(addr => breakpoints.has(addr));
+                        const bpInfo = lineAddresses.map(addr => breakpoints.get(addr)).find(bp => bp !== undefined);
+                        const hasCondition = bpInfo?.condition ? true : false;
                         const isCodeLine = lineAddresses.length > 0;
                         const asmLines = showAssembly ? sourceMapper.getAsmForLocation(selectedFileName!, lineNumber) : [];
+                        const firstBpAddr = lineAddresses.find(addr => breakpoints.has(addr));
 
                         return (
                             <React.Fragment key={lineNumber}>
@@ -194,19 +200,29 @@ export const SourceViewer: React.FC<SourceViewerProps> = memo(({
                                             onToggleLineBreakpoint(lineAddresses);
                                         }
                                     }}
+                                    onContextMenu={(e) => {
+                                        if (isCodeLine && hasBreakpoint && firstBpAddr !== undefined && onUpdateCondition) {
+                                            e.preventDefault();
+                                            setConditionEdit({
+                                                address: firstBpAddr,
+                                                x: e.clientX,
+                                                y: e.clientY,
+                                                value: bpInfo?.condition || ''
+                                            });
+                                        }
+                                    }}
                                 >
                                     <div style={{ width: '30px', textAlign: 'right', paddingRight: '10px', color: '#475569', userSelect: 'none' }}>
                                         {lineNumber}
                                     </div>
                                     <div style={{ width: '16px', display: 'flex', justifyContent: 'center' }}>
                                         {hasBreakpoint && (
-                                            <div style={{
-                                                width: '8px',
-                                                height: '8px',
-                                                borderRadius: '50%',
-                                                backgroundColor: '#ef4444',
-                                                border: '1px solid #fca5a1'
-                                            }} />
+                                            <div
+                                                className={hasCondition ? 'bp-marker conditional' : 'bp-marker'}
+                                                title={hasCondition ? `条件: ${bpInfo?.condition}\n右クリックで条件編集` : '右クリックで条件を設定'}
+                                            >
+                                                {hasCondition && <span className="bp-condition-icon">?</span>}
+                                            </div>
                                         )}
                                     </div>
                                     <div style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -253,6 +269,51 @@ export const SourceViewer: React.FC<SourceViewerProps> = memo(({
                     })}
                 </div>
             </div>
+
+            {/* 条件編集ポップオーバー */}
+            {conditionEdit && (
+                <div className="bp-condition-overlay" onClick={() => setConditionEdit(null)}>
+                    <div
+                        className="bp-condition-popover"
+                        style={{ left: conditionEdit.x, top: conditionEdit.y }}
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.4rem' }}>
+                            ブレークポイント条件 (0x{conditionEdit.address.toString(16).toUpperCase()})
+                        </div>
+                        <input
+                            autoFocus
+                            className="bp-condition-input"
+                            placeholder="例: counter == 10, r16 & 0x0F != 0"
+                            value={conditionEdit.value}
+                            onChange={e => setConditionEdit({ ...conditionEdit, value: e.target.value })}
+                            onKeyDown={e => {
+                                if (e.key === 'Enter') {
+                                    onUpdateCondition?.(conditionEdit.address, conditionEdit.value);
+                                    setConditionEdit(null);
+                                }
+                                if (e.key === 'Escape') setConditionEdit(null);
+                            }}
+                        />
+                        <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.4rem', justifyContent: 'flex-end' }}>
+                            <button
+                                className="bp-condition-btn"
+                                onClick={() => {
+                                    onUpdateCondition?.(conditionEdit.address, '');
+                                    setConditionEdit(null);
+                                }}
+                            >条件クリア</button>
+                            <button
+                                className="bp-condition-btn primary"
+                                onClick={() => {
+                                    onUpdateCondition?.(conditionEdit.address, conditionEdit.value);
+                                    setConditionEdit(null);
+                                }}
+                            >設定</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 });

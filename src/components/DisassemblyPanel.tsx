@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useRef, useMemo, memo } from 'react';
 import { Disassembler } from '../emulator/Disassembler';
 import type { DisassembledInstruction } from '../emulator/Disassembler';
+import type { BreakpointInfo } from '../emulator/DebugTypes';
 
 interface DisassemblyPanelProps {
     program: Uint16Array | null;
     pc: number;
     isRunning: boolean;
-    breakpoints: Set<number>;
+    breakpoints: Map<number, BreakpointInfo>;
     onToggleBreakpoint: (address: number) => void;
 }
 
@@ -38,7 +39,9 @@ export const DisassemblyPanel: React.FC<DisassemblyPanelProps> = memo(({ program
     const renderedInstructions = useMemo(() => {
         return instructions.map((inst) => {
             const isActive = inst.address === activePc;
-            const hasBreakpoint = breakpoints.has(inst.address);
+            const bpInfo = breakpoints.get(inst.address);
+            const hasBreakpoint = bpInfo !== undefined;
+            const hasCondition = bpInfo?.condition ? true : false;
 
             return (
                 <div
@@ -58,13 +61,12 @@ export const DisassemblyPanel: React.FC<DisassemblyPanelProps> = memo(({ program
                 >
                     <div style={{ width: '16px', display: 'flex', justifyContent: 'center' }}>
                         {hasBreakpoint && (
-                            <div style={{
-                                width: '10px',
-                                height: '10px',
-                                borderRadius: '50%',
-                                backgroundColor: '#ef4444',
-                                border: '1px solid #fca5a1'
-                            }} />
+                            <div
+                                className={hasCondition ? 'bp-marker conditional' : 'bp-marker'}
+                                title={hasCondition ? `条件: ${bpInfo?.condition}` : ''}
+                            >
+                                {hasCondition && <span className="bp-condition-icon">?</span>}
+                            </div>
                         )}
                     </div>
                     <div style={{ width: '40px', textAlign: 'right', color: isActive ? '#e0e7ff' : '#64748b' }}>

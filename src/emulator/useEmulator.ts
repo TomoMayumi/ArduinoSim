@@ -2,14 +2,28 @@ import { useRef, useEffect, useState, useCallback } from 'react';
 import { Atmega328P } from './atmega328p';
 import { SourceMapper } from './SourceMapper';
 import { SourceFileManager } from './SourceFileManager';
+import { ExpressionEvaluator } from './ExpressionEvaluator';
+import type { BreakpointInfo, WatchExpression, WatchResult, DebugVariable } from './DebugTypes';
 
-export function useEmulator(program: Uint16Array | null, lssText: string | null = null, sourceFiles: { name: string, content: string }[] = []) {
+export function useEmulator(program: Uint16Array | null, lssText: string | null = null, sourceFiles: { name: string, content: string }[] = [], debugVariables: DebugVariable[] = []) {
     const [emulator, setEmulator] = useState<Atmega328P | null>(null);
     const [isRunning, setIsRunning] = useState(false);
-    const [breakpoints, setBreakpoints] = useState<Set<number>>(new Set());
+    const [breakpoints, setBreakpoints] = useState<Map<number, BreakpointInfo>>(new Map());
     const [sourceMapper, setSourceMapper] = useState<SourceMapper>(new SourceMapper());
     const [fileManager, setFileManager] = useState<SourceFileManager>(new SourceFileManager());
     const requestRef = useRef<number>(0);
+
+    // ウォッチ式
+    const [watchExpressions, setWatchExpressions] = useState<WatchExpression[]>([]);
+    const [watchResults, setWatchResults] = useState<WatchResult[]>([]);
+
+    // 式評価エンジン
+    const evaluatorRef = useRef<ExpressionEvaluator>(new ExpressionEvaluator(debugVariables));
+
+    // デバッグ変数が変わったら評価エンジンを更新
+    useEffect(() => {
+        evaluatorRef.current.setVariables(debugVariables);
+    }, [debugVariables]);
 
     const start = useCallback(() => {
         if (emulator) {
@@ -32,11 +46,11 @@ export function useEmulator(program: Uint16Array | null, lssText: string | null 
 
     const toggleBreakpoint = useCallback((address: number) => {
         setBreakpoints((prev) => {
-            const next = new Set(prev);
+            const next = new Map(prev);
             if (next.has(address)) {
                 next.delete(address);
             } else {
-                next.add(address);
+                next.set(address, { enabled: true });
             }
             return next;
         });
@@ -47,14 +61,26 @@ export function useEmulator(program: Uint16Array | null, lssText: string | null 
 
         const starts = getBlockStarts(addresses);
         setBreakpoints((prev) => {
-            const next = new Set(prev);
+            const next = new Map(prev);
             // 行内のいずれかのアドレスにBPが貼られていれば、その行のすべてのBPを解除する
             const anySet = addresses.some(addr => next.has(addr));
             if (anySet) {
                 addresses.forEach(addr => next.delete(addr));
             } else {
                 // そうでなければ、すべてのブロックの先頭にBPを貼る
-                starts.forEach(addr => next.add(addr));
+                starts.forEach(addr => next.set(addr, { enabled: true }));
+            }
+            return next;
+        });
+    }, []);
+
+    /** ブレークポイントに条件を設定 */
+    const updateBreakpointCondition = useCallback((address: number, condition: string) => {
+        setBreakpoints((prev) => {
+            const next = new Map(prev);
+            const existing = next.get(address);
+            if (existing) {
+                next.set(address, { ...existing, condition: condition || undefined });
             }
             return next;
         });
@@ -119,7 +145,7 @@ export function useEmulator(program: Uint16Array | null, lssText: string | null 
                 // Breakpoint check logic
                 let hitBreakpoint = false;
                 for (let i = 0; i < 5; i++) {
-                    const hitAddress = emulatorRef.current.step(breakpointsRef.current);
+                    const hitAddress = emulatorRef.current.step(breakpointsRef.current, evaluatorRef.current);
                     if (hitAddress !== null) {
                         hitBreakpoint = true;
                         break;
@@ -145,6 +171,54 @@ export function useEmulator(program: Uint16Array | null, lssText: string | null 
         };
     }, [isRunning, emulator]); // Re-run effect when isRunning or emulator instance changes
 
+    // ウォッチ式の評価（停止中に自動評価）
+    const evaluateWatches = useCallback(() => {
+        if (!emulator || isRunning) {
+            setWatchResults(watchExpressions.map(w => ({
+                id: w.id,
+                expression: w.expression,
+                value: null,
+                format: w.format,
+                error: isRunning ? '実行中...' : 'エミュレータ未接続'
+            })));
+            return;
+        }
+
+        const results = watchExpressions.map(w => {
+            const result = evaluatorRef.current.tryEvaluate(w.expression, emulator.cpu);
+            return {
+                id: w.id,
+                expression: w.expression,
+                value: result.value,
+                error: result.error,
+                format: w.format,
+            };
+        });
+        setWatchResults(results);
+    }, [emulator, isRunning, watchExpressions]);
+
+    // emulatorの状態が変化したらウォッチを再評価
+    useEffect(() => {
+        evaluateWatches();
+    }, [evaluateWatches, emulator, isRunning]);
+
+    const addWatch = useCallback((expression: string) => {
+        const id = `watch_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+        setWatchExpressions(prev => [...prev, { id, expression, format: 'hex' }]);
+    }, []);
+
+    const removeWatch = useCallback((id: string) => {
+        setWatchExpressions(prev => prev.filter(w => w.id !== id));
+    }, []);
+
+    const updateWatchExpression = useCallback((id: string, expression: string) => {
+        setWatchExpressions(prev => prev.map(w => w.id === id ? { ...w, expression } : w));
+    }, []);
+
+    const updateWatchFormat = useCallback((id: string, format: 'hex' | 'dec' | 'bin') => {
+        setWatchExpressions(prev => prev.map(w => w.id === id ? { ...w, format } : w));
+    }, []);
+
     const step = useCallback(() => {
         if (emulator && !isRunning) {
             emulator.stepInstruction();
@@ -160,11 +234,18 @@ export function useEmulator(program: Uint16Array | null, lssText: string | null 
         breakpoints,
         sourceMapper,
         fileManager,
+        watchExpressions,
+        watchResults,
         start,
         stop,
         step,
         reset,
         toggleBreakpoint,
         toggleLineBreakpoint,
+        updateBreakpointCondition,
+        addWatch,
+        removeWatch,
+        updateWatchExpression,
+        updateWatchFormat,
     };
 }

@@ -1,3 +1,5 @@
+import type { BreakpointInfo } from './DebugTypes';
+import type { ExpressionEvaluator } from './ExpressionEvaluator';
 import {
   CPU,
   avrInstruction,
@@ -86,16 +88,24 @@ export class Atmega328P {
     patchTimer(this.timer2);
   }
 
-  public step(breakpoints: Set<number> = new Set()): number | null {
+  public step(breakpoints: Map<number, BreakpointInfo> = new Map(), evaluator?: ExpressionEvaluator): number | null {
     for (let i = 0; i < 50000; i++) {
       avrInstruction(this.cpu);
       this.cpu.tick();
 
       // PC (Program Counter) はワード単位。バイト単位のアドレスに変換してチェック。
       const addr = this.cpu.pc * 2;
-      if (breakpoints.has(addr)) {
-        this.hardware.update();
-        return addr;
+      const bp = breakpoints.get(addr);
+      if (bp && bp.enabled) {
+        // 条件式がなければ無条件停止、あれば条件が真の場合のみ停止
+        if (!bp.condition || !evaluator) {
+          this.hardware.update();
+          return addr;
+        }
+        if (evaluator.evaluateCondition(bp.condition, this.cpu)) {
+          this.hardware.update();
+          return addr;
+        }
       }
 
       // 内部で updateInterval に基づき最適化されるため、毎サイクル呼び出して良い

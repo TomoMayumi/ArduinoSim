@@ -1,12 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { parseHex } from './emulator/intelhex';
 import { useEmulator } from './emulator/useEmulator';
+import { ElfParser } from './emulator/ElfParser';
+import { DwarfParser } from './emulator/DwarfParser';
 import { Pin13Led } from './components/Pin13Led';
 import { SerialConsole } from './components/SerialConsole';
 import { HardwarePanel } from './components/HardwarePanel';
 import { DisassemblyPanel } from './components/DisassemblyPanel';
 import { SourceViewer } from './components/SourceViewer';
 import { CpuStatePanel } from './components/CpuStatePanel';
+import { WatchPanel } from './components/WatchPanel';
+import type { DebugVariable } from './emulator/DebugTypes';
 import './index.css';
 
 // サンプル一覧の型定義
@@ -22,7 +26,14 @@ function App() {
   const [lssInput, setLssInput] = useState('');
   const [sourceFiles, setSourceFiles] = useState<{ name: string, content: string }[]>([]);
   const [program, setProgram] = useState<Uint16Array | null>(null);
-  const { emulator, isRunning, breakpoints, sourceMapper, fileManager, start, stop, step, reset, toggleBreakpoint, toggleLineBreakpoint } = useEmulator(program, lssInput, sourceFiles);
+  const [debugVariables, setDebugVariables] = useState<DebugVariable[]>([]);
+  const {
+    emulator, isRunning, breakpoints, sourceMapper, fileManager,
+    watchExpressions, watchResults,
+    start, stop, step, reset,
+    toggleBreakpoint, toggleLineBreakpoint, updateBreakpointCondition,
+    addWatch, removeWatch, updateWatchExpression, updateWatchFormat
+  } = useEmulator(program, lssInput, sourceFiles, debugVariables);
   const [noResetMode, setNoResetMode] = useState(true);
   const [debugInfo, setDebugInfo] = useState({ pc: 0, cycles: 0 });
   const [viewMode, setViewMode] = useState<'disassembly' | 'source'>('source');
@@ -181,6 +192,7 @@ function App() {
     const validSourceExtensions = ['.c', '.h', '.cpp', '.hpp', '.s', '.asm'];
     let detectedHex: string | null = null;
     let detectedLss: string | null = null;
+    let detectedElf: ArrayBuffer | null = null;
 
     // デコード用の関数
     const decodeFile = async (file: File): Promise<string> => {
@@ -211,13 +223,16 @@ function App() {
             detectedHex = await decodeFile(file);
         } else if (ext === '.lss') {
             detectedLss = await decodeFile(file);
+        } else if (ext === '.elf') {
+            detectedElf = await file.arrayBuffer();
         }
     }
 
-    if (newSourceFiles.length > 0 || detectedHex || detectedLss) {
+    if (newSourceFiles.length > 0 || detectedHex || detectedLss || detectedElf) {
       let msg = '';
       if (newSourceFiles.length > 0) msg += `${newSourceFiles.length} 個のソースファイル`;
-      if (detectedHex) msg += (msg ? '、' : '') + 'HEXファイル';
+      if (detectedElf) msg += (msg ? '、' : '') + 'ELFファイル';
+      else if (detectedHex) msg += (msg ? '、' : '') + 'HEXファイル';
       if (detectedLss) msg += (msg ? '、' : '') + 'LSSファイル';
       msg += 'が見つかりました。\n\n「OK」を押すと現在のリストに追加・上書きします。\n「キャンセル」を押すとクリアして新しく読み込みます。';
 
@@ -240,7 +255,37 @@ function App() {
         setSourceFiles(newSourceFiles);
       }
 
-      if (detectedHex) setHexInput(detectedHex);
+      if (detectedElf) {
+        // ELFファイルからHEXデータと変数情報を抽出（HEXより優先）
+        try {
+          const elfParser = new ElfParser(detectedElf);
+          const rawResult = elfParser.parse();
+          const elfProgram = ElfParser.toProgram(rawResult.programData);
+          setProgram(elfProgram);
+          setHexInput('(ELFから読み込み済み)');
+
+          // DWARF変数情報を抽出
+          try {
+            const dwarfParser = new DwarfParser(rawResult);
+            const vars = dwarfParser.extractVariables();
+            setDebugVariables(vars);
+            if (vars.length > 0) {
+              msg += ` (${vars.length}個のデバッグ変数を検出)`;
+            }
+          } catch (dwarfErr) {
+            console.warn('DWARF解析エラー（変数情報なしで続行）:', dwarfErr);
+            setDebugVariables([]);
+          }
+        } catch (elfErr) {
+          console.error('ELF解析エラー:', elfErr);
+          showToast('ELFファイルの解析に失敗しました', 'error');
+          // フォールバック：HEXがあればそちらを使う
+          if (detectedHex) setHexInput(detectedHex);
+        }
+      } else if (detectedHex) {
+        setHexInput(detectedHex);
+        setDebugVariables([]);
+      }
       if (detectedLss) setLssInput(detectedLss);
 
       if (newSourceFiles.length > 0 && !activeTabFilename) {
@@ -263,6 +308,7 @@ function App() {
     setActiveTabFilename(null);
     setSelectedSample('');
     setProgram(null);
+    setDebugVariables([]);
     reset();
     setDebugInfo({ pc: 0, cycles: 0 });
     showToast('プログラムをクリアしました');
@@ -335,6 +381,16 @@ function App() {
           <div className="card" style={{ display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
             <CpuStatePanel emulator={emulator} isRunning={isRunning} />
           </div>
+          <div className="card" style={{ display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
+            <WatchPanel
+              watchExpressions={watchExpressions}
+              watchResults={watchResults}
+              onAddWatch={addWatch}
+              onRemoveWatch={removeWatch}
+              onUpdateExpression={updateWatchExpression}
+              onUpdateFormat={updateWatchFormat}
+            />
+          </div>
         </aside>
 
         <aside className="disassembly-sidebar">
@@ -363,6 +419,7 @@ function App() {
                 breakpoints={breakpoints}
                 onToggleBreakpoint={toggleBreakpoint}
                 onToggleLineBreakpoint={toggleLineBreakpoint}
+                onUpdateCondition={updateBreakpointCondition}
                 showAssembly={showAsmInSource}
               />
             ) : (
