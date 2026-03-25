@@ -28,9 +28,6 @@ export interface ElfRawResult {
 const ELF_MAGIC = [0x7f, 0x45, 0x4c, 0x46]; // \x7fELF
 const ELFCLASS32 = 1;
 const ELFDATA2LSB = 1; // Little Endian
-const SHT_PROGBITS = 1;
-const SHF_ALLOC = 0x2;
-const SHF_EXECINSTR = 0x4;
 
 export class ElfParser {
   private view: DataView;
@@ -73,24 +70,36 @@ export class ElfParser {
       sections.set(name, { name, type, flags, addr, offset, size, data: sectionData });
     }
 
-    // .textセクション（実行可能コード）を取得
-    let programData: Uint8Array = new Uint8Array(0);
-    const textSection = sections.get('.text');
-    if (textSection) {
-      programData = textSection.data;
-    } else {
-      // .textが無い場合、ALLOC+EXECINSTR フラグを持つセクションを結合
-      const execSections = Array.from(sections.values())
-        .filter(s => s.type === SHT_PROGBITS && (s.flags & SHF_ALLOC) && (s.flags & SHF_EXECINSTR))
-        .sort((a, b) => a.addr - b.addr);
+    const phoff = this.view.getUint32(0x1c, true);
+    const phentsize = this.view.getUint16(0x2a, true);
+    const phnum = this.view.getUint16(0x2c, true);
 
-      if (execSections.length > 0) {
-        const maxAddr = Math.max(...execSections.map(s => s.addr + s.size));
-        programData = new Uint8Array(maxAddr);
-        for (const s of execSections) {
-          programData.set(s.data, s.addr);
+    const PT_LOAD = 1;
+    let maxAddr = 0;
+    const loadSegments: { paddr: number, data: Uint8Array }[] = [];
+
+    // Program Headers からロードすべきセグメント（.text, .data等）を抽出
+    for (let i = 0; i < phnum; i++) {
+        const base = phoff + i * phentsize;
+        const type = this.view.getUint32(base + 0x00, true);
+        const offset = this.view.getUint32(base + 0x04, true);
+        const paddr = this.view.getUint32(base + 0x0c, true);
+        const filesz = this.view.getUint32(base + 0x10, true);
+
+        if (type === PT_LOAD && filesz > 0 && paddr < 0x800000) {
+            const segmentData = this.data.slice(offset, offset + filesz);
+            loadSegments.push({ paddr, data: segmentData });
+            if (paddr + filesz > maxAddr) {
+                maxAddr = paddr + filesz;
+            }
         }
-      }
+    }
+
+    // AVRの標準的なプログラムサイズ(64KB)でフラッシュメモリを構成
+    const programSize = Math.max(maxAddr, 65536);
+    let programData: Uint8Array = new Uint8Array(programSize);
+    for (const seg of loadSegments) {
+        programData.set(seg.data, seg.paddr);
     }
 
     return { programData, entryPoint, sections };

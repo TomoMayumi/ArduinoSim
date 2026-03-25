@@ -1,0 +1,169 @@
+{
+  "phdrs": [
+    {
+      "type": 1,
+      "offset": 148,
+      "vaddr": 0,
+      "paddr": 0,
+      "filesz": 4988,
+      "memsz": 4988,
+      "flags": 5
+    },
+    {
+      "type": 1,
+      "offset": 5136,
+      "vaddr": 8388864,
+      "paddr": 4988,
+      "filesz": 42,
+      "memsz": 42,
+      "flags": 6
+    },
+    {
+      "type": 1,
+      "offset": 5178,
+      "vaddr": 8388906,
+      "paddr": 8388906,
+      "filesz": 0,
+      "memsz": 168,
+      "flags": 6
+    }
+  ],
+  "sections": [
+    {
+      "name": "",
+      "addr": 0,
+      "size": 0,
+      "offset": 0,
+      "type": 0,
+      "flags": 0
+    },
+    {
+      "name": ".data",
+      "addr": 8388864,
+      "size": 42,
+      "offset": 5136,
+      "type": 1,
+      "flags": 3
+    },
+    {
+      "name": ".text",
+      "addr": 0,
+      "size": 4988,
+      "offset": 148,
+      "type": 1,
+      "flags": 6
+    },
+    {
+      "name": ".bss",
+      "addr": 8388906,
+      "size": 168,
+      "offset": 5178,
+      "type": 8,
+      "flags": 3
+    },
+    {
+      "name": ".comment",
+      "addr": 0,
+      "size": 48,
+      "offset": 5178,
+      "type": 1,
+      "flags": 48
+    },
+    {
+      "name": ".note.gnu.avr.deviceinfo",
+      "addr": 0,
+      "size": 64,
+      "offset": 5228,
+      "type": 7,
+      "flags": 0
+    },
+    {
+      "name": ".debug_aranges",
+      "addr": 0,
+      "size": 1104,
+      "offset": 5292,
+      "type": 1,
+      "flags": 0
+    },
+    {
+      "name": ".debug_info",
+      "addr": 0,
+      "size": 13967,
+      "offset": 6396,
+      "type": 1,
+      "flags": 0
+    },
+    {
+      "name": ".debug_abbrev",
+      "addr": 0,
+      "size": 5786,
+      "offset": 20363,
+      "type": 1,
+      "flags": 0
+    },
+    {
+      "name": ".debug_line",
+      "addr": 0,
+      "size": 7555,
+      "offset": 26149,
+      "type": 1,
+      "flags": 0
+    },
+    {
+      "name": ".debug_frame",
+      "addr": 0,
+      "size": 2124,
+      "offset": 33704,
+      "type": 1,
+      "flags": 0
+    },
+    {
+      "name": ".debug_str",
+      "addr": 0,
+      "size": 4808,
+      "offset": 35828,
+      "type": 1,
+      "flags": 0
+    },
+    {
+      "name": ".debug_loc",
+      "addr": 0,
+      "size": 6926,
+      "offset": 40636,
+      "type": 1,
+      "flags": 0
+    },
+    {
+      "name": ".debug_ranges",
+      "addr": 0,
+      "size": 856,
+      "offset": 47562,
+      "type": 1,
+      "flags": 0
+    },
+    {
+      "name": ".shstrtab",
+      "addr": 0,
+      "size": 180,
+      "offset": 56372,
+      "type": 3,
+      "flags": 0
+    },
+    {
+      "name": ".symtab",
+      "addr": 0,
+      "size": 4896,
+      "offset": 48420,
+      "type": 2,
+      "flags": 0
+    },
+    {
+      "name": ".strtab",
+      "addr": 0,
+      "size": 3056,
+      "offset": 53316,
+      "type": 3,
+      "flags": 0
+    }
+  ]
+}
