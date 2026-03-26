@@ -26,6 +26,7 @@ function App() {
   const [lssInput, setLssInput] = useState('');
   const [sourceFiles, setSourceFiles] = useState<{ name: string, content: string }[]>([]);
   const [program, setProgram] = useState<Uint16Array | null>(null);
+  const [programSourceType, setProgramSourceType] = useState<'none' | 'hex' | 'elf'>('none');
   const [debugVariables, setDebugVariables] = useState<DebugVariable[]>([]);
   const {
     emulator, isRunning, breakpoints, sourceMapper, fileManager,
@@ -61,6 +62,11 @@ function App() {
 
   useEffect(() => {
     try {
+      if (programSourceType === 'elf') {
+        // ELFからの読み込み時はすでにprogramが設定されているためHEXのパースはスキップする
+        return;
+      }
+      
       if (hexInput) {
         setProgram(parseHex(hexInput));
       } else {
@@ -69,7 +75,7 @@ function App() {
     } catch (e) {
       console.error('HEX Parse Error:', e);
     }
-  }, [hexInput]);
+  }, [hexInput, programSourceType]);
 
   // サンプル一覧を読み込む
   useEffect(() => {
@@ -92,6 +98,7 @@ function App() {
     try {
       const response = await fetch(`/samples/${filename}`);
       const data = await response.json();
+      setProgramSourceType('hex');
       setHexInput(data.hex || '');
       setLssInput(data.lss || '');
       setSourceFiles(data.sourceFiles || []);
@@ -252,7 +259,16 @@ function App() {
           return merged;
         });
       } else {
+        stop();
+        setHexInput('');
+        setLssInput('');
         setSourceFiles(newSourceFiles);
+        setActiveTabFilename(null);
+        setSelectedSample('');
+        setProgram(null);
+        setDebugVariables([]);
+        reset();
+        setDebugInfo({ pc: 0, cycles: 0 });
       }
 
       if (detectedElf) {
@@ -261,8 +277,14 @@ function App() {
           const elfParser = new ElfParser(detectedElf);
           const rawResult = elfParser.parse();
           const elfProgram = ElfParser.toProgram(rawResult.programData);
+          
+          setProgramSourceType('elf');
           setProgram(elfProgram);
-          setHexInput('(ELFから読み込み済み)');
+          if (detectedHex) {
+            setHexInput(detectedHex);
+          } else {
+            setHexInput('');
+          }
 
           // DWARF変数情報を抽出
           try {
@@ -280,9 +302,13 @@ function App() {
           console.error('ELF解析エラー:', elfErr);
           showToast('ELFファイルの解析に失敗しました', 'error');
           // フォールバック：HEXがあればそちらを使う
-          if (detectedHex) setHexInput(detectedHex);
+          if (detectedHex) {
+            setProgramSourceType('hex');
+            setHexInput(detectedHex);
+          }
         }
       } else if (detectedHex) {
+        setProgramSourceType('hex');
         setHexInput(detectedHex);
         setDebugVariables([]);
       }
@@ -302,6 +328,7 @@ function App() {
 
   const clearProgram = () => {
     stop();
+    setProgramSourceType('none');
     setHexInput('');
     setLssInput('');
     setSourceFiles([]);
@@ -572,8 +599,11 @@ function App() {
                         <textarea
                           rows={3}
                           value={hexInput}
-                          onChange={(e) => setHexInput(e.target.value)}
-                          placeholder="Intel HEX"
+                          onChange={(e) => {
+                            setHexInput(e.target.value);
+                            setProgramSourceType('hex');
+                          }}
+                          placeholder={programSourceType === 'elf' ? 'ELFデータ優先。入力でHEX上書き。' : 'Intel HEX'}
                         />
                       </div>
                       <div style={{ marginTop: '0.5rem' }}>
