@@ -104,7 +104,7 @@ export class Atmega328P {
           return addr;
         }
         
-        const result = evaluator.tryEvaluate(bp.condition, this.cpu);
+        const result = evaluator.tryEvaluate(bp.condition, this.cpu, this.cpu.pc);
         if (result.error) {
           this.breakReason = `条件エラー (アドレス 0x${addr.toString(16)}): ${result.error}`;
           this.hardware.update();

@@ -87,7 +87,7 @@ export function useEmulator(program: Uint16Array | null, lssText: string | null 
     const updateBreakpointCondition = useCallback((addresses: number[], condition: string) => {
         if (condition && condition.trim() !== '') {
             if (evaluatorRef.current && emulatorRef.current) {
-                const result = evaluatorRef.current.tryEvaluate(condition, emulatorRef.current.cpu);
+                const result = evaluatorRef.current.tryEvaluate(condition, emulatorRef.current.cpu, emulatorRef.current.cpu.pc);
                 if (result.error) {
                     const proceed = window.confirm(`【警告】条件式の評価エラー\n\n${result.error}\n\n存在しない変数名（ローカル変数など）や不正な構文が含まれている可能性があります。このまま設定すると、実行時にエラーとなって都度停止します。設定を続行しますか？`);
                     if (!proceed) return;
@@ -215,7 +215,7 @@ export function useEmulator(program: Uint16Array | null, lssText: string | null 
         }
 
         const results = watchExpressions.map(w => {
-            const result = evaluatorRef.current.tryEvaluate(w.expression, emulator.cpu);
+            const result = evaluatorRef.current.tryEvaluate(w.expression, emulator.cpu, emulator.cpu.pc);
             return {
                 id: w.id,
                 expression: w.expression,

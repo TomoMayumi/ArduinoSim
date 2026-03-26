@@ -15,6 +15,11 @@
 import type { CPU } from 'avr8js';
 import type { DebugVariable } from './DebugTypes';
 
+// DWARF Location Expression オペコード
+const DW_OP_addr = 0x03;
+const DW_OP_reg0 = 0x50;  // DW_OP_reg0 .. DW_OP_reg31
+const DW_OP_fbreg = 0x91;
+
 // トークンの種類
 type TokenType =
   | 'number'
@@ -104,15 +109,15 @@ export class ExpressionEvaluator {
   }
 
   /** 式を評価して数値を返す */
-  public evaluate(expression: string, cpu: CPU): number {
+  public evaluate(expression: string, cpu: CPU, pc: number): number {
     const tokens = this.tokenize(expression);
-    return this.parseExprFromTokens(tokens, cpu, 0);
+    return this.parseExprFromTokens(tokens, cpu, pc, 0);
   }
 
   /** 条件式を評価してブール値を返す */
-  public evaluateCondition(expression: string, cpu: CPU): boolean {
+  public evaluateCondition(expression: string, cpu: CPU, pc: number): boolean {
     try {
-      const value = this.evaluate(expression, cpu);
+      const value = this.evaluate(expression, cpu, pc);
       return value !== 0;
     } catch {
       return true; // エラー時は停止させる（安全側）
@@ -120,9 +125,9 @@ export class ExpressionEvaluator {
   }
 
   /** 式を評価し、エラー時はエラーメッセージを返す */
-  public tryEvaluate(expression: string, cpu: CPU): { value: number | null; error?: string } {
+  public tryEvaluate(expression: string, cpu: CPU, pc: number): { value: number | null; error?: string } {
     try {
-      const value = this.evaluate(expression, cpu);
+      const value = this.evaluate(expression, cpu, pc);
       return { value };
     } catch (e: any) {
       return { value: null, error: e.message || '評価エラー' };
@@ -213,7 +218,7 @@ export class ExpressionEvaluator {
 
 
   /** 一次式のパース */
-  private parsePrimary(tokens: Token[], cpu: CPU): { value: number; pos: number } {
+  private parsePrimary(tokens: Token[], cpu: CPU, pc: number): { value: number; pos: number } {
     // 既にパース済みの位置を見つける
     // 実際には pos は caller が管理すべきだが、簡略化のため tokens を消費する形で実装
     // → 配列の先頭を消費する方式に変更
@@ -233,17 +238,17 @@ export class ExpressionEvaluator {
     if (token.type === 'operator') {
       if (token.value === '-') {
         tokens.shift();
-        const operand = this.parsePrimary(tokens, cpu);
+        const operand = this.parsePrimary(tokens, cpu, pc);
         return { value: -operand.value, pos: 0 };
       }
       if (token.value === '~') {
         tokens.shift();
-        const operand = this.parsePrimary(tokens, cpu);
+        const operand = this.parsePrimary(tokens, cpu, pc);
         return { value: ~operand.value, pos: 0 };
       }
       if (token.value === '!') {
         tokens.shift();
-        const operand = this.parsePrimary(tokens, cpu);
+        const operand = this.parsePrimary(tokens, cpu, pc);
         return { value: operand.value === 0 ? 1 : 0, pos: 0 };
       }
     }
@@ -251,7 +256,7 @@ export class ExpressionEvaluator {
     // 括弧
     if (token.type === 'lparen') {
       tokens.shift();
-      const result = this.parseExprFromTokens(tokens, cpu, 0);
+      const result = this.parseExprFromTokens(tokens, cpu, pc, 0);
       const closing = tokens[0];
       if (!closing || closing.type !== 'rparen') {
         throw new Error('閉じ括弧がありません');
@@ -263,7 +268,7 @@ export class ExpressionEvaluator {
     // メモリ参照 [アドレス]
     if (token.type === 'lbracket') {
       tokens.shift();
-      const addrResult = this.parseExprFromTokens(tokens, cpu, 0);
+      const addrResult = this.parseExprFromTokens(tokens, cpu, pc, 0);
       const closing = tokens[0];
       if (!closing || closing.type !== 'rbracket') {
         throw new Error('閉じ括弧 ] がありません');
@@ -276,7 +281,7 @@ export class ExpressionEvaluator {
     // 識別子（レジスタ名、SFR名、変数名）
     if (token.type === 'identifier') {
       tokens.shift();
-      const value = this.resolveIdentifier(token.value, cpu);
+      const value = this.resolveIdentifier(token.value, cpu, pc);
       return { value, pos: 0 };
     }
 
@@ -284,8 +289,8 @@ export class ExpressionEvaluator {
   }
 
   /** トークン配列から式をパース（内部用） */
-  private parseExprFromTokens(tokens: Token[], cpu: CPU, minPrec: number): number {
-    let leftVal = this.parsePrimary(tokens, cpu).value;
+  private parseExprFromTokens(tokens: Token[], cpu: CPU, pc: number, minPrec: number): number {
+    let leftVal = this.parsePrimary(tokens, cpu, pc).value;
 
     while (true) {
       const token = tokens[0];
@@ -295,7 +300,7 @@ export class ExpressionEvaluator {
 
       const op = token.value;
       tokens.shift();
-      const rightVal = this.parseExprFromTokens(tokens, cpu, prec + 1);
+      const rightVal = this.parseExprFromTokens(tokens, cpu, pc, prec + 1);
 
       leftVal = this.applyOp(op, leftVal, rightVal);
     }
@@ -304,7 +309,7 @@ export class ExpressionEvaluator {
   }
 
   /** 識別子を解決して値を返す */
-  private resolveIdentifier(name: string, cpu: CPU): number {
+  private resolveIdentifier(name: string, cpu: CPU, pc: number): number {
     const lower = name.toLowerCase();
     // レジスタ
     const reg = REGISTER_MAP[lower];
@@ -324,14 +329,160 @@ export class ExpressionEvaluator {
       return cpu.data[sfrAddr] || 0;
     }
 
-    // DWARF変数（大文字小文字を区別して検索）
-    const debugVar = this.variables.find(v => v.name === name);
-    if (debugVar) {
-      // サイズに応じてメモリから読み出す
-      return this.readMemory(cpu, debugVar.address, debugVar.size);
+    // DWARF変数（現在のPCがスコープ内のローカル変数を優先）
+    // PCはワード単位なので、バイト単位のアドレスに変換して比較
+    const bytePc = pc * 2;
+    const localVars = this.variables.filter(v => v.name === name && v.scope);
+    const activeLocal = localVars.find(v => bytePc >= v.scope!.start && bytePc < v.scope!.end);
+
+    if (activeLocal) {
+        return this.evaluateDebugVariable(cpu, activeLocal, pc);
+    }
+
+    // グローバル変数
+    const globalVar = this.variables.find(v => v.name === name && !v.scope);
+    if (globalVar) {
+      return this.evaluateDebugVariable(cpu, globalVar, pc);
     }
 
     throw new Error(`未知の識別子: '${name}'`);
+  }
+
+  /** DebugVariable の値を評価 */
+  private evaluateDebugVariable(cpu: CPU, v: DebugVariable, pc: number): number {
+    if (v.address !== undefined) {
+      return this.readMemory(cpu, v.address, v.size);
+    }
+    if (v.location) {
+      // ロケーション情報を評価
+      let locExpr = v.location;
+      
+      if (v.isLocationList) {
+        // ロケーションリストから現在のPCに対応するエントリを探す
+        // PCはワード単位で渡されるので、バイト単位に変換して比較
+        locExpr = this.selectLocationFromList(v.location, pc * 2, v.baseAddress || 0) || new Uint8Array(0);
+        if (locExpr.length === 0) return 0;
+      }
+      
+      const loc = this.evaluateDwarfLocationInfo(cpu, locExpr, v.frameBase);
+      
+      if (loc.type === 'memory') {
+        return this.readMemory(cpu, loc.value, v.size);
+      } else {
+        // レジスタ変数の場合。v.size 分のレジスタを結合して返す
+        let val = 0;
+        const startReg = loc.value;
+        for (let i = 0; i < v.size && i < 4; i++) {
+          const regIdx = startReg + i;
+          if (regIdx <= 31) {
+            val |= (cpu.data[regIdx] || 0) << (i * 8);
+          }
+        }
+        return val >>> 0;
+      }
+    }
+    return 0;
+  }
+
+  /** ロケーションリストから現在のPCに対応する有効な式を選択 */
+  private selectLocationFromList(list: Uint8Array, bytePc: number, initialBaseAddress: number): Uint8Array | null {
+    let offset = 0;
+    let currentBase = initialBaseAddress;
+    const view = new DataView(list.buffer, list.byteOffset, list.byteLength);
+    while (offset + 8 <= list.length) {
+      const start = view.getUint32(offset, true);
+      const end = view.getUint32(offset + 4, true);
+      offset += 8;
+
+      if (start === 0 && end === 0) break;
+      
+      // Base Address Selection Entry
+      if (start === 0xffffffff) {
+        currentBase = end;
+        continue;
+      }
+
+      const len = view.getUint16(offset, true);
+      offset += 2;
+      
+      // ベースアドレスを足して判定
+      if (bytePc >= (start + currentBase) && bytePc < (end + currentBase)) {
+        return list.slice(offset, offset + len);
+      }
+      offset += len;
+    }
+    return null;
+  }
+
+  /** DWARFロケーション式の評価（簡易版：addr / memory / value を返す） */
+  private evaluateDwarfLocationInfo(cpu: CPU, loc: Uint8Array, frameBase?: Uint8Array): { type: 'memory' | 'value'; value: number } {
+    if (loc.length === 0) return { type: 'value', value: 0 };
+    const op = loc[0];
+
+    if (op === DW_OP_addr) {
+      const addr = (loc[1] | (loc[2] << 8) | (loc[3] << 16) | (loc[4] << 24)) >>> 0;
+      return { type: 'memory', value: addr >= 0x800000 ? addr - 0x800000 : addr };
+    }
+
+    if (op === 0x23) { // DW_OP_plus_uconst
+       // 前のオペコードの結果に定数を足す。簡易版のため、addr に足す
+       let val = 0; let shift = 0; let i = 1;
+       while (i < loc.length) {
+         const byte = loc[i++];
+         val |= (byte & 0x7f) << shift;
+         if (!(byte & 0x80)) break;
+         shift += 7;
+       }
+       // 本来は stack[top] + val。簡易的に現在の memory 値に加算
+       return { type: 'memory', value: 0 /* 暫定 */ + val }; 
+    }
+
+    if (op >= DW_OP_reg0 && op <= DW_OP_reg0 + 31) {
+      const regIdx = op - DW_OP_reg0;
+      // AVRではポインタや変数はしばしばレジスタペア(2バイト)で保持される 
+      // とりあえず2バイト読み取っておく（1バイト変数の場合は上位でマスクされる）
+      const val = (cpu.data[regIdx] || 0) | ((cpu.data[regIdx + 1] || 0) << 8);
+      return { type: 'value', value: val };
+    }
+
+    if (op >= 0x70 && op <= 0x8f) { // DW_OP_breg0 .. DW_OP_breg31
+      const regIdx = op - 0x70;
+      const baseAddr = (cpu.data[regIdx] || 0) | ((cpu.data[regIdx + 1] || 0) << 8);
+      // SLEB128 offset
+      let offset = 0; let shift = 0; let i = 1;
+      while (i < loc.length) {
+        const byte = loc[i++];
+        offset |= (byte & 0x7f) << shift;
+        shift += 7;
+        if (!(byte & 0x80)) break;
+      }
+      if (shift < 32 && (loc[i - 1] & 0x40)) {
+        offset |= -(1 << shift);
+      }
+      return { type: 'memory', value: baseAddr + offset };
+    }
+
+    if (op === DW_OP_fbreg && frameBase) {
+      // frameBase 自体もロケーション式。まずベースを評価
+      const baseLoc = this.evaluateDwarfLocationInfo(cpu, frameBase);
+      // SLEB128 オフセット
+      let offset = 0;
+      let shift = 0;
+      let i = 1;
+      while (i < loc.length) {
+        const byte = loc[i++];
+        offset |= (byte & 0x7f) << shift;
+        shift += 7;
+        if (!(byte & 0x80)) break;
+      }
+      if (shift < 32 && (loc[i - 1] & 0x40)) {
+        offset |= -(1 << shift);
+      }
+      
+      return { type: 'memory', value: baseLoc.value + offset };
+    }
+
+    return { type: 'value', value: 0 };
   }
 
   /** メモリからサイズ分のデータを読む（リトルエンディアン） */

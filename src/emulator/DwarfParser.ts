@@ -12,6 +12,8 @@ const DW_TAG_compile_unit = 0x11;
 const DW_TAG_variable = 0x34;
 const DW_TAG_base_type = 0x24;
 const DW_TAG_typedef = 0x16;
+const DW_TAG_member = 0x0d;
+const DW_TAG_constant = 0x27;
 const DW_TAG_pointer_type = 0x0f;
 const DW_TAG_const_type = 0x26;
 const DW_TAG_volatile_type = 0x35;
@@ -20,12 +22,20 @@ const DW_TAG_structure_type = 0x13;
 const DW_TAG_union_type = 0x17;
 const DW_TAG_enumeration_type = 0x04;
 const DW_TAG_subprogram = 0x2e;
+const DW_TAG_formal_parameter = 0x05;
+const DW_TAG_lexical_block = 0x0b;
+const DW_TAG_inlined_subroutine = 0x1d;
 
 // DWARF Attribute定数
 const DW_AT_location = 0x02;
 const DW_AT_byte_size = 0x0b;
 const DW_AT_name = 0x03;
 const DW_AT_type = 0x49;
+const DW_AT_low_pc = 0x11;
+const DW_AT_high_pc = 0x12;
+const DW_AT_frame_base = 0x40;
+const DW_AT_abstract_origin = 0x31;
+const DW_AT_specification = 0x47;
 
 // DWARF Form定数
 const DW_FORM_addr = 0x01;
@@ -49,6 +59,8 @@ const DW_FORM_ref4 = 0x13;
 const DW_FORM_ref8 = 0x14;
 const DW_FORM_ref_udata = 0x15;
 const DW_FORM_indirect = 0x16;
+const DW_FORM_sec_offset = 0x17;
+const DW_FORM_exprloc = 0x18;
 
 // DWARF Location Expression オペコード
 const DW_OP_addr = 0x03;
@@ -166,6 +178,7 @@ export class DwarfParser {
     const infoSection = elfResult.sections.get('.debug_info');
     const abbrevSection = elfResult.sections.get('.debug_abbrev');
     const strSection = elfResult.sections.get('.debug_str');
+    const locSection = elfResult.sections.get('.debug_loc');
 
     if (!infoSection || !abbrevSection) {
       throw new Error('DWARFデバッグ情報が見つかりません。-g オプション付きでコンパイルしてください。');
@@ -174,7 +187,9 @@ export class DwarfParser {
     this.debugInfo = infoSection.data;
     this.debugAbbrev = abbrevSection.data;
     this.debugStr = strSection ? strSection.data : null;
+    this.debugLoc = locSection ? locSection.data : null;
   }
+  private debugLoc: Uint8Array | null = null;
 
   /** 変数情報を抽出する */
   public extractVariables(): DebugVariable[] {
@@ -185,6 +200,7 @@ export class DwarfParser {
 
     while (reader.remaining > 0) {
       // Compilation Unit ヘッダ
+      const unitHeaderOffset = reader.offset;
       const unitLength = reader.readU32();
       if (unitLength === 0 || unitLength === 0xffffffff) break;
       const cuEndOffset = reader.offset + unitLength;
@@ -203,7 +219,7 @@ export class DwarfParser {
       const abbrevTable = this.parseAbbrevTable(abbrevOffset);
 
       // DIEツリーをパース
-      const dies = this.parseDies(reader, cuEndOffset, abbrevTable);
+      const dies = this.parseDies(reader, cuEndOffset, abbrevTable, unitHeaderOffset);
 
       // DIEツリーから変数を抽出
       this.extractVariablesFromDies(dies, variables);
@@ -241,7 +257,7 @@ export class DwarfParser {
   }
 
   /** DIEツリーをパース */
-  private parseDies(reader: ByteReader, endOffset: number, abbrevTable: Map<number, AbbrevEntry>): Die[] {
+  private parseDies(reader: ByteReader, endOffset: number, abbrevTable: Map<number, AbbrevEntry>, unitOffset: number): Die[] {
     const result: Die[] = [];
     const stack: Die[] = [];
 
@@ -271,7 +287,7 @@ export class DwarfParser {
 
       // 属性値を読む
       for (const attrSpec of abbrev.attributes) {
-        const value = this.readAttributeValue(reader, attrSpec.form);
+        const value = this.readAttributeValue(reader, attrSpec.form, unitOffset);
         die.attributes.set(attrSpec.name, {
           name: attrSpec.name,
           form: attrSpec.form,
@@ -297,22 +313,30 @@ export class DwarfParser {
   }
 
   /** 属性値を読む */
-  private readAttributeValue(reader: ByteReader, form: number): number | string | Uint8Array {
+  private readAttributeValue(reader: ByteReader, form: number, unitOffset: number): number | string | Uint8Array {
     switch (form) {
       case DW_FORM_addr:
         // AVRのDWARFではアドレスは通常4バイト
         if (this.addrSize === 2) return reader.readU16();
         return reader.readU32();
       case DW_FORM_data1:
-      case DW_FORM_ref1:
       case DW_FORM_flag:
         return reader.readU8();
+      case DW_FORM_ref1:
+        return unitOffset + reader.readU8();
       case DW_FORM_data2:
-      case DW_FORM_ref2:
         return reader.readU16();
+      case DW_FORM_ref2:
+        return unitOffset + reader.readU16();
       case DW_FORM_data4:
-      case DW_FORM_ref4:
+      case DW_FORM_sec_offset:
         return reader.readU32();
+      case DW_FORM_ref4:
+        return unitOffset + reader.readU32();
+      case DW_FORM_exprloc: {
+        const len = reader.readULEB128();
+        return reader.readBytes(len);
+      }
       case DW_FORM_data8:
       case DW_FORM_ref8:
         // 8バイト値は上位4バイトを捨てる（AVRでは使わない）
@@ -322,8 +346,9 @@ export class DwarfParser {
       case DW_FORM_sdata:
         return reader.readSLEB128();
       case DW_FORM_udata:
-      case DW_FORM_ref_udata:
         return reader.readULEB128();
+      case DW_FORM_ref_udata:
+        return unitOffset + reader.readULEB128();
       case DW_FORM_string:
         return reader.readCString();
       case DW_FORM_strp: {
@@ -353,7 +378,7 @@ export class DwarfParser {
         return reader.readU32();
       case DW_FORM_indirect: {
         const actualForm = reader.readULEB128();
-        return this.readAttributeValue(reader, actualForm);
+        return this.readAttributeValue(reader, actualForm, unitOffset);
       }
       default:
         // 未対応フォームはスキップ不能。ベストエフォートで0を返す
@@ -362,63 +387,146 @@ export class DwarfParser {
     }
   }
 
-  /** DIEツリーからグローバル/static変数を抽出 */
   private extractVariablesFromDies(dies: Die[], variables: DebugVariable[]): void {
     for (const die of dies) {
       if (die.tag === DW_TAG_compile_unit) {
+        const cuBase = this.getNumAttr(die, DW_AT_low_pc) || 0;
         // CU直下の変数（グローバル変数）を探す
-        this.collectVariables(die.children, variables, dies, undefined);
+        this.collectVariables(die.children, variables, dies, undefined, undefined, undefined, cuBase);
       }
     }
   }
 
-  /** 変数DIEを収集 */
-  private collectVariables(dies: Die[], variables: DebugVariable[], allDies: Die[], scopeFunction?: string): void {
+  private collectVariables(dies: Die[], variables: DebugVariable[], allDies: Die[], scopeFunction?: string, currentScope?: { start: number; end: number }, currentFrameBase?: Uint8Array, cuBase?: number): void {
     for (const die of dies) {
-      if (die.tag === DW_TAG_variable) {
-        const variable = this.dieToVariable(die, allDies, scopeFunction);
+      if (die.tag === DW_TAG_variable || die.tag === DW_TAG_formal_parameter || die.tag === DW_TAG_constant) {
+        const variable = this.dieToVariable(die, allDies, scopeFunction, currentScope, currentFrameBase, cuBase);
         if (variable) {
           variables.push(variable);
         }
-      } else if (die.tag === DW_TAG_subprogram) {
-        // 関数内の変数（static ローカル変数のみ、固定アドレスを持つもの）
-        const funcName = this.getStringAttr(die, DW_AT_name);
-        if (funcName && die.children.length > 0) {
-          this.collectVariables(die.children, variables, allDies, funcName);
+      } else if (die.tag === DW_TAG_subprogram || die.tag === DW_TAG_lexical_block || die.tag === DW_TAG_inlined_subroutine) {
+        const name = this.getInheritedStringAttr(die, DW_AT_name, allDies);
+        const lowPc = this.getNumAttr(die, DW_AT_low_pc);
+        let highPc = this.getNumAttr(die, DW_AT_high_pc);
+
+        let newFrameBase = currentFrameBase;
+        if (die.tag === DW_TAG_subprogram) {
+          const fbAttr = die.attributes.get(DW_AT_frame_base);
+          if (fbAttr && fbAttr.value instanceof Uint8Array) {
+            newFrameBase = fbAttr.value;
+          }
+        }
+        
+        let newScope = currentScope;
+        if (lowPc !== undefined && highPc !== undefined) {
+          const absoluteHighPc = (highPc < lowPc) ? (lowPc + highPc) : highPc;
+          newScope = { start: lowPc, end: absoluteHighPc };
+        }
+
+        const funcName = (die.tag === DW_TAG_subprogram || die.tag === DW_TAG_inlined_subroutine) ? name : scopeFunction;
+        if (die.children.length > 0) {
+          this.collectVariables(die.children, variables, allDies, funcName, newScope, newFrameBase, cuBase);
         }
       }
     }
   }
 
   /** DIEから変数情報を構築 */
-  private dieToVariable(die: Die, allDies: Die[], scopeFunction?: string): DebugVariable | null {
-    const name = this.getStringAttr(die, DW_AT_name);
+  private dieToVariable(die: Die, allDies: Die[], scopeFunction?: string, scope?: { start: number; end: number }, frameBase?: Uint8Array, cuBase?: number): DebugVariable | null {
+    const name = this.getInheritedStringAttr(die, DW_AT_name, allDies);
     if (!name) return null;
 
     // ロケーション情報を取得
-    const locationAttr = die.attributes.get(DW_AT_location);
+    const locationAttr = this.getInheritedAttr(die, DW_AT_location, allDies);
     if (!locationAttr) return null;
 
-    const address = this.evaluateLocation(locationAttr.value);
-    if (address === null) return null;
+    const locValue = locationAttr.value;
+    
+    // 静的アドレスか、動的ロケーション式かを判定
+    let address: number | undefined = undefined;
+    let location: Uint8Array | undefined = undefined;
+    let isLocationList: boolean = false;
 
-    // AVR の SRAM は 0x800000 オフセットで DWARF に記録されることがある
-    // 0x800000 以上なら SRAM アドレスとして 0x800000 を引く
-    let sramAddress = address;
-    if (address >= 0x800000) {
-      sramAddress = address - 0x800000;
+    if (typeof locValue === 'number' && locationAttr.form !== DW_FORM_addr) {
+      // 数値だが DW_FORM_addr でない場合、.debug_loc へのオフセット（Location List）
+      if (this.debugLoc) {
+        location = this.extractLocList(locValue);
+        isLocationList = true;
+      }
+    } else if (typeof locValue === 'number') {
+      address = locValue;
+    } else if (locValue instanceof Uint8Array) {
+      if (locValue.length > 0 && locValue[0] === DW_OP_addr) {
+        const addr = this.evaluateLocation(locValue);
+        address = addr === null ? undefined : addr;
+      } else {
+        location = locValue;
+      }
     }
 
-    // 型情報を解決
+    if (address === undefined && location === undefined) return null;
+
+    if (address !== undefined && address >= 0x800000) {
+      address -= 0x800000;
+    }
+
     const typeInfo = this.resolveType(die, allDies);
 
     return {
       name,
       typeName: typeInfo.name,
-      address: sramAddress,
+      address,
+      location,
+      isLocationList,
+      baseAddress: cuBase,
+      frameBase,
       size: typeInfo.size,
       function: scopeFunction,
+      scope,
     };
+  }
+
+  /** .debug_loc からロケーションリストを抽出 */
+  private extractLocList(offset: number): Uint8Array {
+    if (!this.debugLoc || offset >= this.debugLoc.length) return new Uint8Array(0);
+    // Location List は 2つのアドレスペアで始まる。終端は [0, 0]
+    // ここでは evaluator に渡すためにそのままコピー
+    // ※実際には現在の CU のベースアドレスが必要だが、AVR では通常 0
+    let end = offset;
+    const view = new DataView(this.debugLoc.buffer, this.debugLoc.byteOffset, this.debugLoc.byteLength);
+    while (end + 4 <= this.debugLoc.length) {
+      const s = view.getUint32(end, true);
+      const e = view.getUint32(end + 4, true);
+      if (s === 0 && e === 0) {
+        end += 8;
+        break;
+      }
+      end += 8;
+      const len = view.getUint16(end, true);
+      end += 2 + len;
+    }
+    return this.debugLoc.slice(offset, end);
+  }
+
+  /** 属性を継承（abstract_origin / specification）を考慮して取得 */
+  private getInheritedAttr(die: Die, attr: number, allDies: Die[]): { name: number, form: number, value: any } | undefined {
+    const a = die.attributes.get(attr);
+    if (a) return a;
+
+    const origin = die.attributes.get(DW_AT_abstract_origin) || die.attributes.get(DW_AT_specification);
+    if (origin && typeof origin.value === 'number') {
+      const targetDie = this.findDieByOffset(allDies, origin.value);
+      if (targetDie && targetDie !== die) {
+        return this.getInheritedAttr(targetDie, attr, allDies);
+      }
+    }
+    return undefined;
+  }
+
+  private getInheritedStringAttr(die: Die, attr: number, allDies: Die[]): string | undefined {
+    const a = this.getInheritedAttr(die, attr, allDies);
+    if (a && typeof a.value === 'string') return a.value;
+    return undefined;
   }
 
   /** ロケーション式を評価してアドレスを返す */
@@ -461,7 +569,7 @@ export class DwarfParser {
 
   /** 型を再帰的に解決 */
   private resolveType(die: Die, allDies: Die[]): { name: string; size: number } {
-    const typeRef = die.attributes.get(DW_AT_type);
+    const typeRef = this.getInheritedAttr(die, DW_AT_type, allDies);
     if (!typeRef || typeof typeRef.value !== 'number') {
       return { name: 'unknown', size: 1 };
     }
@@ -522,7 +630,7 @@ export class DwarfParser {
 
   /** 型DIEのDW_AT_typeを辿って型情報を取得 */
   private resolveTypeFromDie(die: Die, allDies: Die[]): { name: string; size: number } {
-    const typeRef = die.attributes.get(DW_AT_type);
+    const typeRef = this.getInheritedAttr(die, DW_AT_type, allDies);
     if (!typeRef || typeof typeRef.value !== 'number') {
       return { name: 'void', size: 0 };
     }

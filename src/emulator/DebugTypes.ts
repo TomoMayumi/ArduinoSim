@@ -32,14 +32,24 @@ export interface DebugVariable {
   name: string;
   /** 型名（例: "int", "uint8_t", "char"） */
   typeName: string;
-  /** SRAMアドレス（グローバル/static変数の場合） */
-  address: number;
+  /** SRAMアドレス（グローバル/static変数の場合。オプションに変更） */
+  address?: number;
+  /** DWARFロケーション式（ローカル変数の場合） */
+  location?: Uint8Array;
+  /** ロケーションリストで使用するベースアドレス（CUのlow_pc） */
+  baseAddress?: number;
+  /** ロケーション情報が .debug_loc 形式（Location List）かどうか */
+  isLocationList?: boolean;
+  /** 関数のフレームベース計算式（DW_OP_fbreg 用） */
+  frameBase?: Uint8Array;
   /** バイトサイズ */
   size: number;
   /** 定義元ファイル名 */
   file?: string;
   /** 所属関数名（グローバルの場合はundefined） */
   function?: string;
+  /** 変数が有効なPC範囲（word address、ローカル変数の場合） */
+  scope?: { start: number; end: number };
 }
 
 /** ELFパース結果 */
