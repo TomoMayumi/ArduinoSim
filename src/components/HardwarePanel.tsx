@@ -1,5 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
+
+export const HardwarePanelTitle = 'ブレッドボード';
 import { Atmega328P } from '../emulator/atmega328p';
 import { LedComponent } from '../emulator/hardware/LedComponent';
 import { SwitchComponent } from '../emulator/hardware/SwitchComponent';
@@ -363,7 +365,6 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
 
     return (
         <div className="hardware-panel">
-            <h3>ブレッドボード</h3>
             <div className="components-grid">
                 {/* スイッチ 4つをひとつの枠にまとめて横並び表示（押す操作が必要なので先に配置） */}
                 <div className="hardware-component hw-group" style={{ gridColumn: 'span 2', position: 'relative' }}>

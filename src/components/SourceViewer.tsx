@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useMemo, memo, useState } from 'react';
+
+export const SourceViewerTitle = 'ソースコード';
 import { SourceMapper } from '../emulator/SourceMapper';
 import type { SourceFileManager } from '../emulator/SourceFileManager';
 import type { BreakpointInfo } from '../emulator/DebugTypes';

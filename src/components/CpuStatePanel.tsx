@@ -1,4 +1,6 @@
 import React, { memo, useState, useEffect } from 'react';
+
+export const CpuStatePanelTitle = 'レジスタ';
 import { Atmega328P } from '../emulator/atmega328p';
 import { CPU_GROUPS, PERIPHERAL_GROUPS, extractBitFieldValue } from './RegisterDefinitions';
 import type { RegisterGroup } from './RegisterDefinitions';
@@ -212,9 +214,8 @@ export const CpuStatePanel: React.FC<CpuStatePanelProps> = memo(({ emulator, isR
     };
 
     return (
-        <div className="cpu-state-panel" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.8rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <h4 style={{ margin: 0, color: '#cbd5e1' }}>レジスタ</h4>
+        <div className="cpu-state-panel" style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', fontSize: '0.8rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: '0.2rem' }}>
                 <span className="sfr-format-toggle" onClick={cycleFormat} title="クリックで表示形式を切り替え">{formatLabel(displayFormat)}</span>
             </div>
             <div className="sfr-tree">

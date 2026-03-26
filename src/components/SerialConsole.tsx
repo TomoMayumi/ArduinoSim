@@ -1,4 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
+
+export const SerialConsoleTitle = 'シリアルモニター';
 import { AVRUSART } from 'avr8js';
 
 interface SerialConsoleProps {
@@ -63,9 +65,8 @@ export const SerialConsole: React.FC<SerialConsoleProps> = ({ uart, onReset, noR
 
     return (
         <div className="serial-console">
-            <div className="serial-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-                <h3 style={{ margin: 0, fontSize: '0.9rem' }}>シリアルモニター</h3>
-                <button onClick={toggleConnect} className={isConnected ? 'connected' : ''} style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}>
+            <div className="serial-header" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.4rem', marginTop: '-0.2rem' }}>
+                <button onClick={toggleConnect} className={isConnected ? 'connected' : ''} style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem' }}>
                     {isConnected ? '切断' : '接続'}
                 </button>
             </div>

@@ -1,16 +1,16 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { parseHex } from './emulator/intelhex';
 import { useEmulator } from './emulator/useEmulator';
 import { ElfParser } from './emulator/ElfParser';
 import { DwarfParser } from './emulator/DwarfParser';
 import { Pin13Led } from './components/Pin13Led';
-import { SerialConsole } from './components/SerialConsole';
-import { HardwarePanel } from './components/HardwarePanel';
-import { DisassemblyPanel } from './components/DisassemblyPanel';
-import { SourceViewer } from './components/SourceViewer';
-import { CpuStatePanel } from './components/CpuStatePanel';
-import { WatchPanel } from './components/WatchPanel';
-import { BreakpointPanel } from './components/BreakpointPanel';
+import { SerialConsole, SerialConsoleTitle } from './components/SerialConsole';
+import { HardwarePanel, HardwarePanelTitle } from './components/HardwarePanel';
+import { DisassemblyPanel, DisassemblyPanelTitle } from './components/DisassemblyPanel';
+import { SourceViewer, SourceViewerTitle } from './components/SourceViewer';
+import { CpuStatePanel, CpuStatePanelTitle } from './components/CpuStatePanel';
+import { WatchPanel, WatchPanelTitle } from './components/WatchPanel';
+import { BreakpointPanel, BreakpointPanelTitle } from './components/BreakpointPanel';
 import type { DebugVariable } from './emulator/DebugTypes';
 import './index.css';
 
@@ -56,6 +56,74 @@ function App() {
 
   // トースト通知
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  // パネルの型定義とレイアウト状態
+  type PanelId = 'hardware' | 'serial' | 'cpu' | 'breakpoints' | 'watch' | 'view';
+  const [panelLayout, setPanelLayout] = useState<{ [key: string]: PanelId[] }>(() => {
+    try {
+      const saved = localStorage.getItem('arduinoSim_panelLayout');
+      return saved ? JSON.parse(saved) : {
+        left: ['hardware', 'serial'],
+        middle: ['cpu', 'breakpoints', 'watch'],
+        right: ['view']
+      };
+    } catch {
+      return {
+        left: ['hardware', 'serial'],
+        middle: ['cpu', 'breakpoints', 'watch'],
+        right: ['view']
+      };
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem('arduinoSim_panelLayout', JSON.stringify(panelLayout));
+  }, [panelLayout]);
+
+  const [draggingPanel, setDraggingPanel] = useState<PanelId | null>(null);
+
+  const handleDragStart = (e: React.DragEvent, panelId: PanelId) => {
+    setDraggingPanel(panelId);
+    e.dataTransfer.setData('panelId', panelId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e: React.DragEvent, columnId: string, targetIndex: number) => {
+    e.preventDefault();
+    const panelId = e.dataTransfer.getData('panelId') as PanelId;
+    if (!panelId) return;
+
+    const nextLayout = { ...panelLayout };
+    
+    // 現在の位置から削除
+    let sourceCol = '';
+    for (const colId in nextLayout) {
+      if (nextLayout[colId].includes(panelId)) {
+        sourceCol = colId;
+        nextLayout[colId] = nextLayout[colId].filter(id => id !== panelId);
+        break;
+      }
+    }
+
+    // 新しい位置に挿入
+    // 同じカラム内で後ろに移動する場合、削除によってインデックスがずれるのを調整
+    let adjustedIndex = targetIndex;
+    if (sourceCol === columnId) {
+      const sourceIndex = panelLayout[columnId].indexOf(panelId);
+      if (sourceIndex < targetIndex) {
+        adjustedIndex = Math.max(0, targetIndex - 1);
+      }
+    }
+    
+    nextLayout[columnId].splice(adjustedIndex, 0, panelId);
+    setPanelLayout({ ...nextLayout });
+    setDraggingPanel(null);
+  };
 
   // カラム幅のリサイズ状態
   const [leftWidth, setLeftWidth] = useState(450);
@@ -437,95 +505,109 @@ function App() {
       </header>
 
       <div className="main-layout" style={{ gridTemplateColumns: `${leftWidth}px 8px ${middleWidth}px 8px 1fr`, gap: 0 }}>
-        <main className="main-content">
-          <div className="card">
-            <HardwarePanel emulator={emulator} isRunning={isRunning} />
-          </div>
-
-          <div className="card" style={{ padding: '0.5rem 1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-            <SerialConsole
-              uart={emulator?.uart}
-              onReset={reset}
-              noResetMode={noResetMode}
-            />
-          </div>
-        </main>
-
-        <div 
-          className={`resizer-v ${isResizingLeft ? 'resizing' : ''}`} 
-          onMouseDown={() => setIsResizingLeft(true)}
-        />
-
-        <aside className="register-sidebar">
-          <div className="card" style={{ display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
-            <CpuStatePanel emulator={emulator} isRunning={isRunning} />
-          </div>
-          <div className="card" style={{ display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
-            <BreakpointPanel
-              breakpoints={breakpoints}
-              sourceMapper={sourceMapper}
-              onUpdateCondition={updateBreakpointCondition}
-              onRemoveBreakpoints={removeBreakpoints}
-            />
-          </div>
-          <div className="card" style={{ display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
-            <WatchPanel
-              watchExpressions={watchExpressions}
-              watchResults={watchResults}
-              onAddWatch={addWatch}
-              onRemoveWatch={removeWatch}
-              onUpdateExpression={updateWatchExpression}
-              onUpdateFormat={updateWatchFormat}
-            />
-          </div>
-        </aside>
-
-        <div 
-          className={`resizer-v ${isResizingMiddle ? 'resizing' : ''}`} 
-          onMouseDown={() => setIsResizingMiddle(true)}
-        />
-
-        <aside className="disassembly-sidebar">
-          <div className="card" style={{ display: 'flex', flexDirection: 'column', boxSizing: 'border-box', flex: 1, minHeight: 0 }}>
-            <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.5rem', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', gap: '1rem' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
-                  <input type="radio" value="source" checked={viewMode === 'source'} onChange={(e) => setViewMode(e.target.value as any)} /> ソース
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
-                  <input type="radio" value="disassembly" checked={viewMode === 'disassembly'} onChange={(e) => setViewMode(e.target.value as any)} /> 逆アセンブリ
-                </label>
-              </div>
-              {viewMode === 'source' && (
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer', fontSize: '0.8rem', color: '#94a3b8' }}>
-                  <input type="checkbox" checked={showAsmInSource} onChange={(e) => setShowAsmInSource(e.target.checked)} /> ASM表示
-                </label>
-              )}
-            </div>
-            {viewMode === 'source' ? (
-              <SourceViewer
-                sourceMapper={sourceMapper}
-                fileManager={fileManager}
-                pc={isRunning ? -1 : debugInfo.pc}
-                isRunning={isRunning}
-                breakpoints={breakpoints}
-                onToggleBreakpoint={toggleBreakpoint}
-                onToggleLineBreakpoint={toggleLineBreakpoint}
-                onUpdateCondition={updateBreakpointCondition}
-                showAssembly={showAsmInSource}
-              />
-            ) : (
-              <DisassemblyPanel
-                program={program}
-                pc={isRunning ? -1 : debugInfo.pc}
-                isRunning={isRunning}
-                breakpoints={breakpoints}
-                onToggleBreakpoint={toggleBreakpoint}
+        {Object.entries(panelLayout).map(([columnId, panelIds], colIndex) => (
+          <React.Fragment key={columnId}>
+            {colIndex > 0 && (
+              <div 
+                className={`resizer-v ${colIndex === 1 ? (isResizingLeft ? 'resizing' : '') : (isResizingMiddle ? 'resizing' : '')}`}
+                onMouseDown={() => colIndex === 1 ? setIsResizingLeft(true) : setIsResizingMiddle(true)}
               />
             )}
-          </div>
-        </aside>
+            <div 
+              className={columnId === 'left' ? 'main-content' : (columnId === 'middle' ? 'register-sidebar' : 'disassembly-sidebar')}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, columnId, panelIds.length)}
+            >
+              {panelIds.map((panelId, index) => {
+                let content: React.ReactNode = null;
+                let title = '';
+                let extraStyle: React.CSSProperties = {};
 
+                if (panelId === 'hardware') {
+                   title = HardwarePanelTitle;
+                   content = <HardwarePanel emulator={emulator} isRunning={isRunning} />;
+                } else if (panelId === 'serial') {
+                   title = SerialConsoleTitle;
+                   content = <SerialConsole uart={emulator?.uart} onReset={reset} noResetMode={noResetMode} />;
+                   extraStyle = { padding: '0.5rem 1.5rem', flex: 1, display: 'flex', flexDirection: 'column' };
+                } else if (panelId === 'cpu') {
+                   title = CpuStatePanelTitle;
+                   content = <CpuStatePanel emulator={emulator} isRunning={isRunning} />;
+                } else if (panelId === 'breakpoints') {
+                   title = BreakpointPanelTitle;
+                   content = <BreakpointPanel breakpoints={breakpoints} sourceMapper={sourceMapper} onUpdateCondition={updateBreakpointCondition} onRemoveBreakpoints={removeBreakpoints} />;
+                } else if (panelId === 'watch') {
+                   title = WatchPanelTitle;
+                   content = <WatchPanel watchExpressions={watchExpressions} watchResults={watchResults} onAddWatch={addWatch} onRemoveWatch={removeWatch} onUpdateExpression={updateWatchExpression} onUpdateFormat={updateWatchFormat} />;
+                } else if (panelId === 'view') {
+                   title = viewMode === 'source' ? SourceViewerTitle : DisassemblyPanelTitle;
+                   extraStyle = { flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' };
+                   content = (
+                    <>
+                      <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.5rem', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
+                            <input type="radio" value="source" checked={viewMode === 'source'} onChange={(e) => setViewMode(e.target.value as any)} /> ソース
+                          </label>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
+                            <input type="radio" value="disassembly" checked={viewMode === 'disassembly'} onChange={(e) => setViewMode(e.target.value as any)} /> 逆アセンブリ
+                          </label>
+                        </div>
+                        {viewMode === 'source' && (
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer', fontSize: '0.8rem', color: '#94a3b8' }}>
+                            <input type="checkbox" checked={showAsmInSource} onChange={(e) => setShowAsmInSource(e.target.checked)} /> ASM表示
+                          </label>
+                        )}
+                      </div>
+                      {viewMode === 'source' ? (
+                        <SourceViewer
+                          sourceMapper={sourceMapper}
+                          fileManager={fileManager}
+                          pc={isRunning ? -1 : debugInfo.pc}
+                          isRunning={isRunning}
+                          breakpoints={breakpoints}
+                          onToggleBreakpoint={toggleBreakpoint}
+                          onToggleLineBreakpoint={toggleLineBreakpoint}
+                          onUpdateCondition={updateBreakpointCondition}
+                          showAssembly={showAsmInSource}
+                        />
+                      ) : (
+                        <DisassemblyPanel
+                          program={program}
+                          pc={isRunning ? -1 : debugInfo.pc}
+                          isRunning={isRunning}
+                          breakpoints={breakpoints}
+                          onToggleBreakpoint={toggleBreakpoint}
+                        />
+                      )}
+                    </>
+                   );
+                }
+
+                return (
+                  <div 
+                    key={panelId}
+                    className={`card ${draggingPanel === panelId ? 'dragging' : ''}`}
+                    style={{ ...extraStyle, position: 'relative' }}
+                    draggable="true"
+                    onDragStart={(e) => handleDragStart(e, panelId)}
+                    onDragOver={(e) => handleDragOver(e)}
+                    onDrop={(e) => {
+                      e.stopPropagation();
+                      handleDrop(e, columnId, index);
+                    }}
+                  >
+                    <div className="card-drag-handle" title="ドラッグして移動">
+                      <span style={{ fontSize: '10px', opacity: 0.5, marginRight: '6px' }}>⠿</span>
+                      <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{title}</span>
+                    </div>
+                    {content}
+                  </div>
+                );
+              })}
+            </div>
+          </React.Fragment>
+        ))}
       </div>
 
       {showSettings && (
@@ -553,6 +635,15 @@ function App() {
                   style={{ background: '#475569', fontSize: '0.8rem', padding: '0.5rem' }}
                 >
                   ハードウェア設定を初期化
+                </button>
+                <button
+                  onClick={() => {
+                    localStorage.removeItem('arduinoSim_panelLayout');
+                    window.location.reload();
+                  }}
+                  style={{ background: '#475569', fontSize: '0.8rem', padding: '0.5rem' }}
+                >
+                  レイアウトを初期化
                 </button>
               </div>
             </div>
@@ -643,7 +734,7 @@ function App() {
               {/* 区切り線と現在のソースコード/HEX情報 */}
               <div style={{ borderTop: '1px solid #334155', paddingTop: '1.5rem', display: 'flex', flexDirection: 'column', flex: 1 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                  <h3 style={{ margin: 0, fontSize: '1rem' }}>📄 ロード済みファイル</h3>
+                  <div style={{ margin: 0, fontSize: '1rem' }}>📄 ロード済みファイル</div>
                   <button
                     onClick={exportCurrentState}
                     title="現在のプロジェクト状態をJSONファイルとして保存"

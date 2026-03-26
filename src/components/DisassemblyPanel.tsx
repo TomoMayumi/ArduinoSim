@@ -1,4 +1,6 @@
 import React, { useEffect, useState, useRef, useMemo, memo, useCallback } from 'react';
+
+export const DisassemblyPanelTitle = '逆アセンブリ';
 import { Disassembler } from '../emulator/Disassembler';
 import type { DisassembledInstruction } from '../emulator/Disassembler';
 import type { BreakpointInfo } from '../emulator/DebugTypes';
@@ -125,7 +127,6 @@ export const DisassemblyPanel: React.FC<DisassemblyPanelProps> = memo(({ program
 
     return (
         <div className="disassembly-panel" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <h3 style={{ margin: '0 0 0.5rem 0', color: 'white' }}>Disassembly</h3>
             <div
                 ref={listRef}
                 onScroll={onScroll}

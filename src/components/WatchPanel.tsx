@@ -1,4 +1,6 @@
 import React, { memo, useState, useRef } from 'react';
+
+export const WatchPanelTitle = 'ウォッチ';
 import type { WatchExpression, WatchResult } from '../emulator/DebugTypes';
 
 interface WatchPanelProps {
@@ -69,9 +71,6 @@ export const WatchPanel: React.FC<WatchPanelProps> = memo(({
 
     return (
         <div className="watch-panel">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
-                <h4 style={{ margin: 0, color: '#cbd5e1', fontSize: '0.8rem' }}>ウォッチ</h4>
-            </div>
 
             {/* ウォッチ式リスト */}
             <div className="watch-list">

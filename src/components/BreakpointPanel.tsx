@@ -1,4 +1,6 @@
 import React, { useMemo, useState, memo } from 'react';
+
+export const BreakpointPanelTitle = 'ブレークポイント';
 import type { BreakpointInfo } from '../emulator/DebugTypes';
 import type { SourceMapper } from '../emulator/SourceMapper';
 
@@ -80,8 +82,7 @@ export const BreakpointPanel: React.FC<BreakpointPanelProps> = memo(({
 
     return (
         <div className="watch-panel">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
-                <h4 style={{ margin: 0, color: '#cbd5e1', fontSize: '0.8rem' }}>ブレークポイント</h4>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: '0.4rem' }}>
                 <span style={{ fontSize: '0.7rem', color: '#64748b' }}>{groups.length}件</span>
             </div>
 

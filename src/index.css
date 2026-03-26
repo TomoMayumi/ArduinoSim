@@ -96,6 +96,33 @@ body {
   padding: 1.25rem;
   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
   border: 1px solid #334155;
+  transition: opacity 0.2s, border-color 0.2s;
+}
+
+.card.dragging {
+  opacity: 0.5;
+  border: 1px dashed var(--accent-color);
+  background: rgba(30, 41, 59, 0.5);
+}
+
+.card-drag-handle {
+  display: flex;
+  align-items: center;
+  margin: -1.25rem -1.25rem 0.75rem -1.25rem;
+  padding: 0.35rem 0.75rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid #334155;
+  cursor: grab;
+  user-select: none;
+  border-radius: 0.75rem 0.75rem 0 0;
+}
+
+.card-drag-handle:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.card-drag-handle:active {
+  cursor: grabbing;
 }
 
 button {
