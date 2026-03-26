@@ -11,7 +11,7 @@ interface SourceViewerProps {
     breakpoints: Map<number, BreakpointInfo>;
     onToggleBreakpoint: (address: number) => void;
     onToggleLineBreakpoint: (addresses: number[]) => void;
-    onUpdateCondition?: (address: number, condition: string) => void;
+    onUpdateCondition?: (addresses: number[], condition: string) => void;
     showAssembly?: boolean;
 }
 
@@ -22,7 +22,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = memo(({
     const listRef = useRef<HTMLDivElement>(null);
     const prevPcRef = useRef<number>(pc);
     const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
-    const [conditionEdit, setConditionEdit] = useState<{ address: number; x: number; y: number; value: string } | null>(null);
+    const [conditionEdit, setConditionEdit] = useState<{ addresses: number[]; x: number; y: number; value: string } | null>(null);
 
     const activeByteAddress = isRunning ? -1 : pc * 2;
     const currentLocation = useMemo(() => {
@@ -204,7 +204,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = memo(({
                                         if (isCodeLine && hasBreakpoint && firstBpAddr !== undefined && onUpdateCondition) {
                                             e.preventDefault();
                                             setConditionEdit({
-                                                address: firstBpAddr,
+                                                addresses: lineAddresses,
                                                 x: e.clientX,
                                                 y: e.clientY,
                                                 value: bpInfo?.condition || ''
@@ -279,7 +279,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = memo(({
                         onClick={e => e.stopPropagation()}
                     >
                         <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.4rem' }}>
-                            ブレークポイント条件 (0x{conditionEdit.address.toString(16).toUpperCase()})
+                            ブレークポイント条件 (0x{conditionEdit.addresses[0].toString(16).toUpperCase()}{conditionEdit.addresses.length > 1 ? ` 他${conditionEdit.addresses.length - 1}件` : ''})
                         </div>
                         <input
                             autoFocus
@@ -289,7 +289,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = memo(({
                             onChange={e => setConditionEdit({ ...conditionEdit, value: e.target.value })}
                             onKeyDown={e => {
                                 if (e.key === 'Enter') {
-                                    onUpdateCondition?.(conditionEdit.address, conditionEdit.value);
+                                    onUpdateCondition?.(conditionEdit.addresses, conditionEdit.value);
                                     setConditionEdit(null);
                                 }
                                 if (e.key === 'Escape') setConditionEdit(null);
@@ -299,14 +299,14 @@ export const SourceViewer: React.FC<SourceViewerProps> = memo(({
                             <button
                                 className="bp-condition-btn"
                                 onClick={() => {
-                                    onUpdateCondition?.(conditionEdit.address, '');
+                                    onUpdateCondition?.(conditionEdit.addresses, '');
                                     setConditionEdit(null);
                                 }}
                             >条件クリア</button>
                             <button
                                 className="bp-condition-btn primary"
                                 onClick={() => {
-                                    onUpdateCondition?.(conditionEdit.address, conditionEdit.value);
+                                    onUpdateCondition?.(conditionEdit.addresses, conditionEdit.value);
                                     setConditionEdit(null);
                                 }}
                             >設定</button>

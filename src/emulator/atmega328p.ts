@@ -34,6 +34,7 @@ export class Atmega328P {
   public portC: AVRIOPort;
   public portD: AVRIOPort;
   public hardware: HardwareManager;
+  public breakReason: string | null = null;
 
 
   constructor(program: Uint16Array) {
@@ -102,7 +103,14 @@ export class Atmega328P {
           this.hardware.update();
           return addr;
         }
-        if (evaluator.evaluateCondition(bp.condition, this.cpu)) {
+        
+        const result = evaluator.tryEvaluate(bp.condition, this.cpu);
+        if (result.error) {
+          this.breakReason = `条件エラー (アドレス 0x${addr.toString(16)}): ${result.error}`;
+          this.hardware.update();
+          return addr;
+        } else if (result.value !== 0) {
+          this.breakReason = null;
           this.hardware.update();
           return addr;
         }

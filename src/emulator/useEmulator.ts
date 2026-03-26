@@ -12,6 +12,7 @@ export function useEmulator(program: Uint16Array | null, lssText: string | null 
     const [sourceMapper, setSourceMapper] = useState<SourceMapper>(new SourceMapper());
     const [fileManager, setFileManager] = useState<SourceFileManager>(new SourceFileManager());
     const requestRef = useRef<number>(0);
+    const [breakpointError, setBreakpointError] = useState<string | null>(null);
 
     // ウォッチ式
     const [watchExpressions, setWatchExpressions] = useState<WatchExpression[]>([]);
@@ -74,13 +75,36 @@ export function useEmulator(program: Uint16Array | null, lssText: string | null 
         });
     }, []);
 
-    /** ブレークポイントに条件を設定 */
-    const updateBreakpointCondition = useCallback((address: number, condition: string) => {
+    const removeBreakpoints = useCallback((addresses: number[]) => {
         setBreakpoints((prev) => {
             const next = new Map(prev);
-            const existing = next.get(address);
-            if (existing) {
-                next.set(address, { ...existing, condition: condition || undefined });
+            addresses.forEach(addr => next.delete(addr));
+            return next;
+        });
+    }, []);
+
+    /** ブレークポイントに条件を設定 */
+    const updateBreakpointCondition = useCallback((addresses: number[], condition: string) => {
+        if (condition && condition.trim() !== '') {
+            if (evaluatorRef.current && emulatorRef.current) {
+                const result = evaluatorRef.current.tryEvaluate(condition, emulatorRef.current.cpu);
+                if (result.error) {
+                    const proceed = window.confirm(`【警告】条件式の評価エラー\n\n${result.error}\n\n存在しない変数名（ローカル変数など）や不正な構文が含まれている可能性があります。このまま設定すると、実行時にエラーとなって都度停止します。設定を続行しますか？`);
+                    if (!proceed) return;
+                }
+            }
+        }
+
+        const starts = getBlockStarts(addresses);
+        setBreakpoints((prev) => {
+            const next = new Map(prev);
+            for (const address of starts) {
+                const existing = next.get(address);
+                if (existing) {
+                    next.set(address, { ...existing, condition: condition || undefined });
+                } else {
+                    next.set(address, { enabled: true, condition: condition || undefined });
+                }
             }
             return next;
         });
@@ -154,6 +178,12 @@ export function useEmulator(program: Uint16Array | null, lssText: string | null 
 
                 if (hitBreakpoint) {
                     setIsRunning(false);
+                    if (emulatorRef.current.breakReason) {
+                        setBreakpointError(emulatorRef.current.breakReason);
+                        emulatorRef.current.breakReason = null;
+                    } else {
+                        setBreakpointError(null);
+                    }
                 } else {
                     requestRef.current = requestAnimationFrame(loop);
                 }
@@ -242,10 +272,13 @@ export function useEmulator(program: Uint16Array | null, lssText: string | null 
         reset,
         toggleBreakpoint,
         toggleLineBreakpoint,
+        removeBreakpoints,
         updateBreakpointCondition,
         addWatch,
         removeWatch,
         updateWatchExpression,
         updateWatchFormat,
+        breakpointError,
+        setBreakpointError,
     };
 }

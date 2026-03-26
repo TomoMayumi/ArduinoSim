@@ -10,6 +10,7 @@ import { DisassemblyPanel } from './components/DisassemblyPanel';
 import { SourceViewer } from './components/SourceViewer';
 import { CpuStatePanel } from './components/CpuStatePanel';
 import { WatchPanel } from './components/WatchPanel';
+import { BreakpointPanel } from './components/BreakpointPanel';
 import type { DebugVariable } from './emulator/DebugTypes';
 import './index.css';
 
@@ -32,8 +33,9 @@ function App() {
     emulator, isRunning, breakpoints, sourceMapper, fileManager,
     watchExpressions, watchResults,
     start, stop, step, reset,
-    toggleBreakpoint, toggleLineBreakpoint, updateBreakpointCondition,
-    addWatch, removeWatch, updateWatchExpression, updateWatchFormat
+    toggleBreakpoint, toggleLineBreakpoint, removeBreakpoints, updateBreakpointCondition,
+    addWatch, removeWatch, updateWatchExpression, updateWatchFormat,
+    breakpointError, setBreakpointError
   } = useEmulator(program, lssInput, sourceFiles, debugVariables);
   const [noResetMode, setNoResetMode] = useState(true);
   const [debugInfo, setDebugInfo] = useState({ pc: 0, cycles: 0 });
@@ -59,6 +61,14 @@ function App() {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   }, []);
+
+  // ブレークポイントエラー表示
+  useEffect(() => {
+    if (breakpointError) {
+      showToast(breakpointError, 'error');
+      setBreakpointError(null);
+    }
+  }, [breakpointError, showToast, setBreakpointError]);
 
   useEffect(() => {
     try {
@@ -407,6 +417,14 @@ function App() {
         <aside className="register-sidebar">
           <div className="card" style={{ display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
             <CpuStatePanel emulator={emulator} isRunning={isRunning} />
+          </div>
+          <div className="card" style={{ display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
+            <BreakpointPanel
+              breakpoints={breakpoints}
+              sourceMapper={sourceMapper}
+              onUpdateCondition={updateBreakpointCondition}
+              onRemoveBreakpoints={removeBreakpoints}
+            />
           </div>
           <div className="card" style={{ display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
             <WatchPanel

@@ -106,8 +106,7 @@ export class ExpressionEvaluator {
   /** 式を評価して数値を返す */
   public evaluate(expression: string, cpu: CPU): number {
     const tokens = this.tokenize(expression);
-    const result = this.parseExpression(tokens, cpu, 0);
-    return result.value;
+    return this.parseExprFromTokens(tokens, cpu, 0);
   }
 
   /** 条件式を評価してブール値を返す */
@@ -212,28 +211,6 @@ export class ExpressionEvaluator {
     return tokens;
   }
 
-  /** 式を再帰下降法でパース・評価 */
-  private parseExpression(tokens: Token[], cpu: CPU, minPrec: number): { value: number; pos: number } {
-    let left = this.parsePrimary(tokens, cpu);
-
-    while (true) {
-      const token = tokens[left.pos];
-      if (!token || token.type !== 'operator') break;
-      const prec = PRECEDENCE[token.value];
-      if (prec === undefined || prec < minPrec) break;
-
-      const op = token.value;
-      left.pos++;
-      const right = this.parseExpression(tokens, cpu, prec + 1);
-
-      left = {
-        value: this.applyOp(op, left.value, right.value),
-        pos: right.pos
-      };
-    }
-
-    return left;
-  }
 
   /** 一次式のパース */
   private parsePrimary(tokens: Token[], cpu: CPU): { value: number; pos: number } {
