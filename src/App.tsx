@@ -4,13 +4,14 @@ import { useEmulator } from './emulator/useEmulator';
 import { ElfParser } from './emulator/ElfParser';
 import { DwarfParser } from './emulator/DwarfParser';
 import { Pin13Led } from './components/Pin13Led';
-import { SerialConsole, SerialConsoleTitle } from './components/SerialConsole';
 import { HardwarePanel, HardwarePanelTitle } from './components/HardwarePanel';
-import { DisassemblyPanel, DisassemblyPanelTitle } from './components/DisassemblyPanel';
-import { SourceViewer, SourceViewerTitle } from './components/SourceViewer';
+import { SerialConsole, SerialConsoleTitle } from './components/SerialConsole';
 import { CpuStatePanel, CpuStatePanelTitle } from './components/CpuStatePanel';
-import { WatchPanel, WatchPanelTitle } from './components/WatchPanel';
 import { BreakpointPanel, BreakpointPanelTitle } from './components/BreakpointPanel';
+import { WatchPanel, WatchPanelTitle } from './components/WatchPanel';
+import { ViewPanel } from './components/ViewPanel'; // New import
+import { SourceViewerTitle } from './components/SourceViewer';
+import { DisassemblyPanelTitle } from './components/DisassemblyPanel';
 import type { DebugVariable } from './emulator/DebugTypes';
 import './index.css';
 
@@ -86,6 +87,12 @@ function App() {
     setDraggingPanel(panelId);
     e.dataTransfer.setData('panelId', panelId);
     e.dataTransfer.effectAllowed = 'move';
+    
+    // ドラッグ中のイメージをカード全体にする
+    const card = (e.target as HTMLElement).closest('.card');
+    if (card) {
+      e.dataTransfer.setDragImage(card, 20, 10);
+    }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -519,85 +526,82 @@ function App() {
               onDrop={(e) => handleDrop(e, columnId, panelIds.length)}
             >
               {panelIds.map((panelId, index) => {
-                let content: React.ReactNode = null;
-                let title = '';
-                let extraStyle: React.CSSProperties = {};
+                const state = {
+                    emulator, isRunning, reset, noResetMode, 
+                    breakpoints, sourceMapper, updateBreakpointCondition, removeBreakpoints,
+                    watchExpressions, watchResults, addWatch, removeWatch, updateWatchExpression, updateWatchFormat,
+                    viewMode, setViewMode, showAsmInSource, setShowAsmInSource, debugInfo, toggleBreakpoint, toggleLineBreakpoint, program, fileManager
+                };
 
-                if (panelId === 'hardware') {
-                   title = HardwarePanelTitle;
-                   content = <HardwarePanel emulator={emulator} isRunning={isRunning} />;
-                } else if (panelId === 'serial') {
-                   title = SerialConsoleTitle;
-                   content = <SerialConsole uart={emulator?.uart} onReset={reset} noResetMode={noResetMode} />;
-                   extraStyle = { padding: '0.5rem 1.5rem', flex: 1, display: 'flex', flexDirection: 'column' };
-                } else if (panelId === 'cpu') {
-                   title = CpuStatePanelTitle;
-                   content = <CpuStatePanel emulator={emulator} isRunning={isRunning} />;
-                } else if (panelId === 'breakpoints') {
-                   title = BreakpointPanelTitle;
-                   content = <BreakpointPanel breakpoints={breakpoints} sourceMapper={sourceMapper} onUpdateCondition={updateBreakpointCondition} onRemoveBreakpoints={removeBreakpoints} />;
-                } else if (panelId === 'watch') {
-                   title = WatchPanelTitle;
-                   content = <WatchPanel watchExpressions={watchExpressions} watchResults={watchResults} onAddWatch={addWatch} onRemoveWatch={removeWatch} onUpdateExpression={updateWatchExpression} onUpdateFormat={updateWatchFormat} />;
-                } else if (panelId === 'view') {
-                   title = viewMode === 'source' ? SourceViewerTitle : DisassemblyPanelTitle;
-                   extraStyle = { flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' };
-                   content = (
-                    <>
-                      <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.5rem', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div style={{ display: 'flex', gap: '1rem' }}>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
-                            <input type="radio" value="source" checked={viewMode === 'source'} onChange={(e) => setViewMode(e.target.value as any)} /> ソース
-                          </label>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
-                            <input type="radio" value="disassembly" checked={viewMode === 'disassembly'} onChange={(e) => setViewMode(e.target.value as any)} /> 逆アセンブリ
-                          </label>
-                        </div>
-                        {viewMode === 'source' && (
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer', fontSize: '0.8rem', color: '#94a3b8' }}>
-                            <input type="checkbox" checked={showAsmInSource} onChange={(e) => setShowAsmInSource(e.target.checked)} /> ASM表示
-                          </label>
-                        )}
-                      </div>
-                      {viewMode === 'source' ? (
-                        <SourceViewer
-                          sourceMapper={sourceMapper}
-                          fileManager={fileManager}
-                          pc={isRunning ? -1 : debugInfo.pc}
-                          isRunning={isRunning}
-                          breakpoints={breakpoints}
-                          onToggleBreakpoint={toggleBreakpoint}
-                          onToggleLineBreakpoint={toggleLineBreakpoint}
-                          onUpdateCondition={updateBreakpointCondition}
-                          showAssembly={showAsmInSource}
-                        />
-                      ) : (
-                        <DisassemblyPanel
-                          program={program}
-                          pc={isRunning ? -1 : debugInfo.pc}
-                          isRunning={isRunning}
-                          breakpoints={breakpoints}
-                          onToggleBreakpoint={toggleBreakpoint}
-                        />
-                      )}
-                    </>
-                   );
-                }
+                const PANEL_REGISTRY: Record<string, { title: string | (() => string), extraStyle?: React.CSSProperties, render: (s: typeof state) => React.ReactNode }> = {
+                    hardware: {
+                        title: HardwarePanelTitle,
+                        render: (s) => <HardwarePanel emulator={s.emulator} isRunning={s.isRunning} />
+                    },
+                    serial: {
+                        title: SerialConsoleTitle,
+                        extraStyle: { padding: '0.5rem 1.5rem', flex: 1, display: 'flex', flexDirection: 'column' },
+                        render: (s) => <SerialConsole uart={s.emulator?.uart} onReset={s.reset} noResetMode={s.noResetMode} />
+                    },
+                    cpu: {
+                        title: CpuStatePanelTitle,
+                        render: (s) => <CpuStatePanel emulator={s.emulator} isRunning={s.isRunning} />
+                    },
+                    breakpoints: {
+                        title: BreakpointPanelTitle,
+                        render: (s) => <BreakpointPanel breakpoints={s.breakpoints} sourceMapper={s.sourceMapper} onUpdateCondition={s.updateBreakpointCondition} onRemoveBreakpoints={s.removeBreakpoints} />
+                    },
+                    watch: {
+                        title: WatchPanelTitle,
+                        render: (s) => <WatchPanel watchExpressions={s.watchExpressions} watchResults={s.watchResults} onAddWatch={s.addWatch} onRemoveWatch={s.removeWatch} onUpdateExpression={s.updateWatchExpression} onUpdateFormat={s.updateWatchFormat} />
+                    },
+                    view: {
+                        title: () => state.viewMode === 'source' ? SourceViewerTitle : DisassemblyPanelTitle,
+                        extraStyle: { flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' },
+                        render: (s) => (
+                            <ViewPanel
+                                viewMode={s.viewMode}
+                                setViewMode={s.setViewMode}
+                                showAsmInSource={s.showAsmInSource}
+                                setShowAsmInSource={s.setShowAsmInSource}
+                                sourceMapper={s.sourceMapper}
+                                fileManager={s.fileManager}
+                                pc={s.isRunning ? -1 : s.debugInfo.pc}
+                                isRunning={s.isRunning}
+                                breakpoints={s.breakpoints}
+                                program={s.program}
+                                onToggleBreakpoint={s.toggleBreakpoint}
+                                onToggleLineBreakpoint={s.toggleLineBreakpoint}
+                                onUpdateCondition={s.updateBreakpointCondition}
+                            />
+                        )
+                    }
+                };
+
+                const panelDef = PANEL_REGISTRY[panelId];
+                if (!panelDef) return null;
+
+                const title = typeof panelDef.title === 'function' ? panelDef.title() : panelDef.title;
+                const content = panelDef.render(state);
+                const extraStyle = panelDef.extraStyle || {};
 
                 return (
                   <div 
                     key={panelId}
                     className={`card ${draggingPanel === panelId ? 'dragging' : ''}`}
                     style={{ ...extraStyle, position: 'relative' }}
-                    draggable="true"
-                    onDragStart={(e) => handleDragStart(e, panelId)}
                     onDragOver={(e) => handleDragOver(e)}
                     onDrop={(e) => {
                       e.stopPropagation();
                       handleDrop(e, columnId, index);
                     }}
                   >
-                    <div className="card-drag-handle" title="ドラッグして移動">
+                    <div 
+                      className="card-drag-handle" 
+                      title="ドラッグして移動"
+                      draggable="true"
+                      onDragStart={(e) => handleDragStart(e, panelId)}
+                    >
                       <span style={{ fontSize: '10px', opacity: 0.5, marginRight: '6px' }}>⠿</span>
                       <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{title}</span>
                     </div>
