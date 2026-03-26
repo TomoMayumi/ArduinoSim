@@ -57,6 +57,43 @@ function App() {
   // トースト通知
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
+  // カラム幅のリサイズ状態
+  const [leftWidth, setLeftWidth] = useState(450);
+  const [middleWidth, setMiddleWidth] = useState(300);
+  const [isResizingLeft, setIsResizingLeft] = useState(false);
+  const [isResizingMiddle, setIsResizingMiddle] = useState(false);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isResizingLeft) {
+        // App container padding (0.5rem = 8px)
+        const newWidth = Math.max(300, e.clientX - 12);
+        setLeftWidth(newWidth);
+      } else if (isResizingMiddle) {
+        // Left column + resizer
+        const newWidth = Math.max(250, e.clientX - leftWidth - 20);
+        setMiddleWidth(newWidth);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsResizingLeft(false);
+      setIsResizingMiddle(false);
+      document.body.style.cursor = '';
+    };
+
+    if (isResizingLeft || isResizingMiddle) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'col-resize';
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizingLeft, isResizingMiddle, leftWidth]);
+
   const showToast = useCallback((message: string, type: 'success' | 'error' = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
@@ -399,7 +436,7 @@ function App() {
         </div>
       </header>
 
-      <div className="main-layout">
+      <div className="main-layout" style={{ gridTemplateColumns: `${leftWidth}px 8px ${middleWidth}px 8px 1fr`, gap: 0 }}>
         <main className="main-content">
           <div className="card">
             <HardwarePanel emulator={emulator} isRunning={isRunning} />
@@ -413,6 +450,11 @@ function App() {
             />
           </div>
         </main>
+
+        <div 
+          className={`resizer-v ${isResizingLeft ? 'resizing' : ''}`} 
+          onMouseDown={() => setIsResizingLeft(true)}
+        />
 
         <aside className="register-sidebar">
           <div className="card" style={{ display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
@@ -437,6 +479,11 @@ function App() {
             />
           </div>
         </aside>
+
+        <div 
+          className={`resizer-v ${isResizingMiddle ? 'resizing' : ''}`} 
+          onMouseDown={() => setIsResizingMiddle(true)}
+        />
 
         <aside className="disassembly-sidebar">
           <div className="card" style={{ display: 'flex', flexDirection: 'column', boxSizing: 'border-box', flex: 1, minHeight: 0 }}>

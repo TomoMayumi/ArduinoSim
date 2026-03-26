@@ -46,12 +46,24 @@ body {
 
 .main-layout {
   display: grid;
-  grid-template-columns: minmax(450px, 1.5fr) minmax(300px, 0.5fr) minmax(300px, 1.7fr);
-  gap: 0.5rem;
   flex: 1;
   overflow-y: hidden;
   overflow-x: hidden;
   padding-top: 0.5rem;
+}
+
+.resizer-v {
+  width: 8px;
+  cursor: col-resize;
+  background: transparent;
+  transition: background 0.2s;
+  z-index: 10;
+  border-radius: 4px;
+}
+
+.resizer-v:hover,
+.resizer-v.resizing {
+  background: rgba(56, 189, 248, 0.3);
 }
 
 .header {
