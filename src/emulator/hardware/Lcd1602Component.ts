@@ -6,6 +6,7 @@ export interface Lcd1602State extends ComponentState {
     lines: string[]; // 2 lines of 16 characters each
     cursorRow: number;
     cursorCol: number;
+    displayOn: boolean;
 }
 
 export class Lcd1602Component implements Component {
@@ -25,6 +26,7 @@ export class Lcd1602Component implements Component {
     private lines: string[] = ['                ', '                '];
     private cursorRow: number = 0;
     private cursorCol: number = 0;
+    private displayOn: boolean = false;
 
     private lastEnState: boolean = false;
     private isWaitingForLowerNibble: boolean = false;
@@ -124,15 +126,20 @@ export class Lcd1602Component implements Component {
                 this.cursorRow = 0;
                 this.cursorCol = addr;
             }
+        } else if ((cmd & 0xF8) === 0x08) { // Display ON/OFF Control
+            // 0 0 0 0 1 D C B
+            this.displayOn = (cmd & 0x04) === 0x04;
+            // Cursor and blink are ignored for now but could be added later
         }
-        // Other commands (display on/off, shift, function set) are ignored in this simplified model
+        // Other commands (shift, function set) are ignored in this simplified model
     }
 
     getState(): Lcd1602State {
         return {
             lines: [...this.lines],
             cursorRow: this.cursorRow,
-            cursorCol: this.cursorCol
+            cursorCol: this.cursorCol,
+            displayOn: this.displayOn
         };
     }
 }

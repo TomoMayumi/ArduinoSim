@@ -286,12 +286,13 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
                     <button className="settings-btn" onClick={() => openConfigFor(comp.id)}>⚙️</button>
                     <span className="label" style={{ color: '#000' }}>{comp.name}</span>
                     <div className="lcd-display" style={{
-                        background: '#738618', padding: '0.5rem', borderRadius: '0.25rem', fontFamily: 'monospace',
+                        background: lcdState.displayOn ? '#738618' : '#3f460d', padding: '0.5rem', borderRadius: '0.25rem', fontFamily: 'monospace',
                         color: '#000', fontSize: '1rem', lineHeight: '1.2', border: '2px solid #5a6a12',
-                        boxShadow: 'inset 0 0 10px rgba(0,0,0,0.5)', width: 'fit-content'
+                        boxShadow: 'inset 0 0 10px rgba(0,0,0,0.5)', width: 'fit-content',
+                        transition: 'background 0.3s ease'
                     }}>
                         {lcdState.lines.map((line, row) => (
-                            <div key={row} style={{ display: 'flex' }}>
+                            <div key={row} style={{ display: 'flex', opacity: lcdState.displayOn ? 1 : 0, transition: 'opacity 0.3s ease' }}>
                                 {line.split('').map((char, col) => (
                                     <span key={col} style={{
                                         display: 'inline-block', width: '12px', height: '18px', textAlign: 'center',
