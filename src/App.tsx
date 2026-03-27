@@ -220,8 +220,7 @@ function App() {
     try {
       const response = await fetch(`/samples/${filename}`);
       const data = await response.json();
-      setProgramSourceType('hex');
-      setHexInput(data.hex || '');
+
       setLssInput(data.lss || '');
       setSourceFiles(data.sourceFiles || []);
       
@@ -234,6 +233,47 @@ function App() {
       if (data.hardwareConfigs) {
         localStorage.setItem('arduino_sim_hardware_config', JSON.stringify(data.hardwareConfigs));
         window.dispatchEvent(new Event('hardwareConfigChanged'));
+      }
+
+      if (data.elf) {
+        // ELF形式のロード
+        try {
+          const binaryString = atob(data.elf);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          const elfBuffer = bytes.buffer;
+
+          const elfParser = new ElfParser(elfBuffer);
+          const rawResult = elfParser.parse();
+          const elfProgram = ElfParser.toProgram(rawResult.programData);
+
+          setProgramSourceType('elf');
+          setProgram(elfProgram);
+          setHexInput(data.hex || '');
+
+          try {
+            const dwarfParser = new DwarfParser(rawResult);
+            const vars = dwarfParser.extractVariables();
+            setDebugVariables(vars);
+          } catch (dwarfErr) {
+            console.warn('DWARF解析エラー:', dwarfErr);
+            setDebugVariables([]);
+          }
+        } catch (elfErr) {
+          console.error('ELF解析エラー:', elfErr);
+          showToast('ELF形式の解析に失敗しました。HEX形式へのフォールバックを試みます', 'error');
+          // フォールバック
+          setProgramSourceType('hex');
+          setHexInput(data.hex || '');
+          setDebugVariables([]);
+        }
+      } else {
+        // 従来のHEX形式
+        setProgramSourceType('hex');
+        setHexInput(data.hex || '');
+        setDebugVariables([]);
       }
 
       setSelectedSample(filename);

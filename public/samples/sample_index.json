@@ -73,6 +73,12 @@
       "description": "ハイブリッドシステムの総合サンプル（全コンポーネント使用）"
     },
     {
+      "filename": "hybrid_system_elf.json",
+      "name": "Hybrid System (ELF)",
+      "category": "応用",
+      "description": "ELF形式によるハイブリッドシステムの総合サンプル（デバッグ変数対応）"
+    },
+    {
       "filename": "lcd_test.json",
       "name": "LCD Debug (デバッグ)",
       "category": "応用",
