@@ -1,4 +1,3 @@
-import { CPU } from 'avr8js';
 
 export interface ComponentState {
     // 汎用的な状態格納用
@@ -14,8 +13,8 @@ export interface Component {
     updateInterval?: number;
 
     // シミュレーションステップごとの更新処理
-    // cpu: CPUインスタンス
-    update(cpu: CPU): void;
+    // cpu: CPUインスタンス (AVRまたはARM)
+    update(cpu: any): void;
 
     // Reactコンポーネント用の状態を返す
     getState(): ComponentState;

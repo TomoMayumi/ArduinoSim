@@ -22,6 +22,8 @@ export interface ElfRawResult {
   entryPoint: number;
   /** 全セクション */
   sections: Map<string, ElfSection>;
+  /** アーキテクチャ (AVR/ARM) */
+  architecture: string;
 }
 
 // ELF定数
@@ -70,6 +72,10 @@ export class ElfParser {
       sections.set(name, { name, type, flags, addr, offset, size, data: sectionData });
     }
 
+    // E_MACHINE をチェック (AVR=83, ARM=40)
+    const e_machine = this.view.getUint16(0x12, true);
+    const isARM = e_machine === 40;
+
     const phoff = this.view.getUint32(0x1c, true);
     const phentsize = this.view.getUint16(0x2a, true);
     const phnum = this.view.getUint16(0x2c, true);
@@ -86,7 +92,10 @@ export class ElfParser {
         const paddr = this.view.getUint32(base + 0x0c, true);
         const filesz = this.view.getUint32(base + 0x10, true);
 
-        if (type === PT_LOAD && filesz > 0 && paddr < 0x800000) {
+        // AVR: 0x800000 以上は RAM なので除外。ARM: すべての PT_LOAD を対象。
+        if (type === PT_LOAD && filesz > 0) {
+            if (!isARM && paddr >= 0x800000) continue;
+            
             const segmentData = this.data.slice(offset, offset + filesz);
             loadSegments.push({ paddr, data: segmentData });
             if (paddr + filesz > maxAddr) {
@@ -95,18 +104,24 @@ export class ElfParser {
         }
     }
 
-    // AVRの標準的なプログラムサイズ(64KB)でフラッシュメモリを構成
-    const programSize = Math.max(maxAddr, 65536);
+    // AVR: 標準 64KB, ARM: RA4M1 は 256KB
+    const programSize = isARM ? 256 * 1024 : Math.max(maxAddr, 65536);
     let programData: Uint8Array = new Uint8Array(programSize);
     for (const seg of loadSegments) {
-        programData.set(seg.data, seg.paddr);
+        // セグメントを適切なアドレスに配置
+        // ARMの場合、Flashは 0x00000000 から始まる
+        if (seg.paddr < programSize) {
+            programData.set(seg.data, seg.paddr);
+        }
     }
 
-    return { programData, entryPoint, sections };
+    return { programData, entryPoint, sections, architecture: isARM ? 'ARM' : 'AVR' };
   }
 
   /** ELFプログラムデータをUint16Array（avr8jsフォーマット）に変換 */
-  public static toProgram(rawData: Uint8Array): Uint16Array {
+  public static toProgram(rawData: Uint8Array, arch: string = 'AVR'): Uint16Array | Uint8Array {
+    if (arch === 'ARM') return rawData; // ARM はバイト配列のまま扱う
+
     const wordCount = Math.ceil(rawData.length / 2);
     const program = new Uint16Array(wordCount);
     for (let i = 0; i < rawData.length; i += 2) {

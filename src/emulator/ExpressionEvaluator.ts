@@ -109,13 +109,13 @@ export class ExpressionEvaluator {
   }
 
   /** 式を評価して数値を返す */
-  public evaluate(expression: string, cpu: CPU, pc: number): number {
+  public evaluate(expression: string, cpu: any, pc: number): number {
     const tokens = this.tokenize(expression);
     return this.parseExprFromTokens(tokens, cpu, pc, 0);
   }
 
   /** 条件式を評価してブール値を返す */
-  public evaluateCondition(expression: string, cpu: CPU, pc: number): boolean {
+  public evaluateCondition(expression: string, cpu: any, pc: number): boolean {
     try {
       const value = this.evaluate(expression, cpu, pc);
       return value !== 0;
@@ -125,7 +125,7 @@ export class ExpressionEvaluator {
   }
 
   /** 式を評価し、エラー時はエラーメッセージを返す */
-  public tryEvaluate(expression: string, cpu: CPU, pc: number): { value: number | null; error?: string } {
+  public tryEvaluate(expression: string, cpu: any, pc: number): { value: number | null; error?: string } {
     try {
       const value = this.evaluate(expression, cpu, pc);
       return { value };

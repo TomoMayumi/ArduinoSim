@@ -1,4 +1,3 @@
-import { CPU } from 'avr8js';
 import type { Component, ComponentState } from './Component';
 import { setPinInput } from '../PinMappings';
 
@@ -28,7 +27,8 @@ export class SwitchComponent implements Component {
 
     private isPressed = false;
 
-    update(cpu: CPU): void {
+    // ... (rest of the class)
+    update(cpu: any): void {
         setPinInput(cpu, this.pin, this.isPressed);
     }
 

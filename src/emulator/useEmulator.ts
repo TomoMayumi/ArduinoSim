@@ -1,12 +1,20 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { Atmega328P } from './atmega328p';
+import { RA4M1 } from './RA4M1';
+import type { Emulator } from './Emulator';
 import { SourceMapper } from './SourceMapper';
 import { SourceFileManager } from './SourceFileManager';
 import { ExpressionEvaluator } from './ExpressionEvaluator';
 import type { BreakpointInfo, WatchExpression, WatchResult, DebugVariable } from './DebugTypes';
 
-export function useEmulator(program: Uint16Array | null, lssText: string | null = null, sourceFiles: { name: string, content: string }[] = [], debugVariables: DebugVariable[] = []) {
-    const [emulator, setEmulator] = useState<Atmega328P | null>(null);
+export function useEmulator(
+    program: Uint16Array | Uint8Array | null, 
+    lssText: string | null = null, 
+    sourceFiles: { name: string, content: string }[] = [], 
+    debugVariables: DebugVariable[] = [],
+    architecture: string = 'AVR'
+) {
+    const [emulator, setEmulator] = useState<Emulator | null>(null);
     const [isRunning, setIsRunning] = useState(false);
     const [breakpoints, setBreakpoints] = useState<Map<number, BreakpointInfo>>(new Map());
     const [sourceMapper, setSourceMapper] = useState<SourceMapper>(new SourceMapper());
@@ -115,7 +123,7 @@ export function useEmulator(program: Uint16Array | null, lssText: string | null 
         const sorted = [...addresses].sort((a, b) => a - b);
         const starts = [sorted[0]];
         for (let i = 1; i < sorted.length; i++) {
-            // AVRの命令サイズ（2 or 4バイト）を考慮し、4バイトを超える隙間があれば別ブロックとみなす
+            // 命令サイズ（AVR: 2/4, ARM: 2/4）を考慮。4バイトを超える隙間があれば別ブロックとみなす
             if (sorted[i] > sorted[i - 1] + 4) {
                 starts.push(sorted[i]);
             }
@@ -125,12 +133,17 @@ export function useEmulator(program: Uint16Array | null, lssText: string | null 
 
     useEffect(() => {
         if (program) {
-            const newEmulator = new Atmega328P(program);
+            let newEmulator: Emulator;
+            if (architecture === 'ARM') {
+                newEmulator = new RA4M1(program as Uint8Array);
+            } else {
+                newEmulator = new Atmega328P(program as Uint16Array);
+            }
             setEmulator(newEmulator);
         } else {
             setEmulator(null);
         }
-    }, [program]);
+    }, [program, architecture]);
 
     useEffect(() => {
         const fm = new SourceFileManager();
@@ -148,7 +161,7 @@ export function useEmulator(program: Uint16Array | null, lssText: string | null 
     }, [lssText, sourceFiles]);
 
     const isRunningRef = useRef(isRunning);
-    const emulatorRef = useRef<Atmega328P | null>(null);
+    const emulatorRef = useRef<Emulator | null>(null);
     const breakpointsRef = useRef(breakpoints);
 
     useEffect(() => {

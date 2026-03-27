@@ -30,6 +30,7 @@ function App() {
   const [program, setProgram] = useState<Uint16Array | null>(null);
   const [programSourceType, setProgramSourceType] = useState<'none' | 'hex' | 'elf'>('none');
   const [debugVariables, setDebugVariables] = useState<DebugVariable[]>([]);
+  const [architecture, setArchitecture] = useState<string>('AVR');
   const {
     emulator, isRunning, breakpoints, sourceMapper, fileManager,
     watchExpressions, watchResults,
@@ -37,7 +38,7 @@ function App() {
     toggleBreakpoint, toggleLineBreakpoint, removeBreakpoints, updateBreakpointCondition,
     addWatch, removeWatch, updateWatchExpression, updateWatchFormat,
     breakpointError, setBreakpointError
-  } = useEmulator(program, lssInput, sourceFiles, debugVariables);
+  } = useEmulator(program, lssInput, sourceFiles, debugVariables, architecture);
   const [noResetMode, setNoResetMode] = useState(true);
   const [debugInfo, setDebugInfo] = useState({ pc: 0, cycles: 0 });
   const [viewMode, setViewMode] = useState<'disassembly' | 'source'>('source');
@@ -191,6 +192,7 @@ function App() {
       
       if (hexInput) {
         setProgram(parseHex(hexInput));
+        setArchitecture('AVR');
       } else {
         setProgram(null);
       }
@@ -247,10 +249,11 @@ function App() {
 
           const elfParser = new ElfParser(elfBuffer);
           const rawResult = elfParser.parse();
-          const elfProgram = ElfParser.toProgram(rawResult.programData);
+          const elfProgram = ElfParser.toProgram(rawResult.programData, rawResult.architecture);
 
+          setArchitecture(rawResult.architecture);
           setProgramSourceType('elf');
-          setProgram(elfProgram);
+          setProgram(elfProgram as any);
           setHexInput(data.hex || '');
 
           try {
@@ -268,12 +271,14 @@ function App() {
           setProgramSourceType('hex');
           setHexInput(data.hex || '');
           setDebugVariables([]);
+          setArchitecture('AVR');
         }
       } else {
         // 従来のHEX形式
         setProgramSourceType('hex');
         setHexInput(data.hex || '');
         setDebugVariables([]);
+        setArchitecture('AVR');
       }
 
       setSelectedSample(filename);
@@ -309,7 +314,7 @@ function App() {
     showToast('現在の状態をエクスポートしました');
   };
 
-  // サンプルをカテゴリ別にグループ化
+  // サンプルのグループ化など...
   const samplesByCategory = sampleList.reduce<Record<string, SampleInfo[]>>((acc, sample) => {
     if (!acc[sample.category]) acc[sample.category] = [];
     acc[sample.category].push(sample);
@@ -438,10 +443,11 @@ function App() {
         try {
           const elfParser = new ElfParser(detectedElf);
           const rawResult = elfParser.parse();
-          const elfProgram = ElfParser.toProgram(rawResult.programData);
+          const elfProgram = ElfParser.toProgram(rawResult.programData, rawResult.architecture);
           
+          setArchitecture(rawResult.architecture);
           setProgramSourceType('elf');
-          setProgram(elfProgram);
+          setProgram(elfProgram as any);
           if (detectedHex) {
             setHexInput(detectedHex);
           } else {
@@ -467,12 +473,14 @@ function App() {
           if (detectedHex) {
             setProgramSourceType('hex');
             setHexInput(detectedHex);
+            setArchitecture('AVR');
           }
         }
       } else if (detectedHex) {
         setProgramSourceType('hex');
         setHexInput(detectedHex);
         setDebugVariables([]);
+        setArchitecture('AVR');
       }
       if (detectedLss) setLssInput(detectedLss);
 
@@ -576,7 +584,7 @@ function App() {
                 const PANEL_REGISTRY: Record<string, { title: string | (() => string), extraStyle?: React.CSSProperties, render: (s: typeof state) => React.ReactNode }> = {
                     hardware: {
                         title: HardwarePanelTitle,
-                        render: (s) => <HardwarePanel emulator={s.emulator} isRunning={s.isRunning} />
+                        render: (s) => <HardwarePanel emulator={s.emulator as any} isRunning={s.isRunning} />
                     },
                     serial: {
                         title: SerialConsoleTitle,
@@ -585,7 +593,7 @@ function App() {
                     },
                     cpu: {
                         title: CpuStatePanelTitle,
-                        render: (s) => <CpuStatePanel emulator={s.emulator} isRunning={s.isRunning} />
+                        render: (s) => <CpuStatePanel emulator={s.emulator as any} isRunning={s.isRunning} />
                     },
                     breakpoints: {
                         title: BreakpointPanelTitle,

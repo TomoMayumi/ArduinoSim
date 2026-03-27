@@ -1,5 +1,4 @@
 
-import { CPU } from 'avr8js';
 import type { Component, LedState } from './Component';
 import { getPinState } from '../PinMappings';
 
@@ -24,8 +23,12 @@ export class LedComponent implements Component {
 
     private isOn = false;
 
-    update(cpu: CPU): void {
+    update(cpu: any): void {
         this.isOn = getPinState(cpu, this.pin);
+    }
+
+    public setPinState(isOn: boolean) {
+        this.isOn = isOn;
     }
 
     getState(): LedState {

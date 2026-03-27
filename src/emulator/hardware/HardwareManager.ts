@@ -1,15 +1,19 @@
-import { CPU } from 'avr8js';
 import type { Component, ComponentState } from './Component';
+import { LedComponent } from './LedComponent';
+
+export interface GenericCPU {
+    cycles: number;
+}
 
 export class HardwareManager {
     private components: Component[] = [];
     private highFreqComponents: Component[] = [];
     private lowFreqComponents: Component[] = [];
-    private cpu: CPU;
+    private cpu: GenericCPU;
     private lastLowFreqUpdate: number = 0;
     private readonly DEFAULT_LOW_FREQ_INTERVAL = 512;
 
-    constructor(cpu: CPU) {
+    constructor(cpu: GenericCPU) {
         this.cpu = cpu;
     }
 
@@ -59,5 +63,17 @@ export class HardwareManager {
             states[component.id] = component.getState();
         }
         return states;
+    }
+
+    // 特定のピンの状態を更新するヘルパー
+    public setPinState(pinName: string, isHigh: boolean) {
+        for (const component of this.components) {
+            if (component.type === 'LED') {
+                const led = component as any; // LedComponent
+                if (led.pin === pinName) {
+                    led.setPinState?.(isHigh);
+                }
+            }
+        }
     }
 }

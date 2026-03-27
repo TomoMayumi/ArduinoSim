@@ -17,13 +17,15 @@ import {
   usart0Config,
 } from 'avr8js';
 
+import type { Emulator } from './Emulator';
+
 export interface EmulatorConfig {
   program: Uint16Array;
 }
 
 import { HardwareManager } from './hardware/HardwareManager';
 
-export class Atmega328P {
+export class Atmega328P implements Emulator {
   public cpu: CPU;
   public timer0: AVRTimer;
   public timer1: AVRTimer;
