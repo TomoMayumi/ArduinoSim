@@ -590,7 +590,7 @@ function App() {
                     },
                     serial: {
                         title: SerialConsoleTitle,
-                        extraStyle: { padding: '0.5rem 1.5rem', flex: 1, display: 'flex', flexDirection: 'column' },
+                        extraStyle: { flex: 1, display: 'flex', flexDirection: 'column' },
                         render: (s) => <SerialConsole uart={s.emulator?.uart} onReset={s.reset} noResetMode={s.noResetMode} />
                     },
                     cpu: {
