@@ -9,9 +9,11 @@ import { SerialConsole, SerialConsoleTitle } from './components/SerialConsole';
 import { CpuStatePanel, CpuStatePanelTitle } from './components/CpuStatePanel';
 import { BreakpointPanel, BreakpointPanelTitle } from './components/BreakpointPanel';
 import { WatchPanel, WatchPanelTitle } from './components/WatchPanel';
-import { ViewPanel } from './components/ViewPanel'; // New import
+import { ViewPanel } from './components/ViewPanel';
 import { SourceViewerTitle } from './components/SourceViewer';
 import { DisassemblyPanelTitle } from './components/DisassemblyPanel';
+import { OscilloscopePanel, OscilloscopePanelTitle } from './components/OscilloscopePanel';
+import { OscilloscopeComponent } from './emulator/hardware/OscilloscopeComponent';
 import type { DebugVariable } from './emulator/DebugTypes';
 import './index.css';
 
@@ -65,13 +67,13 @@ function App() {
     try {
       const saved = localStorage.getItem('arduinoSim_panelLayout');
       return saved ? JSON.parse(saved) : {
-        left: ['hardware', 'serial'],
+        left: ['hardware', 'oscilloscope', 'serial'],
         middle: ['cpu', 'breakpoints', 'watch'],
         right: ['view']
       };
     } catch {
       return {
-        left: ['hardware', 'serial'],
+        left: ['hardware', 'oscilloscope', 'serial'],
         middle: ['cpu', 'breakpoints', 'watch'],
         right: ['view']
       };
@@ -602,6 +604,21 @@ function App() {
                     watch: {
                         title: WatchPanelTitle,
                         render: (s) => <WatchPanel watchExpressions={s.watchExpressions} watchResults={s.watchResults} onAddWatch={s.addWatch} onRemoveWatch={s.removeWatch} onUpdateExpression={s.updateWatchExpression} onUpdateFormat={s.updateWatchFormat} />
+                    },
+                    oscilloscope: {
+                        title: OscilloscopePanelTitle,
+                        render: (s) => {
+                            const comp = s.emulator?.hardware.getComponent('scope-1') as OscilloscopeComponent;
+                            if (!comp) return <div>オシロスコープがロードされていません</div>;
+                            return (
+                                <OscilloscopePanel
+                                    state={comp.getState()}
+                                    isRunning={!!s.isRunning}
+                                    onPinChange={(chIdx, pin) => comp.setChannelPin(chIdx, pin)}
+                                    onModeChange={(chIdx, mode) => comp.setChannelMode(chIdx, mode)}
+                                />
+                            );
+                        }
                     },
                     view: {
                         title: () => state.viewMode === 'source' ? SourceViewerTitle : DisassemblyPanelTitle,

@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
+export const OscilloscopePanelTitle = 'オシロスコープ';
 import type { OscilloscopeState } from '../emulator/hardware/OscilloscopeComponent';
 
 interface OscilloscopePanelProps {
@@ -204,7 +205,7 @@ export const OscilloscopePanel: React.FC<OscilloscopePanelProps> = ({ state, isR
     }, [state, timeScale, triggerMode, triggerEdge, triggerChannel, triggerLevel, isArmed, frozenState, displayChannelCount]);
 
     return (
-        <div className="oscilloscope-panel" style={{ background: '#1e293b', padding: '1rem', borderRadius: '8px', color: '#f8fafc', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}>
+        <div className="oscilloscope-panel" style={{ background: '#1e293b', borderRadius: '8px', color: '#f8fafc', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
                     <h3 style={{ margin: 0, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap' }}>
