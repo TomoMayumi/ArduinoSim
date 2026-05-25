@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { Atmega328P } from './atmega328p';
+import { Atmega168PA } from './atmega168pa';
 import { RA4M1 } from './RA4M1';
 import type { Emulator } from './Emulator';
 import { SourceMapper } from './SourceMapper';
@@ -136,6 +137,8 @@ export function useEmulator(
             let newEmulator: Emulator;
             if (architecture === 'ARM') {
                 newEmulator = new RA4M1(program as Uint8Array);
+            } else if (architecture === 'AVR_ATMEGA168PA') {
+                newEmulator = new Atmega168PA(program as Uint16Array);
             } else {
                 newEmulator = new Atmega328P(program as Uint16Array);
             }

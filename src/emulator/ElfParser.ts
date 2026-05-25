@@ -76,6 +76,15 @@ export class ElfParser {
     const e_machine = this.view.getUint16(0x12, true);
     const isARM = e_machine === 40;
 
+    // AVR の場合、.note.gnu.avr.deviceinfo からMCU種別を検出する
+    let avrMcuName: string | null = null;
+    if (!isARM) {
+      const noteSection = sections.get('.note.gnu.avr.deviceinfo');
+      if (noteSection && noteSection.data.length >= 12) {
+        avrMcuName = this.parseAvrDeviceNote(noteSection.data);
+      }
+    }
+
     const phoff = this.view.getUint32(0x1c, true);
     const phentsize = this.view.getUint16(0x2a, true);
     const phnum = this.view.getUint16(0x2c, true);
@@ -115,7 +124,7 @@ export class ElfParser {
         }
     }
 
-    return { programData, entryPoint, sections, architecture: isARM ? 'ARM' : 'AVR' };
+    return { programData, entryPoint, sections, architecture: isARM ? 'ARM' : this.resolveAvrArchitecture(avrMcuName) };
   }
 
   /** ELFプログラムデータをUint16Array（avr8jsフォーマット）に変換 */
@@ -161,5 +170,52 @@ export class ElfParser {
     let end = offset;
     while (end < data.length && data[end] !== 0) end++;
     return new TextDecoder('utf-8').decode(data.slice(offset, end));
+  }
+
+  /**
+   * .note.gnu.avr.deviceinfo セクションからデバイス名を取得する。
+   * Note 形式: namesz(4) + descsz(4) + type(4) + name("AVR\0") + descriptor
+   * descriptor: core(4) + flash_start(4) + flash_size(4) + sram_start(4) +
+   *             sram_size(4) + eeprom_start(4) + eeprom_size(4) + device_name(...)
+   */
+  private parseAvrDeviceNote(data: Uint8Array): string | null {
+    try {
+      const noteView = new DataView(data.buffer, data.byteOffset, data.byteLength);
+      const namesz = noteView.getUint32(0, true);
+      const descsz = noteView.getUint32(4, true);
+      const type = noteView.getUint32(8, true);
+
+      // NT_GNU_ABI_TAG = 1, but AVR uses type 1 for device info
+      if (type !== 1 || namesz !== 4) return null;
+
+      // name should be "AVR\0"
+      const name = this.readCString(data, 12);
+      if (name !== 'AVR') return null;
+
+      // descriptor starts after name (aligned to 4 bytes)
+      const descOffset = 12 + Math.ceil(namesz / 4) * 4;
+      if (data.length < descOffset + descsz) return null;
+
+      // device name string follows the 7 uint32 fields (28 bytes)
+      const deviceNameOffset = descOffset + 28;
+      if (deviceNameOffset >= data.length) return null;
+
+      return this.readCString(data, deviceNameOffset);
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * AVR MCU 名からアーキテクチャ文字列を解決する。
+   * 不明な場合は 'AVR'（ATmega328P 相当）をデフォルトとする。
+   */
+  private resolveAvrArchitecture(mcuName: string | null): string {
+    if (!mcuName) return 'AVR';
+    const lower = mcuName.toLowerCase();
+    if (lower.includes('atmega168') || lower === 'atmega168pa' || lower === 'atmega168a' || lower === 'atmega168p') {
+      return 'AVR_ATMEGA168PA';
+    }
+    return 'AVR';
   }
 }
