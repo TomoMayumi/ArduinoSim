@@ -12,7 +12,6 @@ const DW_TAG_compile_unit = 0x11;
 const DW_TAG_variable = 0x34;
 const DW_TAG_base_type = 0x24;
 const DW_TAG_typedef = 0x16;
-const DW_TAG_member = 0x0d;
 const DW_TAG_constant = 0x27;
 const DW_TAG_pointer_type = 0x0f;
 const DW_TAG_const_type = 0x26;

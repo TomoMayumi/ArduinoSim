@@ -1,5 +1,4 @@
 import type { Component, ComponentState } from './Component';
-import { LedComponent } from './LedComponent';
 
 export interface GenericCPU {
     cycles: number;

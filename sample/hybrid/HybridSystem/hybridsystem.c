@@ -4,7 +4,7 @@
  * 内容：ハイブリッドシステム                           *
  * 日付：2019/06/13                                     *
  * note:                                                *
- * 作成者：yamashita_y                                  *
+ * 作成者：                                  *
  *******************************************************/
 #include "drivers/timer.h"
 #include "car/speed_meter.h"
