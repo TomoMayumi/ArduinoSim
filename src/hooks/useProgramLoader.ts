@@ -46,7 +46,7 @@ export function useProgramLoader(showToast: (message: string, type?: 'success' |
 
   // サンプル一覧を読み込む
   useEffect(() => {
-    fetch('/samples/sample_index.json')
+    fetch(`${import.meta.env.BASE_URL}samples/sample_index.json`)
       .then(res => res.json())
       .then(data => {
         setSampleList(data.samples || []);
@@ -70,7 +70,7 @@ export function useProgramLoader(showToast: (message: string, type?: 'success' |
     const sampleInfo = sampleList.find(s => s.filename === filename);
 
     try {
-      const response = await fetch(`/samples/${filename}`);
+      const response = await fetch(`${import.meta.env.BASE_URL}samples/${filename}`);
       const data = await response.json();
 
       setLssInput(data.lss || '');
