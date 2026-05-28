@@ -83,6 +83,12 @@
       "name": "LCD Debug (デバッグ)",
       "category": "応用",
       "description": "LCD初期化シーケンスのデバッグ用サンプル"
+    },
+    {
+      "filename": "artecrobo_linetracer.json",
+      "name": "ArtecROBO ライントレーサー",
+      "category": "応用",
+      "description": "ATmega168PA搭載ArtecROBOで黒線をトレースするシミュレーション"
     }
   ]
 }

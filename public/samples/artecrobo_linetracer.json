@@ -1,0 +1,25 @@
+{
+  "hex": ":1000000004E00EBF0FEF0DBF00EF0AB90CE90BB90A\r\n:1000100001E005B903EA04BD03E005BD00E007BD4A\r\n:1000200008BD09B113B1202F2095312F309523FD44\r\n:1000300008C022FD18C030FD1BC050E557BD58BD9B\r\n:10004000F0CF22FD06C030FD09C050EC57BD58BDB1\r\n:10005000E8CF50E558BD50EC57BDE3CF50EC58BD4C\r\n:1000600050E557BDDECF50E058BD50EC57BDD9CF5D\r\n:0A00700050EC58BD50E057BDD4CF4E\r\n:00000001FF",
+  "lss": "",
+  "sourceFiles": [
+    {
+      "name": "linetracer.c",
+      "content": "/**\n * ArtecROBO ライントレーサー\n * ATmega168PA (Arduino互換ピン配置)\n *\n * ピン配置:\n *   D5 (OC0B) = 左モーターPWM\n *   D4        = 左モーター方向 (HIGH = 前進)\n *   D6 (OC0A) = 右モーターPWM\n *   D7        = 右モーター方向 (HIGH = 前進)\n *   D2 (PD2)  = 左フォトリフレクタ (LOW = 黒線)\n *   D3 (PD3)  = 中央フォトリフレクタ (LOW = 黒線)\n *   D8 (PB0)  = 右フォトリフレクタ (LOW = 黒線)\n */\n#include <avr/io.h>\n\n#define MOTOR_FAST 192  /* 75% デューティサイクル */\n#define MOTOR_SLOW  80  /* 31% デューティサイクル */\n\nstatic void motors_init(void) {\n    /* D4, D5, D6, D7 を出力ピンに設定 */\n    DDRD |= (1 << PD4) | (1 << PD5) | (1 << PD6) | (1 << PD7);\n    /* D2, D3 を入力 + 内部プルアップ有効 */\n    DDRD  &= ~((1 << PD2) | (1 << PD3));\n    PORTD |=  (1 << PD2) | (1 << PD3);\n    /* D8 を入力 + 内部プルアップ有効 */\n    DDRB  &= ~(1 << PB0);\n    PORTB |=  (1 << PB0);\n    /* 方向ピン初期化: D4, D7 を HIGH (前進) に設定 */\n    PORTD |= (1 << PD4) | (1 << PD7);\n    /* Timer0: Fast PWM (OC0A=D6, OC0B=D5), 分周比64 (~980Hz) */\n    TCCR0A = (1 << COM0A1) | (1 << COM0B1) | (1 << WGM01) | (1 << WGM00);\n    TCCR0B = (1 << CS01) | (1 << CS00);\n    OCR0A = 0;\n    OCR0B = 0;\n}\n\nstatic void set_motors(uint8_t left, uint8_t right) {\n    OCR0B = left;   /* 左モーター (D5 = OC0B) */\n    OCR0A = right;  /* 右モーター (D6 = OC0A) */\n}\n\nint main(void) {\n    motors_init();\n\n    for (;;) {\n        uint8_t pind = PIND;\n        uint8_t pinb = PINB;\n\n        /* LOW = 黒線上 (プルアップのため黒線でLOWになる) */\n        uint8_t sL = !(pind & (1 << PD2));  /* 左センサー  */\n        uint8_t sC = !(pind & (1 << PD3));  /* 中央センサー */\n        uint8_t sR = !(pinb & (1 << PB0));  /* 右センサー  */\n\n        if (sC) {\n            if      (sL && !sR) set_motors(MOTOR_SLOW, MOTOR_FAST); /* 中央+左 → 右に傾き → 左補正 */\n            else if (!sL && sR) set_motors(MOTOR_FAST, MOTOR_SLOW); /* 中央+右 → 左に傾き → 右補正 */\n            else                set_motors(MOTOR_FAST, MOTOR_FAST); /* 中央のみ → 直進 */\n        } else {\n            if      (sL && !sR) set_motors(0,           MOTOR_FAST); /* 左のみ → 急左旋回 */\n            else if (!sL && sR) set_motors(MOTOR_FAST,  0);          /* 右のみ → 急右旋回 */\n            else                set_motors(MOTOR_SLOW,  MOTOR_SLOW); /* 検出なし → 低速直進 */\n        }\n    }\n}\n"
+    }
+  ],
+  "hardwareConfigs": [
+    {
+      "id": "line-tracer-1",
+      "type": "LINE_TRACER",
+      "name": "ライントレーサー",
+      "leftPwmPin": "D5",
+      "leftDirPin": "D4",
+      "leftDirActiveHigh": true,
+      "rightPwmPin": "D6",
+      "rightDirPin": "D7",
+      "rightDirActiveHigh": true,
+      "sensorPins": ["D2", "D3", "D8"],
+      "sensorOnBlack": false
+    }
+  ]
+}

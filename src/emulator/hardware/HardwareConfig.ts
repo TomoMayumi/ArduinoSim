@@ -1,4 +1,4 @@
-export type ComponentType = 'LED' | 'SWITCH' | 'POTENTIOMETER' | 'SEVEN_SEGMENT' | 'MOTOR' | 'LCD1602' | 'AD_KEYBOARD' | 'OSCILLOSCOPE';
+export type ComponentType = 'LED' | 'SWITCH' | 'POTENTIOMETER' | 'SEVEN_SEGMENT' | 'MOTOR' | 'LCD1602' | 'AD_KEYBOARD' | 'OSCILLOSCOPE' | 'LINE_TRACER';
 
 export interface BaseConfig {
     id: string;
@@ -61,7 +61,19 @@ export interface OscilloscopeConfig extends BaseConfig {
     pins: string[]; // 複数チャンネル対応
 }
 
-export type HardwareConfig = LedConfig | SwitchConfig | PotentiometerConfig | SevenSegmentConfig | MotorConfig | Lcd1602Config | AdKeyboardConfig | OscilloscopeConfig;
+export interface LineTracerConfig extends BaseConfig {
+    type: 'LINE_TRACER';
+    leftPwmPin: string;
+    leftDirPin: string;
+    leftDirActiveHigh: boolean;
+    rightPwmPin: string;
+    rightDirPin: string;
+    rightDirActiveHigh: boolean;
+    sensorPins: string[];     // [leftPin, centerPin, rightPin]
+    sensorOnBlack: boolean;   // true = pin HIGH when sensor is on black
+}
+
+export type HardwareConfig = LedConfig | SwitchConfig | PotentiometerConfig | SevenSegmentConfig | MotorConfig | Lcd1602Config | AdKeyboardConfig | OscilloscopeConfig | LineTracerConfig;
 
 const STORAGE_KEY = 'arduino_sim_hardware_config';
 
@@ -106,10 +118,15 @@ export function loadHardwareConfigs(): HardwareConfig[] {
 
     // 固定IDの順序を維持しながら、localStorageの設定をマージする。
     // loacalStorageに存在するIDはその設定を使い、存在しないIDはデフォルトを使う。
-    return DEFAULT_CONFIGS.map(defaultCfg => {
+    const fixedConfigs = DEFAULT_CONFIGS.map(defaultCfg => {
         const saved = stored.find(c => c.id === defaultCfg.id);
         return saved ?? defaultCfg;
     });
+
+    // 固定ID以外のカスタムコンポーネント（LINE_TRACERなど）をlocalStorageから追加する。
+    const extraConfigs = stored.filter(c => !FIXED_COMPONENT_IDS.includes(c.id));
+
+    return [...fixedConfigs, ...extraConfigs];
 }
 
 export function saveHardwareConfigs(configs: HardwareConfig[]) {

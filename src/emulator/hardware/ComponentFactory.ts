@@ -8,6 +8,7 @@ import { MotorComponent } from './MotorComponent';
 import { Lcd1602Component } from './Lcd1602Component';
 import { AdKeyboardComponent } from './AdKeyboardComponent';
 import { OscilloscopeComponent } from './OscilloscopeComponent';
+import { LineTracerComponent } from './LineTracerComponent';
 
 export function createComponentFromConfig(config: HardwareConfig): Component | null {
     switch (config.type) {
@@ -37,6 +38,17 @@ export function createComponentFromConfig(config: HardwareConfig): Component | n
             return new AdKeyboardComponent(config.id, config.name, config.pin);
         case 'OSCILLOSCOPE':
             return new OscilloscopeComponent(config.id, config.name, config.pins);
+        case 'LINE_TRACER':
+            return new LineTracerComponent(config.id, config.name, {
+                leftPwmPin: config.leftPwmPin,
+                leftDirPin: config.leftDirPin,
+                leftDirActiveHigh: config.leftDirActiveHigh,
+                rightPwmPin: config.rightPwmPin,
+                rightDirPin: config.rightDirPin,
+                rightDirActiveHigh: config.rightDirActiveHigh,
+                sensorPins: config.sensorPins,
+                sensorOnBlack: config.sensorOnBlack,
+            });
         default:
             console.warn(`Unknown component type in config: ${(config as any).type}`);
             return null;
