@@ -2,6 +2,34 @@ import React from 'react';
 import { Pin13Led } from './Pin13Led';
 import type { Emulator } from '../emulator/Emulator';
 
+const COMMIT_SHA = import.meta.env.VITE_COMMIT_SHA;
+const shortSha = COMMIT_SHA ? COMMIT_SHA.slice(0, 7) : null;
+
+const CommitBadge: React.FC = () => {
+  if (!shortSha) return null;
+  return (
+    <a
+      href={`https://github.com/TomoMayumi/ArduinoSim/commit/${COMMIT_SHA}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={`デプロイ済みコミット: ${COMMIT_SHA}`}
+      style={{
+        fontFamily: 'monospace',
+        fontSize: '0.7rem',
+        color: '#64748b',
+        background: '#0f172a',
+        border: '1px solid #1e293b',
+        borderRadius: '0.3rem',
+        padding: '0.1rem 0.4rem',
+        textDecoration: 'none',
+        letterSpacing: '0.05em',
+      }}
+    >
+      {shortSha}
+    </a>
+  );
+};
+
 interface Props {
   emulator: Emulator | null;
   isRunning: boolean;
@@ -29,6 +57,7 @@ export const HeaderToolbar: React.FC<Props> = ({
     <header className="header" style={{ padding: '0.5rem 1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
         <h1 style={{ margin: '0', fontSize: '1.2rem' }}>Arduino Simulator</h1>
+        <CommitBadge />
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.8rem', background: '#1e293b', padding: '0.2rem 0.75rem', borderRadius: '0.5rem', border: '1px solid #334155' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <Pin13Led portB={emulator?.portB} /> <span>D13</span>
