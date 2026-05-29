@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 export const HardwarePanelTitle = 'ブレッドボード';
 import { Atmega328P } from '../emulator/atmega328p';
@@ -12,6 +12,8 @@ import type { SevenSegmentState } from '../emulator/hardware/SevenSegmentCompone
 import type { MotorState } from '../emulator/hardware/MotorComponent';
 import type { Lcd1602State } from '../emulator/hardware/Lcd1602Component';
 import type { AdKeyboardState, AdKeyboardComponent } from '../emulator/hardware/AdKeyboardComponent';
+import type { LineTracerState } from '../emulator/hardware/LineTracerComponent';
+import { LINE_TRACER_CANVAS_W, LINE_TRACER_CANVAS_H } from '../emulator/hardware/LineTracerComponent';
 import { loadHardwareConfigs, saveHardwareConfigs } from '../emulator/hardware/HardwareConfig';
 import type { HardwareConfig } from '../emulator/hardware/HardwareConfig';
 import { createComponentFromConfig } from '../emulator/hardware/ComponentFactory';
@@ -35,6 +37,91 @@ const SEGMENT_PATTERNS: { [key: number]: number[] } = {
     7: [1, 1, 1, 0, 0, 0, 0],
     8: [1, 1, 1, 1, 1, 1, 1],
     9: [1, 1, 1, 1, 0, 1, 1],
+};
+
+// Sensor offsets (must match LineTracerComponent constants)
+const CANVAS_SENSOR_OFFSETS = [
+    { lx: -20, ly: 22 },
+    { lx:   0, ly: 22 },
+    { lx:  20, ly: 22 },
+];
+
+const LineTracerCanvas: React.FC<{ state: LineTracerState }> = ({ state }) => {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        const W = LINE_TRACER_CANVAS_W;
+        const H = LINE_TRACER_CANVAS_H;
+        const CX = 250, CY = 175;
+
+        // Background
+        ctx.fillStyle = '#c8e6c9';
+        ctx.fillRect(0, 0, W, H);
+
+        // Oval track as black ring (evenodd rule punches the inner hole)
+        ctx.beginPath();
+        ctx.ellipse(CX, CY, 208, 143, 0, 0, 2 * Math.PI, false);
+        ctx.ellipse(CX, CY, 172, 107, 0, 0, 2 * Math.PI, true);
+        ctx.fillStyle = '#1a1a1a';
+        ctx.fill('evenodd');
+
+        // Start marker: white dashed stripe at bottom-center
+        ctx.save();
+        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(CX - 14, CY + 125);
+        ctx.lineTo(CX + 14, CY + 125);
+        ctx.stroke();
+        ctx.restore();
+
+        // Robot body (blue rectangle, rotated)
+        const { x, y, angle } = state;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+        ctx.fillStyle = '#2563eb';
+        ctx.fillRect(-12, -10, 24, 20);
+        // Direction arrow (white triangle pointing forward)
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.moveTo(14, 0);
+        ctx.lineTo(8, -5);
+        ctx.lineTo(8, 5);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+
+        // Sensors (red = on black, green = on white)
+        const cosA = Math.cos(angle);
+        const sinA = Math.sin(angle);
+        CANVAS_SENSOR_OFFSETS.forEach(({ lx, ly }, i) => {
+            const sx = x + ly * cosA - lx * sinA;
+            const sy = y + ly * sinA + lx * cosA;
+            ctx.beginPath();
+            ctx.arc(sx, sy, 4, 0, 2 * Math.PI);
+            ctx.fillStyle = state.sensors[i] ? '#ef4444' : '#22c55e';
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        });
+    }, [state]);
+
+    return (
+        <canvas
+            ref={canvasRef}
+            width={LINE_TRACER_CANVAS_W}
+            height={LINE_TRACER_CANVAS_H}
+            style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '0.5rem' }}
+        />
+    );
 };
 
 export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunning }) => {
@@ -381,6 +468,14 @@ export const HardwarePanel: React.FC<HardwarePanelProps> = ({ emulator, isRunnin
                 {renderSingleComponent('sevseg-1')}
                 {renderSingleComponent('lcd-1')}
                 {renderSingleComponent('adkey-1')}
+
+                {/* ライントレーサーキャンバス（サンプルプログラム読み込み時に表示） */}
+                {states['line-tracer-1'] && (
+                    <div key="line-tracer-1" className="hardware-component" style={{ gridColumn: '1 / -1' }}>
+                        <span className="label">ライントレーサー（センサー: 赤=黒線, 緑=白地）</span>
+                        <LineTracerCanvas state={states['line-tracer-1'] as LineTracerState} />
+                    </div>
+                )}
             </div>
             {editingConfigs && (
                 <HardwareConfigDialog
